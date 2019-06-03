@@ -40,10 +40,6 @@ abstract class Handler<I>(val handlerId: Long, val transceiver: Transceiver<I>) 
         transceiver.handlerInActive(remoteAddress)
     }
 
-    fun getHandlerId(): Long? {
-        return handlerId
-    }
-
     fun isActive(): Boolean {
         if(this::context.isInitialized){
             val channel = context.channel()
