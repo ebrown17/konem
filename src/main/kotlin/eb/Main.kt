@@ -4,6 +4,8 @@ import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger("Main")
+private val cName = CoroutineName("onConnection")
+private val scopey = CoroutineScope(cName)
 
 fun main(){
     logger.info("hello from main")
@@ -17,13 +19,13 @@ fun main(){
 fun onConnection() {
     logger.info("On COnnection called")
 
-    GlobalScope.launch {
+    scopey.launch {
             logger.info(" in launch")
             withTimeout(1500L) {
                 logger.info(" withTimeout ")
                 delay(1000)
                 for(x  in 1..10){
-                    logger.info("loop: {}",x.toInt())
+                    logger.info("loop: {}",this.coroutineContext.toString())
                 }
             }
         }

@@ -34,6 +34,8 @@ abstract class Server : ChannelReader, HandlerListener {
     private val remoteHostToChannelMap: ConcurrentHashMap<InetSocketAddress, Int> = ConcurrentHashMap()
     private val connectionListeners: MutableList<ConnectionStatusListener> = ArrayList()
 
+    private val serverScope = CoroutineScope(CoroutineName("HandleConnect"))
+
     init {
         val threadFactory = DefaultThreadFactory("server")
         bossGroup = NioEventLoopGroup(1, threadFactory)
@@ -170,7 +172,7 @@ abstract class Server : ChannelReader, HandlerListener {
     }
 
     private fun handleConnect(remoteConnection: InetSocketAddress) {
-        GlobalScope.launch {
+        serverScope.launch {
             withTimeout(1500L) {
                 delay(1000)
                 for (listener in connectionListeners) {
@@ -181,7 +183,7 @@ abstract class Server : ChannelReader, HandlerListener {
     }
 
     private fun handleDisconnect(remoteConnection: InetSocketAddress) {
-        GlobalScope.launch {
+        serverScope.launch{
             withTimeout(1500L) {
                 delay(1000)
                 for (listener in connectionListeners) {
