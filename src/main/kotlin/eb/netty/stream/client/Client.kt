@@ -1,7 +1,6 @@
 package eb.netty.stream.client
 
 import eb.netty.stream.ChannelReader
-import eb.netty.stream.ClientConnectionListener
 import eb.netty.stream.ConnectionStatusListener
 import eb.netty.stream.Transceiver
 import io.netty.bootstrap.Bootstrap

@@ -1,4 +1,4 @@
-package eb.netty.stream
+package eb.netty.stream.client
 
 
 import eb.netty.stream.client.Client
