@@ -23,8 +23,8 @@ abstract class Server : ChannelReader, HandlerListener {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private val bossGroup: EventLoopGroup
-    private val workerGroup: EventLoopGroup
+    private val bossGroup: NioEventLoopGroup
+    private val workerGroup: NioEventLoopGroup
     private var bootstrapMap: ConcurrentHashMap<Int, ServerBootstrap> = ConcurrentHashMap()
     private val channelMap: ConcurrentHashMap<Int, Channel> = ConcurrentHashMap()
     private val channelListenerMap: ConcurrentHashMap<Int, ArrayList<ChannelFutureListener>> = ConcurrentHashMap()
@@ -34,7 +34,7 @@ abstract class Server : ChannelReader, HandlerListener {
     private val remoteHostToChannelMap: ConcurrentHashMap<InetSocketAddress, Int> = ConcurrentHashMap()
     private val connectionListeners: MutableList<ConnectionStatusListener> = ArrayList()
 
-    private val serverScope = CoroutineScope(CoroutineName("HandleConnect"))
+    private val serverScope = CoroutineScope(CoroutineName("ConnectionStatus"))
 
     init {
         val threadFactory = DefaultThreadFactory("server")

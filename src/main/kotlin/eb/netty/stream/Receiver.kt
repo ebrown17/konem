@@ -2,7 +2,7 @@ package eb.netty.stream
 
 import java.net.InetSocketAddress
 
-interface Receiver {
+interface Receiver<I> {
 
-    fun handleChannelRead(addr: InetSocketAddress, msg: Any)
+    fun handleChannelRead(addr: InetSocketAddress, msg: I)
 }

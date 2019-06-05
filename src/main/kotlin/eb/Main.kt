@@ -9,7 +9,9 @@ private val scopey = CoroutineScope(cName)
 
 fun main(){
     logger.info("hello from main")
+    runBlocking {tester() }
     onConnection()
+
     logger.info("after")
     runBlocking { delay(5000) }
     logger.info("After delay")
@@ -18,16 +20,26 @@ fun main(){
 
 fun onConnection() {
     logger.info("On COnnection called")
-
     scopey.launch {
             logger.info(" in launch")
             withTimeout(1500L) {
                 logger.info(" withTimeout ")
-                delay(1000)
                 for(x  in 1..10){
                     logger.info("loop: {}",this.coroutineContext.toString())
                 }
             }
         }
+}
 
+suspend fun  tester(){
+    coroutineScope {
+        logger.info(" in launch")
+        withTimeout(1500L) {
+            logger.info(" withTimeout ")
+            delay(1000)
+            for(x  in 1..10){
+                logger.info("loop: {}",this.coroutineContext.toString())
+            }
+        }
+    }
 }

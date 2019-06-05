@@ -44,7 +44,7 @@ class Transceiver<I>(protected val channelPort: Int) {
         }
     }
 
-    fun transmitMessage(addr: InetSocketAddress, message: I) {
+    fun transmit(addr: InetSocketAddress, message: I) {
         synchronized(activeLock) {
             logger.debug("sendMessage to addr: {} with {}", addr, message)
             val handler = activeHandlers[addr]
