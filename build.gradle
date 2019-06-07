@@ -19,7 +19,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.1'
     implementation 'io.netty:netty-all:4.1.36.Final'
-    implementation 'com.squareup.moshi:moshi:1.8.0'
+    implementation("com.squareup.moshi:moshi-kotlin:1.8.0")
     // implementation 'com.squareup.wire:wire-runtime:2.2.0'
 
     testImplementation 'org.spockframework:spock-core:1.2-groovy-2.5'

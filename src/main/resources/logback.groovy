@@ -12,7 +12,7 @@ scan('1 Minutes')
 
 // config file constants
 def logFileDate = timestamp('yyyy-MM-dd_HHmmss')
-def defaultLogPattern = "%d{HH:mm:ss.SSS} %-5level [%thread] %logger{36}%M.%msg%n"
+def defaultLogPattern = "%d{HH:mm:ss.SSS} %-5level [%thread] %logger{36}.%M - %msg%n"
 
 def name ="konem"
 def mode = "ide"

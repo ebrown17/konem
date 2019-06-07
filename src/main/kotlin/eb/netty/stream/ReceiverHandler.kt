@@ -11,7 +11,7 @@ abstract class ReceiverHandler<I> : Receiver<I> {
         try {
             read(addr, msg)
         } catch (e: Exception) {
-            logger.error("handleReadMessage exception in casting of message : {} ", e.message)
+            logger.error("exception in casting of message : {} ", e.message)
         }
 
     }
