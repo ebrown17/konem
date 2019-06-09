@@ -4,7 +4,7 @@ import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
 import org.slf4j.LoggerFactory
 
-class ExceptionHandler : ChannelDuplexHandler() {
+open class ExceptionHandler : ChannelDuplexHandler() {
     private val logger = LoggerFactory.getLogger(javaClass)
     private var lastExceptionTime: Long = 0
     private var exceptionCount = 0

@@ -4,6 +4,12 @@ import java.net.InetSocketAddress
 
 interface ChannelReader {
 
+
+    fun handleChannelRead(addr: InetSocketAddress, webSocketPath: String, message: Any)
+
+    fun readMessage(addr: InetSocketAddress, webSocketPath: String, message: Any)
+
+
     /**
      *
      * Registers a Receiver on all active ports
@@ -15,10 +21,6 @@ interface ChannelReader {
      * @param receiver
      */
     fun registerChannelReadListener(receiver: Receiver<Any>)
-
-    fun handleChannelRead(addr: InetSocketAddress, webSocketPath: String, message: Any)
-
-    fun readMessage(addr: InetSocketAddress, webSocketPath: String, message: Any)
 
     /**
      * Registers a reader for the specified websocket path.

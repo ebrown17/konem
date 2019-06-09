@@ -5,7 +5,7 @@ import java.net.InetSocketAddress
 import java.util.ArrayList
 import java.util.concurrent.ConcurrentHashMap
 
-class Transceiver<I>(protected val channelPort: Int) {
+open class Transceiver<I>(protected val channelPort: Int) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 

@@ -1,49 +1,42 @@
 package eb
 
 import com.squareup.moshi.*
-import eb.protocol.websocket.JsonMessageReceiver
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
-import com.squareup.moshi.Types.newParameterizedType
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import eb.protocol.websocket.KoneMessageReceiver
+import eb.protocol.websocket.KoneMesssage
+import java.util.*
 
 
 private val logger = LoggerFactory.getLogger("Main")
 private val cName = CoroutineName("onConnection")
 private val scopey = CoroutineScope(cName)
 
-@JsonClass(generateAdapter = true)
-data class DMesssage(val msg_1: Map<String, Any>)
+
 
 fun main() {
     logger.info("hello from main")
 
     val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
-    val adapter= moshi.adapter(DMesssage::class.java)
 
-    var receiver = JsonMessageReceiver { remote, msg ->
-           logger.info("READEERRRR {} {}",remote,msg)
-            val bb = "$msg{hhh :"
-            val dmsg:DMesssage? = adapter.fromJson(msg)
-        if (dmsg != null) {
-            val tty = dmsg.msg_1["1"]
-            logger.info("dmg: {} type of 87:{}", dmsg,tty!!::class.java.name)
-        }
+    val adapter = moshi.adapter(KoneMesssage::class.java)
 
+    var receiver = KoneMessageReceiver { remote, message ->
+            logger.info("KoneMessageReceiver: {} ",message)
     }
 
-
-    val testo = DMesssage(mapOf("1" to 87, "2" to listOf<Int>(1,2,3,4,5,6,7)))
+    val testo = KoneMesssage("heartbeat", Date().toString())
+    println(testo)
     var jjson = adapter.toJson(testo)
 
-    logger.info(" jjson dmsg: {}",testo)
-    logger.info(" jjson string: {}",testo)
-   // val tester =JsonReader.
-    receiver.handleChannelRead(InetSocketAddress(8080),jjson)
+    logger.info(" jjson dmsg: {}", testo)
+    logger.info(" jjson string: {}", jjson)
+    receiver.handleChannelRead(InetSocketAddress(8080), jjson)
 
 /*    runBlocking { tester() }*/
-   // onConnection()
+    // onConnection()
     //val job =tester2()
     logger.info("after")
     //  logger.info("active: {} cancel: {} completed: {}",job.isActive,job.isCancelled,job.isCompleted)

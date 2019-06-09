@@ -12,7 +12,7 @@ abstract class Handler<I>(val handlerId: Long, val transceiver: Transceiver<I>) 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     private lateinit var context: ChannelHandlerContext
-    private lateinit var remoteAddress: InetSocketAddress
+    protected lateinit var remoteAddress: InetSocketAddress
 
 
     fun sendMessage(message: I) {
