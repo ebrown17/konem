@@ -6,8 +6,8 @@ import java.util.concurrent.atomic.AtomicLong
 
 abstract class ServerChannel : ChannelInitializer<SocketChannel>() {
     companion object {
-        protected val channelIds = AtomicLong(0L)
-        protected val WRITE_IDLE_TIME = 15
+        val channelIds = AtomicLong(0L)
+        val WRITE_IDLE_TIME = 15
     }
 
 }
