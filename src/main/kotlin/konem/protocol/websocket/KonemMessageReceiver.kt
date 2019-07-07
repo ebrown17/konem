@@ -130,7 +130,6 @@ class KonemMesssageAdaptor {
   }
 }
 
-//@JsonClass(generateAdapter = true)
 data class KonemMesssage(val type: KonemTypes, val message: Any) {
 
   companion object {

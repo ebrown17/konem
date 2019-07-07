@@ -34,7 +34,7 @@ fun main() {
   val heartBack = adapter.fromJson(jheartb)
   logger.info("converted back to ACTUAL: {}", heartBack)
   receiver.handleChannelRead(InetSocketAddress(8080), jheartb)
-/*
+
   val statusb = KonemMesssage.Status("GOOD",0,5000,0,"GOOD")
   var jstatusb = adapter.toJson(statusb)
   logger.info("statusb before json: {}", statusb)
@@ -42,11 +42,11 @@ fun main() {
   var statusBack : KonemMesssage? = null
   statusBack = adapter.fromJson(jstatusb)
   logger.info("statusb converted back to heartbxxx: {}", statusBack)
-*/
+  receiver.handleChannelRead(InetSocketAddress(8080), jstatusb)
 
 
 
- // receiver.handleChannelRead(InetSocketAddress(8080), jstatusb)
+
 
 /*    runBlocking { tester() }*/
   // onConnection()
