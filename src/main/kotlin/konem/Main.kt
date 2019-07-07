@@ -22,7 +22,7 @@ fun main() {
 
   val adapter = moshi.adapter(KonemMesssage::class.java)
 
-  var receiver = KoneMessageReceiver { remote, message ->
+  var receiver = KonemMessageReceiver { remote, message ->
     logger.info("KoneMessageReceiver: {} ", message as KonemMesssage)
   }
 
