@@ -26,7 +26,7 @@ class KonemMesssageAdaptor {
     val valid = pairInfo.first
     val options = pairInfo.second
 
-    while (jsonReader.hasNext()) {
+    while (jsonReader.peek() != JsonReader.Token.END_DOCUMENT) {
       when (jsonReader.peek()) {
         JsonReader.Token.BEGIN_OBJECT -> jsonReader.beginObject()
         JsonReader.Token.END_OBJECT -> jsonReader.endObject()
