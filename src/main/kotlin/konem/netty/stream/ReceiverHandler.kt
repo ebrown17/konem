@@ -24,5 +24,4 @@ abstract class ReceiverHandler<I> : Receiver<I> {
    */
   abstract fun read(addr: InetSocketAddress, message: I)
 
-
 }

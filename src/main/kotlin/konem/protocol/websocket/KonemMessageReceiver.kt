@@ -1,6 +1,5 @@
 package konem.protocol.websocket
 
-
 import com.squareup.moshi.*
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.sun.org.apache.bcel.internal.classfile.Unknown
@@ -8,7 +7,6 @@ import konem.netty.stream.ReceiverHandler
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 import java.util.*
-
 
 enum class KonemTypes {
   @Json(name = "heartbeat")
@@ -21,7 +19,7 @@ enum class KonemTypes {
 
 class KonemMesssageAdaptor {
 
-  fun prepReader(
+  private fun prepReader(
     jsonReader: JsonReader,
     pairInfo: Pair<Array<String>, JsonReader.Options>
   ): JsonReader {
@@ -47,7 +45,7 @@ class KonemMesssageAdaptor {
     return jsonReader
   }
 
-  fun clearReader(jsonReader: JsonReader): JsonReader {
+  private fun clearReader(jsonReader: JsonReader): JsonReader {
     while (jsonReader.peek() != JsonReader.Token.END_DOCUMENT) {
       when (jsonReader.peek()) {
         JsonReader.Token.BEGIN_OBJECT -> jsonReader.beginObject()
@@ -63,7 +61,7 @@ class KonemMesssageAdaptor {
     return jsonReader
   }
 
-  fun fillMap(
+  private fun fillMap(
     jsonReader: JsonReader,
     pair: Pair<Array<String>, JsonReader.Options>
   ): MutableMap<String, Any?> {
@@ -196,9 +194,9 @@ data class KonemStatus(
 }
 
 
-class KoneMessageReceiver(private val receive: (InetSocketAddress, KonemMesssage) -> Unit) :
+class KonemMessageReceiver(private val receive: (InetSocketAddress, KonemMesssage) -> Unit) :
   ReceiverHandler<String>() {
-  private val logger = LoggerFactory.getLogger(KoneMessageReceiver::class.java)
+  private val logger = LoggerFactory.getLogger(KonemMessageReceiver::class.java)
   private val adaptor = moshi.adapter(KonemMesssage::class.java)
 
   override fun read(addr: InetSocketAddress, message: String) {
