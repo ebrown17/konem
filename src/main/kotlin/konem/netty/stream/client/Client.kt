@@ -38,11 +38,9 @@ abstract class Client(private val serverAddress: InetSocketAddress, config: Clie
     connectionListeners = ArrayList<ConnectionStatusListener>()
   }
 
-
   fun isActive(): Boolean {
     return channel != null && (channel!!.isOpen || channel!!.isActive)
   }
-
 
   @Throws(InterruptedException::class)
   fun connect() {
@@ -158,6 +156,4 @@ abstract class Client(private val serverAddress: InetSocketAddress, config: Clie
     private val MAX_RETRY_TIME = 60L
     private val MAX_RETRY_UNTIL_INCR = 30
   }
-
-
 }

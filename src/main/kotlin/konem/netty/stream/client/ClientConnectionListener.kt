@@ -1,6 +1,5 @@
 package konem.netty.stream.client
 
-
 import io.netty.channel.ChannelFuture
 import io.netty.channel.ChannelFutureListener
 
@@ -28,7 +27,6 @@ class ClientConnectionListener internal constructor(private val client: Client) 
         }
       }, client.calculateRetryTime(), TimeUnit.SECONDS)
     }
-
   }
 
   internal fun setAttemptingConnection() {
@@ -38,5 +36,4 @@ class ClientConnectionListener internal constructor(private val client: Client) 
   private fun clearAttemptingConnection() {
     isAttemptingConnection = false
   }
-
 }

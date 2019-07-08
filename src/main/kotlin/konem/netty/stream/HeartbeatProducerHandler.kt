@@ -26,5 +26,4 @@ abstract class HeartbeatProducerHandler<I>(private val transceiver: Transceiver<
   }
 
   abstract fun generateHeartBeat(): I
-
 }

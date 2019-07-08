@@ -28,5 +28,4 @@ class ClientClosedConnectionListener internal constructor(private val client: Cl
   companion object {
     private val logger = LoggerFactory.getLogger(ClientClosedConnectionListener::class.java)
   }
-
 }

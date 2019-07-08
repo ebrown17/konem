@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory
  *
  * @param expectedInterval The expected heartbeat interval in seconds. This will be used to determine if server
  * is no longer alive.
- * @param missedLimit      The max amount of heartbeats allowed until handler closes channel.
+ * @param missedLimit The max amount of heartbeats allowed until handler closes channel.
  */
 
 abstract class HeartbeatReceiverHandler<I>(

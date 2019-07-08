@@ -150,7 +150,6 @@ abstract class Server : ChannelReader, HandlerListener {
       portAddressMap.remove(port)
 
       logger.info("closeChannel channel {} now closed", port)
-
     }
   }
 
@@ -234,7 +233,6 @@ abstract class Server : ChannelReader, HandlerListener {
     return true
   }
 
-
   fun isPortConfigured(port: Int): Boolean {
     return portAddressMap[port] != null
   }
@@ -246,7 +244,6 @@ abstract class Server : ChannelReader, HandlerListener {
   fun isBootstrapConfigured(port: Int): Boolean {
     return transceiverMap[port] != null
   }
-
 
   override fun registerActiveHandler(channelPort: Int, remoteConnection: InetSocketAddress) {
     var channelConnections = channelConnectionMap[channelPort]

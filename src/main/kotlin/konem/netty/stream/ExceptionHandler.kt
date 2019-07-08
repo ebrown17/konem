@@ -27,7 +27,6 @@ open class ExceptionHandler : ChannelDuplexHandler() {
       logger.error("To many exceptions closing connection from {}", ctx.channel().remoteAddress())
       ctx.close()
     }
-
   }
 
   companion object {

@@ -4,11 +4,9 @@ import java.net.InetSocketAddress
 
 interface ChannelReader {
 
-
   fun handleChannelRead(addr: InetSocketAddress, webSocketPath: String, message: Any)
 
   fun readMessage(addr: InetSocketAddress, webSocketPath: String, message: Any)
-
 
   /**
    *
@@ -27,8 +25,7 @@ interface ChannelReader {
    * Any Request that comes in with specified type will be see by this reader.
    *
    * @param webSocketPaths - webSocket paths you want to read
-   * @param reader        - the listener to handle read data
+   * @param reader - the listener to handle read data
    */
   fun registerChannelReadListener(vararg args: String, receiver: Receiver<Any>)
-
 }

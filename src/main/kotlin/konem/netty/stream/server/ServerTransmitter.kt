@@ -28,6 +28,4 @@ interface ServerTransmitter<I> {
    * @param message
    */
   fun sendMessage(addr: InetSocketAddress, message: I)
-
-
 }

@@ -54,7 +54,7 @@ open class Transceiver<I>(protected val channelPort: Int) {
   }
 
   override fun toString(): String {
-    return ("Transceiver{" + "activeHandlers=" + activeHandlers.size + ", channelReaders=" + channelReaders.size
-      + ", handlerListeners=" + handlerListeners.size + ", channelPort=" + channelPort + '}'.toString())
+    return ("Transceiver{" + "activeHandlers=" + activeHandlers.size + ", channelReaders=" + channelReaders.size +
+      ", handlerListeners=" + handlerListeners.size + ", channelPort=" + channelPort + '}'.toString())
   }
 }

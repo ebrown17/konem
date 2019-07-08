@@ -14,22 +14,26 @@ import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 
 class WebSocketExceptionHandler : ExceptionHandler() {
-    private val logger = LoggerFactory.getLogger(WebSocketExceptionHandler::class.java)
+  private val logger = LoggerFactory.getLogger(WebSocketExceptionHandler::class.java)
 
-    @Throws(Exception::class)
-    override fun channelRead(ctx: ChannelHandlerContext, message: Any) {
-        val req = (message as FullHttpRequest).copy()
-        val path = req.uri()
-        val addr = ctx.channel().localAddress() as InetSocketAddress
-        logger.warn("channelRead: end of pipeline reached without handling: {} on port {}; closing connection", path, addr.port)
-        sendHttpResponse(ctx, req, DefaultFullHttpResponse(HTTP_1_1, FORBIDDEN))
-        ctx.close()
-    }
+  @Throws(Exception::class)
+  override fun channelRead(ctx: ChannelHandlerContext, message: Any) {
+    val req = (message as FullHttpRequest).copy()
+    val path = req.uri()
+    val addr = ctx.channel().localAddress() as InetSocketAddress
+    logger.warn(
+      "channelRead: end of pipeline reached without handling: {} on port {}; closing connection",
+      path,
+      addr.port
+    )
+    sendHttpResponse(ctx, req, DefaultFullHttpResponse(HTTP_1_1, FORBIDDEN))
+    ctx.close()
+  }
 
-    private fun sendHttpResponse(ctx: ChannelHandlerContext, req: HttpRequest, res: HttpResponse) {
-        val future = ctx.channel().writeAndFlush(res)
-        if (!isKeepAlive(req) || res.status().code() != 200) {
-            future.addListener(ChannelFutureListener.CLOSE)
-        }
+  private fun sendHttpResponse(ctx: ChannelHandlerContext, req: HttpRequest, res: HttpResponse) {
+    val future = ctx.channel().writeAndFlush(res)
+    if (!isKeepAlive(req) || res.status().code() != 200) {
+      future.addListener(ChannelFutureListener.CLOSE)
     }
+  }
 }

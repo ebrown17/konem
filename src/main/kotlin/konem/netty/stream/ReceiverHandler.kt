@@ -13,7 +13,6 @@ abstract class ReceiverHandler<I> : Receiver<I> {
     } catch (e: Exception) {
       logger.error("exception in casting of message : {} ", e.message)
     }
-
   }
 
   /**
@@ -23,5 +22,4 @@ abstract class ReceiverHandler<I> : Receiver<I> {
    * @param message
    */
   abstract fun read(addr: InetSocketAddress, message: I)
-
 }
