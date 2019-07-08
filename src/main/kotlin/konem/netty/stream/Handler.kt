@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 
 import java.net.InetSocketAddress
 
-abstract class Handler<I>(val handlerId: Long, val transceiver: Transceiver<I>) :
+abstract class Handler<I>(val handlerId: Long, val abstractTransceiver: Transceiver<I>) :
   SimpleChannelInboundHandler<I>() {
 
   private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -29,7 +29,7 @@ abstract class Handler<I>(val handlerId: Long, val transceiver: Transceiver<I>) 
     logger.info("channelActive remote peer: {} connected", ctx.channel().remoteAddress())
     context = ctx
     remoteAddress = ctx.channel().remoteAddress() as InetSocketAddress
-    transceiver.handlerActive(remoteAddress, this)
+    abstractTransceiver.handlerActive(remoteAddress, this)
     ctx.fireChannelActive()
   }
 
@@ -37,7 +37,7 @@ abstract class Handler<I>(val handlerId: Long, val transceiver: Transceiver<I>) 
   override fun channelInactive(ctx: ChannelHandlerContext) {
     logger.info("channelInactive remote peer: {} disconnected", ctx.channel().remoteAddress())
     ctx.fireChannelInactive()
-    transceiver.handlerInActive(remoteAddress)
+    abstractTransceiver.handlerInActive(remoteAddress)
   }
 
   fun isActive(): Boolean {

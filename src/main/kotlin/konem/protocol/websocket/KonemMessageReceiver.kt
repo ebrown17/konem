@@ -7,7 +7,6 @@ import konem.data.json.KonemMessageAdaptor
 import konem.netty.stream.ReceiverHandler
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
-import java.util.*
 
 class KonemMessageReceiver(private val receive: (InetSocketAddress, KonemMesssage) -> Unit) :
   ReceiverHandler<String>() {

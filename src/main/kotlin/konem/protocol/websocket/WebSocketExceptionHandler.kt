@@ -18,16 +18,31 @@ class WebSocketExceptionHandler : ExceptionHandler() {
 
   @Throws(Exception::class)
   override fun channelRead(ctx: ChannelHandlerContext, message: Any) {
-    val req = (message as FullHttpRequest).copy()
-    val path = req.uri()
-    val addr = ctx.channel().localAddress() as InetSocketAddress
-    logger.warn(
-      "channelRead: end of pipeline reached without handling: {} on port {}; closing connection",
-      path,
-      addr.port
-    )
-    sendHttpResponse(ctx, req, DefaultFullHttpResponse(HTTP_1_1, FORBIDDEN))
-    ctx.close()
+    when (message) {
+      is FullHttpRequest -> {
+        try {
+          val path = message.uri()
+          val addr = ctx.channel().localAddress() as InetSocketAddress
+          logger.warn(
+            "channelRead: end of pipeline reached without handling: {} on port {}; closing connection",
+            path,
+            addr.port
+          )
+          sendHttpResponse(ctx, message, DefaultFullHttpResponse(HTTP_1_1, FORBIDDEN))
+          ctx.close()
+        } finally {
+          message.release()
+        }
+      }
+      else -> {
+        logger.warn(
+          "channelRead: end of pipeline reached without with unexpected type {}; closing connection",
+          message.javaClass
+        )
+        ctx.close()
+      }
+    }
+
   }
 
   private fun sendHttpResponse(ctx: ChannelHandlerContext, req: HttpRequest, res: HttpResponse) {

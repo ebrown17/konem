@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 
 class WebSocketFrameHandler(
   handlerId: Long,
-  transceiver: WebSocketTransceiver,
+  val transceiver: WebSocketTransceiver,
   val webSocketPath: String
 ) : Handler<WebSocketFrame>(handlerId, transceiver) {
 
@@ -19,7 +19,7 @@ class WebSocketFrameHandler(
 
   override fun channelRead0(ctx: ChannelHandlerContext?, frame: WebSocketFrame?) {
     logger.trace("channelRead0 {} sent: {}", remoteAddress, frame.toString())
-    transceiver as WebSocketTransceiver
+
     when (frame) {
       is TextWebSocketFrame -> {
         val message = frame.text()
@@ -37,8 +37,9 @@ class WebSocketFrameHandler(
       // If you want to see Pongs, you will have to create the WebSocketServerProtocolHandler using the correct constructor.
       is PongWebSocketFrame -> logger.info("PongWebSocketFrame from {}", remoteAddress)
       else -> {
-        val message = "unsupported frame type: " + frame!!::class.java
+        val message = "unsupported frame type: " + frame!!.javaClass
         ctx?.fireExceptionCaught(UnsupportedOperationException(message))
+        frame.release()
       }
     }
   }

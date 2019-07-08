@@ -10,17 +10,8 @@ import io.netty.handler.timeout.IdleStateHandler
 class WebSocketServerChannel(transceiver: WebSocketTransceiver, vararg webSocketPaths: String) :
   ServerChannel() {
 
-  private val transceiver: WebSocketTransceiver
-  private val webSocketPaths: Array<String>
-
-  init {
-    if (transceiver is WebSocketTransceiver) {
-      this.transceiver = transceiver
-      this.webSocketPaths = arrayOf(*webSocketPaths)
-    } else {
-      throw IllegalArgumentException("Transceiver must be of type " + WebSocketTransceiver::class.java)
-    }
-  }
+  private val transceiver: WebSocketTransceiver = transceiver
+  private val webSocketPaths: Array<String> = arrayOf(*webSocketPaths)
 
   @Throws(Exception::class)
   override fun initChannel(channel: SocketChannel) {
