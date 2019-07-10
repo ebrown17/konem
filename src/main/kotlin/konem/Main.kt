@@ -7,6 +7,7 @@ import java.net.InetSocketAddress
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import konem.data.json.KonemMessageAdaptor
 import konem.data.json.KonemMesssage
+import konem.data.json.KotlinMessage
 import konem.protocol.websocket.*
 
 private val logger = LoggerFactory.getLogger("Main")
@@ -42,4 +43,6 @@ fun main() {
   statusBack = adapter.fromJson(jstatusb)
   logger.info("statusb converted back to heartbxxx: {}", statusBack)
   receiver.handleChannelRead(InetSocketAddress(8080), jstatusb)
+
+  println(KotlinMessage.Heartbeat())
 }
