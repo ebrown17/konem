@@ -1,4 +1,4 @@
-package konem.data.json
+package konem.data.json.moshi
 
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonReader
@@ -6,7 +6,7 @@ import com.squareup.moshi.JsonReader.Options
 import com.squareup.moshi.JsonReader.Token.*
 import com.squareup.moshi.ToJson
 
-class KonemMessageAdaptor {
+class KonemMoshiMessageAdaptor {
 
   private fun prepReader(reader: JsonReader, pair: Pair<Array<String>, Options>): JsonReader {
     val valid = pair.first
@@ -66,34 +66,40 @@ class KonemMessageAdaptor {
   }
 
   @FromJson
-  fun fromJson(jsonReader: JsonReader): KonemMesssage {
-    val typeMap = fillMap(jsonReader, typeOption)
+  fun fromJson(jsonReader: JsonReader): KonemMoshiMesssage {
+    val typeMap = fillMap(jsonReader,
+      typeOption
+    )
     val type: String = typeMap["type"] as String
     try {
       if (type == heartbeat) {
-        return KonemMesssage(
-          KonemTypes.HEARTBEAT,
-          KonemHeartbeat.fromMap(fillMap(jsonReader, heartOpt))
+        return KonemMoshiMesssage(
+          KonemMoshiTypes.HEARTBEAT,
+          KonemMoshiHeartbeat.fromMap(fillMap(jsonReader,
+            heartOpt
+          ))
         )
       } else if (type == status) {
-        return KonemMesssage(KonemTypes.STATUS, KonemStatus.fromMap(fillMap(jsonReader, statusOpt)))
+        return KonemMoshiMesssage(KonemMoshiTypes.STATUS, KonemMoshiStatus.fromMap(fillMap(jsonReader,
+          statusOpt
+        )))
       }
-      return KonemMesssage(KonemTypes.UNKNOWN, KonemTypes.UNKNOWN.toString())
+      return KonemMoshiMesssage(KonemMoshiTypes.UNKNOWN, KonemMoshiTypes.UNKNOWN.toString())
     } finally {
       clearReader(jsonReader)
     }
   }
 
   @ToJson
-  fun toJson(message: KonemMesssage) = when (message.type) {
-    KonemTypes.HEARTBEAT -> {
+  fun toJson(message: KonemMoshiMesssage) = when (message.type) {
+    KonemMoshiTypes.HEARTBEAT -> {
       message
     }
-    KonemTypes.STATUS -> {
+    KonemMoshiTypes.STATUS -> {
       message
     }
     else -> {
-      KonemMesssage(KonemTypes.UNKNOWN, message.message)
+      KonemMoshiMesssage(KonemMoshiTypes.UNKNOWN, message.message)
     }
   }
 

@@ -1,87 +1,59 @@
 package konem.data.json
 
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Polymorphic
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.StringFormat
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
 import java.util.*
+import konem.data.json.Message.*
 
-enum class KonemTypes {
-  @Json(name = "heartbeat")
-  HEARTBEAT,
-  @Json(name = "status")
-  STATUS,
-  @Json(name = "unknown")
-  UNKNOWN
+@Serializable
+sealed class Message {
+
+  @Serializable
+  data class Heartbeat constructor(val sent: String = Date().toString()) : Message()
+
+  @Serializable
+  data class Status constructor(
+    val shortName: String = "",
+    val errors: Int = -1,
+    val received: Int = -1,
+    val sent: Int = -1,
+    val description: String = ""
+  ) : Message()
+
+  @Serializable
+  data class Unknown constructor(val unknown: String = "Unknown Message") : Message()
+
 }
 
-@JsonClass(generateAdapter = true)
-data class KonemHeartbeat(val sent: String = "Heartbeat Not Found") {
-  companion object {
-    const val sent = "sent"
-    fun fromMap(map: Map<String, Any?>): KonemHeartbeat {
-      return KonemHeartbeat(map[sent] as String)
+@Serializable
+data class KonemMessage(@Polymorphic val konemMessage: Message)
+
+class KonemMessageSerializer {
+
+  private val sealedModule = SerializersModule {
+    polymorphic(Message::class) {
+      Heartbeat::class with Heartbeat.serializer()
+      Status::class with Status.serializer()
+      Unknown::class with Unknown.serializer()
     }
   }
-}
 
-@JsonClass(generateAdapter = true)
-data class KonemUnknown(val description: String = "Unknown Message") {
-  companion object {
-    private const val description = "description"
-    fun fromMap(map: Map<String, Any?>): KonemUnknown {
-      return KonemUnknown(map[description] as String)
-    }
+  private val serializer: KSerializer<KonemMessage>
+    get() = KonemMessage.serializer()
+
+  private val format: StringFormat
+    get() = Json(context = sealedModule)
+
+  fun toJson(msg: KonemMessage): String {
+    return format.stringify(serializer, msg)
   }
-}
 
-@JsonClass(generateAdapter = true)
-data class KonemStatus(
-  val shortName: String = "",
-  val errors: Int = -1,
-  val received: Int = -1,
-  val sent: Int = -1,
-  val description: String = ""
-) {
-  companion object {
-    private const val shortName = "shortName"
-    private const val errors = "errors"
-    private const val received = "received"
-    private const val sent = "sent"
-    private const val description = "description"
-
-    fun fromMap(map: Map<String, Any?>): KonemStatus {
-      return KonemStatus(
-        map[shortName] as String,
-        map[errors] as Int,
-        map[received] as Int,
-        map[sent] as Int,
-        map[description] as String
-      )
-    }
+  fun toKonemMessage(json: String): KonemMessage {
+    return format.parse(serializer, json)
   }
-}
 
-data class KonemMesssage(val type: KonemTypes, val message: Any) {
-
-  companion object {
-
-    fun Heartbeat(): KonemMesssage {
-      return KonemMesssage(KonemTypes.HEARTBEAT, KonemHeartbeat(Date().toString()))
-    }
-
-    fun Status(
-      shortName: String,
-      errors: Int,
-      received: Int,
-      sent: Int,
-      description: String
-    ): KonemMesssage {
-      return KonemMesssage(
-        KonemTypes.STATUS, KonemStatus(shortName, errors, received, sent, description)
-      )
-    }
-
-    fun Unknown(description: String): KonemMesssage {
-      return KonemMesssage(KonemTypes.UNKNOWN, KonemUnknown(description))
-    }
-  }
 }
