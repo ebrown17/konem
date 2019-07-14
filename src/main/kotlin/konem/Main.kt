@@ -3,6 +3,9 @@ package konem
 import konem.data.json.KonemMessage
 import konem.data.json.KonemMessageSerializer
 import konem.data.json.Message
+import konem.netty.stream.ConnectionListener
+import konem.netty.stream.ConnectionStatusListener
+import konem.netty.stream.DisconnectionListener
 import konem.protocol.websocket.KonemMessageReceiver
 import konem.protocol.websocket.WebSocketClientFactory
 import konem.protocol.websocket.WebSocketServer
@@ -26,25 +29,51 @@ fun main() {
     logger.info("KoneMessageReceiver: {} ", message)
     count++
   })
+  server.registerConnectionStatusListener(
+    ConnectionStatusListener(connected = { remoteAddr ->
+      logger.info("Connection from {}", remoteAddr)
+    }, disconnected = { remoteAddr ->
+      logger.info("Disconnection from {}", remoteAddr)
+    })
+  )
 
   val fact = WebSocketClientFactory()
   val client = fact.createClient("localhost", 8080, "/tester")
   val client2 = fact.createClient("localhost", 8080, "/tester")
-  client.connect()
-  client2.connect()
-  Thread.sleep(1000)
-  repeat(100) {
-    repeat(500) {
-      client.sendMessage(KonemMessage(Message.Heartbeat("$it")))
-      client2.sendMessage(KonemMessage(Message.Heartbeat("$it")))
-      // Thread.sleep(1000)
-    }
-    Thread.sleep(1000)
-    println(count)
-    count = 0
+  val connectionListener = ConnectionListener { remoteAddr ->
+    logger.info("Client connected to {}", remoteAddr)
   }
-  fact.shutdown()
+
+
+  client.registerConnectionListener(connectionListener)
+  client.registerDisconnectionListener(DisconnectionListener { remoteAddr ->
+    logger.info("Client {} disconnected from {}", client.toString(), remoteAddr)
+  })
+
+  client2.registerConnectionListener(connectionListener)
+  client2.registerDisconnectionListener(DisconnectionListener { remoteAddr ->
+    logger.info("Client {} disconnected from {}", client.toString(), remoteAddr)
+  })
+
+  client.connect()
+
+  client2.connect()
+
+  Thread.sleep(1000)
+
+  repeat(10) {
+    client.sendMessage(KonemMessage(Message.Heartbeat("$it")))
+    client2.sendMessage(KonemMessage(Message.Heartbeat("$it")))
+    // Thread.sleep(1000)
+  }
+  Thread.sleep(1000)
+  println(count)
+  count = 0
+
+  client.disconnect()
+  client2.disconnect()
 }
+
 @Suppress("MagicNumber")
 fun main1() {
   logger.info("hello from main")

@@ -1,9 +1,5 @@
 package konem.netty.stream.server
 
-import konem.netty.stream.ChannelReader
-import konem.netty.stream.ConnectionStatusListener
-import konem.netty.stream.HandlerListener
-import konem.netty.stream.Transceiver
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.buffer.ByteBufAllocator
 import io.netty.buffer.PooledByteBufAllocator
@@ -12,6 +8,7 @@ import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.util.concurrent.DefaultThreadFactory
+import konem.netty.stream.*
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
@@ -35,13 +32,18 @@ abstract class Server : ChannelReader, HandlerListener {
     ConcurrentHashMap()
   private val remoteHostToChannelMap: ConcurrentHashMap<InetSocketAddress, Int> =
     ConcurrentHashMap()
-  private val connectionListeners: MutableList<ConnectionStatusListener> = ArrayList()
+
+  private val connectionListeners: MutableList<ConnectListener> = ArrayList()
+  private val disconnectionListeners: MutableList<DisconnectListener> = ArrayList()
+
   protected val serverScope = CoroutineScope(CoroutineName("ServerScope"))
+
   companion object {
     private const val soBacklog = 25
     private const val oneSecond = 1_000L
     private const val twoSeconds = 2_000L
   }
+
   init {
     val threadFactory = DefaultThreadFactory("server")
     bossGroup = NioEventLoopGroup(1, threadFactory)
@@ -71,17 +73,17 @@ abstract class Server : ChannelReader, HandlerListener {
   }
 
   protected fun addChannel(port: Int, transceiver: Transceiver<*>): Boolean {
-      if (!isPortConfigured(port)) {
-        if (!isTransceiverConfigured(port)) {
-          if (!isBootstrapConfigured(port)) {
-            portAddressMap[port] = InetSocketAddress(port)
-            transceiverMap[port] = transceiver
-            bootstrapMap[port] = createServerBootstrap(port)
-            transceiver.registerHandlerListener(this)
-            return true
-          }
+    if (!isPortConfigured(port)) {
+      if (!isTransceiverConfigured(port)) {
+        if (!isBootstrapConfigured(port)) {
+          portAddressMap[port] = InetSocketAddress(port)
+          transceiverMap[port] = transceiver
+          bootstrapMap[port] = createServerBootstrap(port)
+          transceiver.registerHandlerListener(this)
+          return true
         }
       }
+    }
     return false
   }
 
@@ -180,7 +182,7 @@ abstract class Server : ChannelReader, HandlerListener {
     serverScope.launch {
       withTimeout(twoSeconds) {
         delay(oneSecond)
-        for (listener in connectionListeners) {
+        for (listener in disconnectionListeners) {
           listener.onDisconnection(remoteConnection)
         }
       }
@@ -200,8 +202,17 @@ abstract class Server : ChannelReader, HandlerListener {
     return Collections.unmodifiableMap(remoteHostToChannelMap)
   }
 
-  fun registerOnConnectionListener(listener: ConnectionStatusListener) {
+  fun registerConnectionListener(listener: ConnectionListener) {
     connectionListeners.add(listener)
+  }
+
+  fun registerDisconnectionListener(listener: DisconnectionListener) {
+    disconnectionListeners.add(listener)
+  }
+
+  fun registerConnectionStatusListener(listener: ConnectionStatusListener) {
+    connectionListeners.add(listener)
+    disconnectionListeners.add(listener)
   }
 
   fun getTransceiverMap(): Map<Int, Transceiver<*>> {

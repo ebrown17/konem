@@ -1,11 +1,9 @@
 package konem.netty.stream.client
 
-import konem.netty.stream.ChannelReader
-import konem.netty.stream.ConnectionStatusListener
-import konem.netty.stream.Transceiver
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.Channel
 import io.netty.channel.ChannelFuture
+import konem.netty.stream.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -27,16 +25,13 @@ abstract class Client(private val serverAddress: InetSocketAddress, config: Clie
 
   private var retryListener: ClientConnectionListener? = null
   private var closedListener: ClientClosedConnectionListener? = null
-  private val connectionListeners: MutableList<ConnectionStatusListener>
+  private val connectionListeners: MutableList<ConnectListener> = ArrayList()
+  private val disconnectionListeners: MutableList<DisconnectListener> = ArrayList()
 
   private var retryCount = 0
   private var retryTime: Long = 0
   internal var isDisconnectInitiated = true
     private set
-
-  init {
-    connectionListeners = ArrayList<ConnectionStatusListener>()
-  }
 
   fun isActive(): Boolean {
     return channel != null && (channel!!.isOpen || channel!!.isActive)
@@ -99,7 +94,7 @@ abstract class Client(private val serverAddress: InetSocketAddress, config: Clie
   private fun handleDisconnection() {
     clietScope.launch {
       delay(oneSecond)
-      for (listener in connectionListeners) {
+      for (listener in disconnectionListeners) {
         listener.onDisconnection(serverAddress)
       }
     }
@@ -147,8 +142,17 @@ abstract class Client(private val serverAddress: InetSocketAddress, config: Clie
     channel?.close()
   }
 
-  fun registerOnConnectionListener(listener: ConnectionStatusListener) {
+  fun registerConnectionListener(listener: ConnectionListener) {
     connectionListeners.add(listener)
+  }
+
+  fun registerDisconnectionListener(listener: DisconnectionListener) {
+    disconnectionListeners.add(listener)
+  }
+
+  fun registerConnectionStatusListener(listener: ConnectionStatusListener) {
+    connectionListeners.add(listener)
+    disconnectionListeners.add(listener)
   }
 
   companion object {
