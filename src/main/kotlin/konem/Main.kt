@@ -15,14 +15,14 @@ import kotlin.system.measureTimeMillis
 private val logger = LoggerFactory.getLogger("Main")
 private val cName = CoroutineName("onConnection")
 private val scopey = CoroutineScope(cName)
-
+@Suppress("MagicNumber")
 fun main() {
 
   val server = WebSocketServer()
   server.addChannel(8080, "/tester")
   server.startServer()
   var count = 0
-  server.registerChannelReadListener(KonemMessageReceiver { remote, message ->
+  server.registerChannelReadListener(KonemMessageReceiver { _, message ->
     logger.info("KoneMessageReceiver: {} ", message)
     count++
   })
@@ -30,13 +30,13 @@ fun main() {
   val fact = WebSocketClientFactory()
   val client = fact.createClient("localhost", 8080, "/tester")
   val client2 = fact.createClient("localhost", 8080, "/tester")
-  client?.connect()
-  client2?.connect()
+  client.connect()
+  client2.connect()
   Thread.sleep(1000)
   repeat(100) {
     repeat(500) {
-      client?.sendMessage(KonemMessage(Message.Heartbeat("$it")))
-      client2?.sendMessage(KonemMessage(Message.Heartbeat("$it")))
+      client.sendMessage(KonemMessage(Message.Heartbeat("$it")))
+      client2.sendMessage(KonemMessage(Message.Heartbeat("$it")))
       // Thread.sleep(1000)
     }
     Thread.sleep(1000)
@@ -45,7 +45,7 @@ fun main() {
   }
   fact.shutdown()
 }
-
+@Suppress("MagicNumber")
 fun main1() {
   logger.info("hello from main")
   val serializer = KonemMessageSerializer()

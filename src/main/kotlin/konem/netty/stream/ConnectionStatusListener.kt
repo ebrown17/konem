@@ -8,11 +8,11 @@ interface ConnectionStatusListener {
    *
    * @param address that connection was made to
    */
-  abstract fun onConnection(address: InetSocketAddress)
+  fun onConnection(address: InetSocketAddress)
 
   /**
    *
    * @param address that disconnected
    */
-  abstract fun onDisconnection(address: InetSocketAddress)
+  fun onDisconnection(address: InetSocketAddress)
 }

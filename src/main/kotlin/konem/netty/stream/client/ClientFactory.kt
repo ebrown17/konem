@@ -28,7 +28,7 @@ abstract class ClientFactory {
     this.clientScope = CoroutineScope(CoroutineName("ClientScope"))
   }
 
-  abstract fun createClient(host: String, port: Int, vararg args: String): Client?
+  abstract fun createClient(host: String, port: Int, vararg args: String): Client
 
   private fun createBootStrap(): Bootstrap {
     val bootstrap = Bootstrap()
@@ -48,7 +48,7 @@ abstract class ClientFactory {
     address: InetSocketAddress,
     config: ClientBootstrapConfig,
     vararg args: String
-  ): Client?
+  ): Client
 
   abstract fun shutdown()
 

@@ -23,7 +23,7 @@ class ClientConnectionListener internal constructor(private val client: Client) 
           client.connect()
         } catch (e: InterruptedException) {
           // TODO test to see what happens if this is reached
-          throw RuntimeException("ClientConnectionListener interrupted while trying to connect")
+          throw InterruptedException("ClientConnectionListener interrupted while trying to connect")
         }
       }, client.calculateRetryTime(), TimeUnit.SECONDS)
     }

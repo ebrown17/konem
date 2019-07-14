@@ -46,8 +46,11 @@ class WebSocketExceptionHandler : ExceptionHandler() {
 
   private fun sendHttpResponse(ctx: ChannelHandlerContext, req: HttpRequest, res: HttpResponse) {
     val future = ctx.channel().writeAndFlush(res)
-    if (!isKeepAlive(req) || res.status().code() != 200) {
+    if (!isKeepAlive(req) || res.status().code() != OK) {
       future.addListener(ChannelFutureListener.CLOSE)
     }
+  }
+  companion object {
+    private const val OK = 200
   }
 }

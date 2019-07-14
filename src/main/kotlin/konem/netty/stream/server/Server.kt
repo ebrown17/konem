@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.collections.ArrayList
 
 abstract class Server : ChannelReader, HandlerListener {
 
@@ -35,9 +36,12 @@ abstract class Server : ChannelReader, HandlerListener {
   private val remoteHostToChannelMap: ConcurrentHashMap<InetSocketAddress, Int> =
     ConcurrentHashMap()
   private val connectionListeners: MutableList<ConnectionStatusListener> = ArrayList()
-
   protected val serverScope = CoroutineScope(CoroutineName("ServerScope"))
-
+  companion object {
+    private const val soBacklog = 25
+    private const val oneSecond = 1_000L
+    private const val twoSeconds = 2_000L
+  }
   init {
     val threadFactory = DefaultThreadFactory("server")
     bossGroup = NioEventLoopGroup(1, threadFactory)
@@ -58,7 +62,7 @@ abstract class Server : ChannelReader, HandlerListener {
     val bootstrap = ServerBootstrap()
     bootstrap.group(bossGroup, workerGroup)
     bootstrap.channel(NioServerSocketChannel::class.java)
-    bootstrap.option(ChannelOption.SO_BACKLOG, 25)
+    bootstrap.option(ChannelOption.SO_BACKLOG, soBacklog)
     bootstrap.childOption(ChannelOption.SO_KEEPALIVE, true)
     bootstrap.childOption(ChannelOption.TCP_NODELAY, true)
     bootstrap.childOption<ByteBufAllocator>(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
@@ -163,8 +167,8 @@ abstract class Server : ChannelReader, HandlerListener {
 
   private fun handleConnect(remoteConnection: InetSocketAddress) {
     serverScope.launch {
-      withTimeout(1500L) {
-        delay(1000)
+      withTimeout(twoSeconds) {
+        delay(oneSecond)
         for (listener in connectionListeners) {
           listener.onConnection(remoteConnection)
         }
@@ -174,8 +178,8 @@ abstract class Server : ChannelReader, HandlerListener {
 
   private fun handleDisconnect(remoteConnection: InetSocketAddress) {
     serverScope.launch {
-      withTimeout(1500L) {
-        delay(1000)
+      withTimeout(twoSeconds) {
+        delay(oneSecond)
         for (listener in connectionListeners) {
           listener.onDisconnection(remoteConnection)
         }

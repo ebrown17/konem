@@ -12,7 +12,7 @@ class WebSocketClientFactory : ClientFactory() {
   private val logger = LoggerFactory.getLogger(WebSocketClientFactory::class.java)
   private val clientArrayList = ArrayList<WebSocketClient>()
 
-  override fun createClient(host: String, port: Int, vararg webSocketPath: String): WebSocketClient? {
+  override fun createClient(host: String, port: Int, vararg webSocketPath: String): WebSocketClient {
     val address = InetSocketAddress(host, port)
     val transceiver = WebSocketTransceiver(port)
     return createClient(address, createClientConfig(transceiver), *webSocketPath)
@@ -22,8 +22,7 @@ class WebSocketClientFactory : ClientFactory() {
     address: InetSocketAddress,
     config: ClientBootstrapConfig,
     vararg webSocketPath: String
-  ): WebSocketClient? {
-    try {
+  ): WebSocketClient {
       val fullWebSocketUrl = buildFullWebSocketPath(address, webSocketPath[0])
       val transceiver = config.transceiver as WebSocketTransceiver
       val bootstrap = config.bootstrap
@@ -32,10 +31,6 @@ class WebSocketClientFactory : ClientFactory() {
       val client = WebSocketClient(address, config, fullWebSocketUrl)
       clientArrayList.add(client)
       return client
-    } catch (e: Exception) {
-      logger.warn("createClient exception creating client {}", e.toString())
-    }
-    return null
   }
 
   @Throws(URISyntaxException::class)

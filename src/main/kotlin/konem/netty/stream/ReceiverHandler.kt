@@ -1,6 +1,7 @@
 package konem.netty.stream
 
 import org.slf4j.LoggerFactory
+import java.lang.ClassCastException
 import java.net.InetSocketAddress
 
 @Suppress("UNCHECKED_CAST")
@@ -11,7 +12,7 @@ abstract class ReceiverHandler<I> : Receiver {
   override fun handleChannelRead(addr: InetSocketAddress, msg: Any) {
     try {
       read(addr, msg as I)
-    } catch (e: Exception) {
+    } catch (e: ClassCastException) {
       logger.error("exception in casting of message : {} ", e.message)
     }
   }

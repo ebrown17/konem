@@ -89,7 +89,7 @@ abstract class Client(private val serverAddress: InetSocketAddress, config: Clie
 
   private fun handleConnection() {
     clietScope.launch {
-      delay(1000)
+      delay(oneSecond)
       for (listener in connectionListeners) {
         listener.onConnection(serverAddress)
       }
@@ -98,7 +98,7 @@ abstract class Client(private val serverAddress: InetSocketAddress, config: Clie
 
   private fun handleDisconnection() {
     clietScope.launch {
-      delay(1000)
+      delay(oneSecond)
       for (listener in connectionListeners) {
         listener.onDisconnection(serverAddress)
       }
@@ -113,7 +113,7 @@ abstract class Client(private val serverAddress: InetSocketAddress, config: Clie
   internal fun calculateRetryTime(): Long {
     var retryTime = System.currentTimeMillis() - this.retryTime
 
-    if (retryTime >= RETRY_TIME * 1000L) {
+    if (retryTime >= RETRY_TIME * oneSecond) {
       retryCount++
     }
     if (this.retryTime == 0L) {
@@ -127,7 +127,7 @@ abstract class Client(private val serverAddress: InetSocketAddress, config: Clie
         retryCount,
         MAX_RETRY_UNTIL_INCR,
         MAX_RETRY_TIME,
-        retryTime / 1000L
+        retryTime / oneSecond
       )
       return MAX_RETRY_TIME
     } else {
@@ -136,7 +136,7 @@ abstract class Client(private val serverAddress: InetSocketAddress, config: Clie
         retryCount,
         MAX_RETRY_UNTIL_INCR,
         RETRY_TIME,
-        retryTime / 1000L
+        retryTime / oneSecond
       )
       return RETRY_TIME
     }
@@ -152,8 +152,9 @@ abstract class Client(private val serverAddress: InetSocketAddress, config: Clie
   }
 
   companion object {
-    private val RETRY_TIME = 10L
-    private val MAX_RETRY_TIME = 60L
-    private val MAX_RETRY_UNTIL_INCR = 30
+    private const val RETRY_TIME = 10L
+    private const val MAX_RETRY_TIME = 60L
+    private const val MAX_RETRY_UNTIL_INCR = 30
+    private const val oneSecond = 1_000L
   }
 }

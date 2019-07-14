@@ -59,7 +59,7 @@ class WebSocketPathHandler(
   private fun sendHttpResponse(ctx: ChannelHandlerContext?, req: HttpRequest, res: HttpResponse) {
     if (ctx != null && (ctx.channel().isOpen || ctx.channel().isActive)) {
       val future = ctx.channel().writeAndFlush(res)
-      if (!isKeepAlive(req) || res.status().code() != 200) {
+      if (!isKeepAlive(req) || res.status().code() != OK) {
         future.addListener(ChannelFutureListener.CLOSE)
       }
     } else {
@@ -75,5 +75,9 @@ class WebSocketPathHandler(
       }
     }
     return valid
+  }
+
+  companion object {
+    private const val OK = 200
   }
 }

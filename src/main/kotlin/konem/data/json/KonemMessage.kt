@@ -7,7 +7,9 @@ import kotlinx.serialization.StringFormat
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import java.util.*
-import konem.data.json.Message.*
+import konem.data.json.Message.Heartbeat
+import konem.data.json.Message.Unknown
+import konem.data.json.Message.Status
 
 @Serializable
 sealed class Message {

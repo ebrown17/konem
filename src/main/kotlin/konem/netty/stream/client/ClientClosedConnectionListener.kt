@@ -19,7 +19,7 @@ class ClientClosedConnectionListener internal constructor(private val client: Cl
           client.connect()
         } catch (e: InterruptedException) {
           logger.error("operationComplete {}", e.message, e)
-          throw RuntimeException("Interrupted trying to connect")
+          throw InterruptedException("Interrupted trying to connect")
         }
       }, client.calculateRetryTime(), TimeUnit.SECONDS)
     }

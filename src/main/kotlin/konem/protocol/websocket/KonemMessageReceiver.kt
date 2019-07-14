@@ -3,6 +3,7 @@ package konem.protocol.websocket
 import konem.data.json.KonemMessage
 import konem.data.json.KonemMessageSerializer
 import konem.netty.stream.ReceiverHandler
+import kotlinx.serialization.json.JsonParsingException
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 
@@ -16,8 +17,8 @@ class KonemMessageReceiver(private val receive: (InetSocketAddress, KonemMessage
       try {
         val kMessage = serializer.toKonemMessage(message)
         receive(addr, kMessage)
-      } catch (e: Exception) {
-        logger.error("exception in casting of message : {} ", e.message)
+      } catch (e: JsonParsingException) {
+        logger.error("JsonParsingException in serializing to KonemMessage with message: {} ", e.message)
       }
     }
   }
