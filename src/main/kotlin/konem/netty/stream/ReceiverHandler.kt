@@ -3,13 +3,14 @@ package konem.netty.stream
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 
-abstract class ReceiverHandler<I> : Receiver<I> {
+@Suppress("UNCHECKED_CAST")
+abstract class ReceiverHandler<I> : Receiver {
 
   private val logger = LoggerFactory.getLogger(javaClass)
 
-  override fun handleChannelRead(addr: InetSocketAddress, msg: I) {
+  override fun handleChannelRead(addr: InetSocketAddress, msg: Any) {
     try {
-      read(addr, msg)
+      read(addr, msg as I)
     } catch (e: Exception) {
       logger.error("exception in casting of message : {} ", e.message)
     }

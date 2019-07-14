@@ -6,7 +6,7 @@ interface ChannelReader {
 
   fun handleChannelRead(addr: InetSocketAddress, webSocketPath: String, message: Any)
 
-  fun readMessage(addr: InetSocketAddress, webSocketPath: String, message: Any)
+  suspend fun readMessage(addr: InetSocketAddress, webSocketPath: String, message: Any)
 
   /**
    *
@@ -18,7 +18,7 @@ interface ChannelReader {
    *
    * @param receiver
    */
-  fun registerChannelReadListener(receiver: Receiver<Any>)
+  fun registerChannelReadListener(receiver: Receiver)
 
   /**
    * Registers a reader for the specified websocket path.
@@ -27,5 +27,5 @@ interface ChannelReader {
    * @param webSocketPaths - webSocket paths you want to read
    * @param reader - the listener to handle read data
    */
-  fun registerChannelReadListener(vararg args: String, receiver: Receiver<Any>)
+  fun registerChannelReadListener(vararg args: String, receiver: Receiver)
 }

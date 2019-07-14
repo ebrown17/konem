@@ -29,14 +29,14 @@ abstract class Server : ChannelReader, HandlerListener {
   private val channelListenerMap: ConcurrentHashMap<Int, ArrayList<ChannelFutureListener>> =
     ConcurrentHashMap()
   private val portAddressMap: ConcurrentHashMap<Int, InetSocketAddress> = ConcurrentHashMap()
-  private val transceiverMap: ConcurrentHashMap<Int, Transceiver<Any>> = ConcurrentHashMap()
+  private val transceiverMap: ConcurrentHashMap<Int, Transceiver<*>> = ConcurrentHashMap()
   private val channelConnectionMap: ConcurrentHashMap<Int, ArrayList<InetSocketAddress>> =
     ConcurrentHashMap()
   private val remoteHostToChannelMap: ConcurrentHashMap<InetSocketAddress, Int> =
     ConcurrentHashMap()
   private val connectionListeners: MutableList<ConnectionStatusListener> = ArrayList()
 
-  private val serverScope = CoroutineScope(CoroutineName("ConnectionStatus"))
+  protected val serverScope = CoroutineScope(CoroutineName("ServerScope"))
 
   init {
     val threadFactory = DefaultThreadFactory("server")
@@ -66,29 +66,18 @@ abstract class Server : ChannelReader, HandlerListener {
     return bootstrap
   }
 
-  protected fun addChannel(port: Int, transceiver: Transceiver<Any>): Boolean {
-    try {
+  protected fun addChannel(port: Int, transceiver: Transceiver<*>): Boolean {
       if (!isPortConfigured(port)) {
-        portAddressMap.put(port, InetSocketAddress(port))
-      } else {
-        return false
+        if (!isTransceiverConfigured(port)) {
+          if (!isBootstrapConfigured(port)) {
+            portAddressMap[port] = InetSocketAddress(port)
+            transceiverMap[port] = transceiver
+            bootstrapMap[port] = createServerBootstrap(port)
+            transceiver.registerHandlerListener(this)
+            return true
+          }
+        }
       }
-
-      if (!isTransceiverConfigured(port)) {
-        transceiverMap[port] = transceiver
-        transceiver.registerHandlerListener(this)
-      } else {
-        return false
-      }
-
-      if (!isBootstrapConfigured(port)) {
-        bootstrapMap[port] = createServerBootstrap(port)
-        return true
-      }
-    } catch (e: Exception) {
-      logger.error("{}", e.message)
-    }
-
     return false
   }
 
@@ -211,7 +200,7 @@ abstract class Server : ChannelReader, HandlerListener {
     connectionListeners.add(listener)
   }
 
-  fun getTransceiverMap(): Map<Int, Transceiver<Any>> {
+  fun getTransceiverMap(): Map<Int, Transceiver<*>> {
     return Collections.unmodifiableMap(transceiverMap)
   }
 

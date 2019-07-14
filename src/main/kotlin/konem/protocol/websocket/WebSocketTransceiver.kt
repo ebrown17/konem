@@ -3,11 +3,14 @@ package konem.protocol.websocket
 import konem.netty.stream.Transceiver
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame
 import io.netty.handler.codec.http.websocketx.WebSocketFrame
+import konem.data.json.KonemMessage
+import konem.data.json.KonemMessageSerializer
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 
 class WebSocketTransceiver(channelPort: Int) : Transceiver<WebSocketFrame>(channelPort) {
   private val logger = LoggerFactory.getLogger(WebSocketTransceiver::class.java)
+  private val serializer = KonemMessageSerializer()
 
   fun handleMessage(addr: InetSocketAddress, webSocketPath: String, message: String) {
     logger.trace("handleMessage from {} with {}", addr, message)
@@ -21,11 +24,13 @@ class WebSocketTransceiver(channelPort: Int) : Transceiver<WebSocketFrame>(chann
    * @param addr
    * @param message
    */
-  fun transmit(addr: InetSocketAddress, message: String) {
+  fun transmit(addr: InetSocketAddress, message: KonemMessage) {
     synchronized(activeLock) {
       logger.debug("sendMessage to addr: {} with {}", addr, message)
       val handler = activeHandlers[addr]
-      handler?.sendMessage(TextWebSocketFrame(message))
+      val kMessage = serializer.toJson(message)
+      val frame = TextWebSocketFrame(kMessage)
+      handler?.sendMessage(frame)
     }
   }
 
@@ -35,9 +40,10 @@ class WebSocketTransceiver(channelPort: Int) : Transceiver<WebSocketFrame>(chann
    * @param message
    * @param websocketPaths
    */
-  fun broadcastMessage(message: String, vararg websocketPaths: String) {
+  fun broadcastMessage(message: KonemMessage, vararg websocketPaths: String) {
     logger.debug("broadcastMessage to paths:{} message: {}", websocketPaths, message)
-    val frame = TextWebSocketFrame(message)
+    val kMessage = serializer.toJson(message)
+    val frame = TextWebSocketFrame(kMessage)
     try {
       synchronized(activeLock) {
         if (websocketPaths.isEmpty()) {
