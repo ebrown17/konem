@@ -28,8 +28,10 @@ abstract class Client(private val serverAddress: InetSocketAddress, config: Clie
   private val connectionListeners: MutableList<ConnectListener> = ArrayList()
   private val disconnectionListeners: MutableList<DisconnectListener> = ArrayList()
 
-  private var retryCount = 0
-  private var retryTime: Long = 0
+  var retryCount = 0
+    private set
+  var retryTime: Long = 0
+    private set
   internal var isDisconnectInitiated = true
     private set
 
