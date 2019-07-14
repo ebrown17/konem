@@ -19,7 +19,7 @@ abstract class Client(private val serverAddress: InetSocketAddress, config: Clie
   ChannelReader {
 
   private val logger = LoggerFactory.getLogger(javaClass)
-  private val transceiver: Transceiver<Any> = config.transceiver
+  private val transceiver: Transceiver<*> = config.transceiver
   protected val bootstrap: Bootstrap = config.bootstrap
   protected val clietScope: CoroutineScope = config.scope
 

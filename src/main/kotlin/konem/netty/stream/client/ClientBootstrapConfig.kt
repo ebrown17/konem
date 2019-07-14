@@ -5,7 +5,7 @@ import io.netty.bootstrap.Bootstrap
 import kotlinx.coroutines.CoroutineScope
 
 data class ClientBootstrapConfig constructor(
-  val transceiver: Transceiver<Any>,
+  val transceiver: Transceiver<*>,
   val bootstrap: Bootstrap,
   val scope: CoroutineScope
 )

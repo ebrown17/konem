@@ -1,13 +1,10 @@
 package konem.netty.stream.client
 
-import java.net.InetSocketAddress
-
 interface ClientTransmitter<I> {
   /**
-   * Sends a message to specified host
+   * Sends a message to specified server
    *
-   * @param addr
    * @param message
    */
-  fun sendMessage(addr: InetSocketAddress, message: I)
+  fun sendMessage(message: I)
 }

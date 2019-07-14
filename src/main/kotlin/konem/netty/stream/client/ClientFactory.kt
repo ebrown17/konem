@@ -16,19 +16,19 @@ import java.net.InetSocketAddress
 
 abstract class ClientFactory {
 
-  private val workerGroup: EventLoopGroup
+  protected val workerGroup: EventLoopGroup
   private val channelClass: Class<out Channel>
   private val allocator: PooledByteBufAllocator
-  internal val clientScope: CoroutineScope
+  private val clientScope: CoroutineScope
 
   init {
     this.workerGroup = NioEventLoopGroup(DEFAULT_NUM_THREADS, DefaultThreadFactory("client", true))
     this.channelClass = NioSocketChannel::class.java
     this.allocator = PooledByteBufAllocator.DEFAULT
-    this.clientScope = CoroutineScope(CoroutineName("ConnectionStatus"))
+    this.clientScope = CoroutineScope(CoroutineName("ClientScope"))
   }
 
-  abstract fun createClient(host: String, port: Int, vararg args: String): Client
+  abstract fun createClient(host: String, port: Int, vararg args: String): Client?
 
   private fun createBootStrap(): Bootstrap {
     val bootstrap = Bootstrap()
@@ -40,7 +40,7 @@ abstract class ClientFactory {
     return bootstrap
   }
 
-  protected fun createClientConfig(transceiver: Transceiver<Any>): ClientBootstrapConfig {
+  protected fun createClientConfig(transceiver: Transceiver<*>): ClientBootstrapConfig {
     return ClientBootstrapConfig(transceiver, createBootStrap(), clientScope)
   }
 
@@ -48,7 +48,7 @@ abstract class ClientFactory {
     address: InetSocketAddress,
     config: ClientBootstrapConfig,
     vararg args: String
-  ): Client
+  ): Client?
 
   abstract fun shutdown()
 
