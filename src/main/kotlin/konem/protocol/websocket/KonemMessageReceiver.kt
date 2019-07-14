@@ -12,7 +12,7 @@ class KonemMessageReceiver(private val receive: (InetSocketAddress, KonemMessage
   private val serializer = KonemMessageSerializer()
 
   override fun read(addr: InetSocketAddress, message: String) {
-    synchronized(this){
+    synchronized(this) {
       try {
         val kMessage = serializer.toKonemMessage(message)
         receive(addr, kMessage)
@@ -20,6 +20,5 @@ class KonemMessageReceiver(private val receive: (InetSocketAddress, KonemMessage
         logger.error("exception in casting of message : {} ", e.message)
       }
     }
-
   }
 }

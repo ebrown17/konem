@@ -15,8 +15,6 @@ class WebSocketServer : Server(), ServerTransmitter<KonemMessage> {
 
   private val logger = LoggerFactory.getLogger(WebSocketServer::class.java)
 
-  private val WS_MIN_SIZE = 1
-
   private val readListeners: ConcurrentHashMap<String, ArrayList<Receiver>> =
     ConcurrentHashMap()
   private val websocketMap: ConcurrentHashMap<Int, Array<String>> = ConcurrentHashMap()

@@ -10,14 +10,16 @@ import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 import java.net.URI
 
-class WebSocketClient(serverAddress: InetSocketAddress, config: ClientBootstrapConfig, private val fullWSPath: URI) : Client(serverAddress,config),
+class WebSocketClient(
+  private val serverAddress: InetSocketAddress,
+  config: ClientBootstrapConfig,
+  private val fullWSPath: URI
+) : Client(serverAddress, config),
   ClientTransmitter<KonemMessage> {
 
-  val logger = LoggerFactory.getLogger(WebSocketClient::class.java)
+  private val logger = LoggerFactory.getLogger(WebSocketClient::class.java)
   private val transceiver = config.transceiver as WebSocketTransceiver
   private val readListeners = mutableListOf<Receiver>()
-  private val serverAddress: InetSocketAddress = serverAddress
-
 
   override fun sendMessage(message: KonemMessage) {
     if (!isActive()) {
@@ -30,13 +32,13 @@ class WebSocketClient(serverAddress: InetSocketAddress, config: ClientBootstrapC
 
   override fun handleChannelRead(addr: InetSocketAddress, webSocketPath: String, message: Any) {
     clietScope.launch {
-      readMessage(addr,webSocketPath,message)
+      readMessage(addr, webSocketPath, message)
     }
   }
 
   override suspend fun readMessage(addr: InetSocketAddress, webSocketPath: String, message: Any) {
     logger.trace("readMessage got message: {}", message)
-    for(listener in readListeners){
+    for (listener in readListeners) {
       listener.handleChannelRead(addr, message)
     }
   }
@@ -52,5 +54,4 @@ class WebSocketClient(serverAddress: InetSocketAddress, config: ClientBootstrapC
   override fun toString(): String {
     return "WebSocketClient{WsUrl=$fullWSPath, $transceiver}"
   }
-
 }

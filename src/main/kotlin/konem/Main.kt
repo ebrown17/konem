@@ -23,10 +23,9 @@ fun main() {
   server.startServer()
   var count = 0
   server.registerChannelReadListener(KonemMessageReceiver { remote, message ->
-    // logger.info("KoneMessageReceiver: {} ", message)
+    logger.info("KoneMessageReceiver: {} ", message)
     count++
   })
-
 
   val fact = WebSocketClientFactory()
   val client = fact.createClient("localhost", 8080, "/tester")
@@ -38,7 +37,7 @@ fun main() {
     repeat(500) {
       client?.sendMessage(KonemMessage(Message.Heartbeat("$it")))
       client2?.sendMessage(KonemMessage(Message.Heartbeat("$it")))
-      //Thread.sleep(1000)
+      // Thread.sleep(1000)
     }
     Thread.sleep(1000)
     println(count)
@@ -46,7 +45,6 @@ fun main() {
   }
   fact.shutdown()
 }
-
 
 fun main1() {
   logger.info("hello from main")

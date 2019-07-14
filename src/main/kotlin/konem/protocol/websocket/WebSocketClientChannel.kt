@@ -34,7 +34,5 @@ class WebSocketClientChannel(
       WebSocketFrameHandler(channelIds.incrementAndGet(), transceiver, webSocketPath.path)
     )
     pipeline.addLast("exceptionHandler", WebSocketExceptionHandler())
-
   }
-
 }
