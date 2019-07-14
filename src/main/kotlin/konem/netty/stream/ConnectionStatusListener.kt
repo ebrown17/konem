@@ -4,11 +4,11 @@ import java.net.InetSocketAddress
 
 interface StatusListener
 
-interface ConnectListener : StatusListener{
+interface ConnectListener : StatusListener {
   fun onConnection(address: InetSocketAddress)
 }
 
-interface DisconnectListener : StatusListener{
+interface DisconnectListener : StatusListener {
   fun onDisconnection(address: InetSocketAddress)
 }
 
@@ -28,7 +28,7 @@ class DisconnectionListener(private val disconnected: (InetSocketAddress) -> Uni
 class ConnectionStatusListener(
   private val connected: (InetSocketAddress) -> Unit,
   private val disconnected: (InetSocketAddress) -> Unit
-) : ConnectListener,DisconnectListener {
+) : ConnectListener, DisconnectListener {
 
   override fun onConnection(address: InetSocketAddress) {
     connected(address)

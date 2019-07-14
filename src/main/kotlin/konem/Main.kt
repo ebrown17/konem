@@ -44,7 +44,6 @@ fun main() {
     logger.info("Client connected to {}", remoteAddr)
   }
 
-
   client.registerConnectionListener(connectionListener)
   client.registerDisconnectionListener(DisconnectionListener { remoteAddr ->
     logger.info("Client {} disconnected from {}", client.toString(), remoteAddr)
