@@ -37,9 +37,10 @@ class WebSocketServer : Server(), ServerTransmitter<KonemMessage> {
 
     return if (validPaths.isNotEmpty()) {
       val transceiver = WebSocketTransceiver(port)
+      websocketMap.putIfAbsent(port, validPaths.toTypedArray())
       val added = addChannel(port, transceiver)
-      if (added) {
-        websocketMap.putIfAbsent(port, validPaths.toTypedArray())
+      if (!added) {
+        websocketMap.remove(port)
       }
       added
     } else {

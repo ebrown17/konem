@@ -4,6 +4,7 @@ import konem.data.json.KonemMessage
 import konem.data.json.KonemMessageSerializer
 import konem.data.json.Message
 import konem.protocol.websocket.KonemMessageReceiver
+import konem.protocol.websocket.WebSocketClientFactory
 import konem.protocol.websocket.WebSocketServer
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -15,15 +16,36 @@ private val logger = LoggerFactory.getLogger("Main")
 private val cName = CoroutineName("onConnection")
 private val scopey = CoroutineScope(cName)
 
-fun main(){
+fun main() {
 
   val server = WebSocketServer()
-  server.addChannel(8080,"/tester")
+  server.addChannel(8080, "/tester")
   server.startServer()
+  var count = 0
+  server.registerChannelReadListener(KonemMessageReceiver { remote, message ->
+    // logger.info("KoneMessageReceiver: {} ", message)
+    count++
+  })
 
 
+  val fact = WebSocketClientFactory()
+  val client = fact.createClient("localhost", 8080, "/tester")
+  val client2 = fact.createClient("localhost", 8080, "/tester")
+  client?.connect()
+  client2?.connect()
+  Thread.sleep(1000)
+  repeat(100) {
+    repeat(500) {
+      client?.sendMessage(KonemMessage(Message.Heartbeat("$it")))
+      client2?.sendMessage(KonemMessage(Message.Heartbeat("$it")))
+      //Thread.sleep(1000)
+    }
+    Thread.sleep(1000)
+    println(count)
+    count = 0
+  }
+  fact.shutdown()
 }
-
 
 
 fun main1() {
@@ -82,7 +104,7 @@ fun main1() {
   receiver.handleChannelRead(InetSocketAddress(8080), jsonBeat)
   receiver.handleChannelRead(InetSocketAddress(8080), jsonStatus)
   receiver.handleChannelRead(InetSocketAddress(8080), jsonUnknown)
-Thread.sleep(1000)
+  Thread.sleep(1000)
   logger.info("{}", KonemMessage(Message.Heartbeat()))
 
   Thread.sleep(1000)
