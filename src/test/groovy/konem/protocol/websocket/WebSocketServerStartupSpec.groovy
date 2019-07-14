@@ -1,6 +1,5 @@
-package websocket
+package konem.protocol.websocket
 
-import konem.protocol.websocket.WebSocketServer
 import spock.lang.Shared
 import spock.lang.Specification
 
