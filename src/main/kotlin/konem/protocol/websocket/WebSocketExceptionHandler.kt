@@ -42,7 +42,6 @@ class WebSocketExceptionHandler : ExceptionHandler() {
         ctx.close()
       }
     }
-
   }
 
   private fun sendHttpResponse(ctx: ChannelHandlerContext, req: HttpRequest, res: HttpResponse) {

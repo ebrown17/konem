@@ -4,6 +4,7 @@ import konem.data.json.KonemMessage
 import konem.data.json.KonemMessageSerializer
 import konem.data.json.Message
 import konem.protocol.websocket.KonemMessageReceiver
+import konem.protocol.websocket.WebSocketServer
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import org.slf4j.LoggerFactory
@@ -14,7 +15,18 @@ private val logger = LoggerFactory.getLogger("Main")
 private val cName = CoroutineName("onConnection")
 private val scopey = CoroutineScope(cName)
 
-fun main() {
+fun main(){
+
+  val server = WebSocketServer()
+  server.addChannel(8080,"/tester")
+  server.startServer()
+
+
+}
+
+
+
+fun main1() {
   logger.info("hello from main")
   val serializer = KonemMessageSerializer()
   var count = 0
@@ -26,7 +38,6 @@ fun main() {
       serializer.toKonemMessage(jsonBeat)
     }
   }
-
 
   val timeT = measureTimeMillis {
     for (i in 1..1000) {
@@ -49,7 +60,7 @@ fun main() {
   println(jsonBeat)
   println(back)
 
-  val kotlinStatus = KonemMessage(Message.Status("Good Times",0,500,199,"All good here"))
+  val kotlinStatus = KonemMessage(Message.Status("Good Times", 0, 500, 199, "All good here"))
   val jsonStatus = serializer.toJson(kotlinStatus)
   val statBack = serializer.toKonemMessage(jsonStatus)
 
@@ -68,17 +79,16 @@ fun main() {
   var receiver = KonemMessageReceiver { remote, message ->
     logger.info("KoneMessageReceiver: {} ", message)
   }
-  receiver.handleChannelRead(InetSocketAddress(8080),jsonBeat)
-  receiver.handleChannelRead(InetSocketAddress(8080),jsonStatus)
-  receiver.handleChannelRead(InetSocketAddress(8080),jsonUnknown)
+  receiver.handleChannelRead(InetSocketAddress(8080), jsonBeat)
+  receiver.handleChannelRead(InetSocketAddress(8080), jsonStatus)
+  receiver.handleChannelRead(InetSocketAddress(8080), jsonUnknown)
 Thread.sleep(1000)
-  logger.info("{}",KonemMessage(Message.Heartbeat()))
+  logger.info("{}", KonemMessage(Message.Heartbeat()))
 
   Thread.sleep(1000)
-  logger.info("{}",KonemMessage(Message.Status()))
+  logger.info("{}", KonemMessage(Message.Status()))
 
   Thread.sleep(1000)
-  logger.info("{}",KonemMessage(Message.Heartbeat()))
-  logger.info("{}",KonemMessage(Message.Unknown()))
-
+  logger.info("{}", KonemMessage(Message.Heartbeat()))
+  logger.info("{}", KonemMessage(Message.Unknown()))
 }

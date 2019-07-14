@@ -56,8 +56,6 @@ dependencies {
     implementation("com.squareup.moshi:moshi-kotlin:1.8.0")
     // implementation 'com.squareup.wire:wire-runtime:2.2.0'
 
-
-
     testImplementation 'org.spockframework:spock-core:1.2-groovy-2.5'
     testImplementation 'junit:junit:4.12'
 

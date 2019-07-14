@@ -26,7 +26,6 @@ sealed class Message {
 
   @Serializable
   data class Unknown constructor(val unknown: String = "Unknown Message") : Message()
-
 }
 
 @Serializable
@@ -55,5 +54,4 @@ class KonemMessageSerializer {
   fun toKonemMessage(json: String): KonemMessage {
     return format.parse(serializer, json)
   }
-
 }
