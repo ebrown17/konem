@@ -56,6 +56,7 @@ dependencies {
     // implementation 'com.squareup.wire:wire-runtime:2.2.0'
 
     testImplementation 'org.spockframework:spock-core:1.2-groovy-2.5'
+    testImplementation "org.codehaus.gpars:gpars:1.2.1"
     testImplementation 'junit:junit:4.12'
 
     ktlint "com.pinterest:ktlint:0.33.0"

@@ -18,6 +18,7 @@ import kotlin.system.measureTimeMillis
 private val logger = LoggerFactory.getLogger("Main")
 private val cName = CoroutineName("onConnection")
 private val scopey = CoroutineScope(cName)
+
 @Suppress("MagicNumber")
 fun main() {
 
@@ -25,10 +26,15 @@ fun main() {
   server.addChannel(8080, "/tester")
   server.startServer()
   var count = 0
-  server.registerChannelReadListener(KonemMessageReceiver { _, message ->
+
+
+  server.registerChannelReadListener(KonemMessageReceiver { addr, message ->
     logger.info("KoneMessageReceiver: {} ", message)
     count++
   })
+
+
+
   server.registerConnectionStatusListener(
     ConnectionStatusListener(connected = { remoteAddr ->
       logger.info("Connection from {}", remoteAddr)

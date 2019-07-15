@@ -10,9 +10,13 @@ import java.util.*
 import konem.data.json.Message.Heartbeat
 import konem.data.json.Message.Unknown
 import konem.data.json.Message.Status
+import konem.data.json.Message.Data
 
 @Serializable
 sealed class Message {
+
+  @Serializable
+  data class Data constructor(val data: String) : Message()
 
   @Serializable
   data class Heartbeat constructor(val sent: String = Date().toString()) : Message()
@@ -37,6 +41,7 @@ class KonemMessageSerializer {
 
   private val sealedModule = SerializersModule {
     polymorphic(Message::class) {
+      Data::class with Data.serializer()
       Heartbeat::class with Heartbeat.serializer()
       Status::class with Status.serializer()
       Unknown::class with Unknown.serializer()

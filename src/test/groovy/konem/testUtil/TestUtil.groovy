@@ -91,7 +91,6 @@ class TestUtil {
                 if(count != reader.messageCount){
                     messageCountMap.put(reader,reader.messageCount)
                     stillRecieving = true
-                    startTime = System.currentTimeMillis()
                 }
             }
             if(!stillRecieving && (System.currentTimeMillis() - startTime)  > max_message_wait) {
@@ -104,7 +103,7 @@ class TestUtil {
         }
         def endTime = System.currentTimeMillis()
         if(!stillRecieving){
-            println "Took ${(endTime - startTime) / 1000L} seconds for readers to recieve all messages"
+            println "Took ${(endTime - startTime) / 1000} seconds for readers to recieve all messages"
         }
         else {
             println "Readers did not recieve all messages in the configured max_message_wait of ${MAX_TIME_BETWEEN_MESSAGE} seconds"

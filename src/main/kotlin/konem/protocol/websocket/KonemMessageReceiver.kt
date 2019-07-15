@@ -7,10 +7,12 @@ import kotlinx.serialization.json.JsonParsingException
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 
-class KonemMessageReceiver(private val receive: (InetSocketAddress, KonemMessage) -> Unit) :
+open class KonemMessageReceiver(private val receive: (InetSocketAddress, KonemMessage) -> Unit) :
   ReceiverHandler<String>() {
   private val logger = LoggerFactory.getLogger(KonemMessageReceiver::class.java)
   private val serializer = KonemMessageSerializer()
+
+  //TODO look at using channels to pass value from receiver
 
   override fun read(addr: InetSocketAddress, message: String) {
     synchronized(this) {
