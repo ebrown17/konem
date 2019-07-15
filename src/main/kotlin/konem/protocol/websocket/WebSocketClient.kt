@@ -19,7 +19,7 @@ class WebSocketClient(
 
   private val logger = LoggerFactory.getLogger(WebSocketClient::class.java)
   private val transceiver = config.transceiver as WebSocketTransceiver
-  private val readListeners = mutableListOf<Receiver>()
+  val readListeners = mutableListOf<Receiver>()
 
   override fun sendMessage(message: KonemMessage) {
     if (!isActive()) {

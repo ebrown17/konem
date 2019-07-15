@@ -5,6 +5,7 @@ import konem.data.json.KonemMessage
 import konem.netty.stream.Receiver
 import konem.netty.stream.server.Server
 import konem.netty.stream.server.ServerTransmitter
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
@@ -123,7 +124,10 @@ class WebSocketServer : Server(), ServerTransmitter<KonemMessage> {
 
   override fun sendMessage(addr: InetSocketAddress, message: KonemMessage) {
     val channelPort = getRemoteHostToChannelMap()[addr]
-    val transceiver = getTransceiverMap()[channelPort] as WebSocketTransceiver
-    transceiver.transmit(addr, message)
+    if(channelPort != null){
+        val transceiver = getTransceiverMap()[channelPort] as WebSocketTransceiver
+      transceiver.transmit(addr, message)
+    }
+
   }
 }

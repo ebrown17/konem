@@ -16,19 +16,21 @@ class TestUtil {
     public static void ensureDisconnected(def clientList, max_disconnect_time = MAX_DISCONNECT_TIME) {
         def startTime = System.currentTimeMillis()
         boolean allInActive = true
+        def changedTime = startTime
         while (true) {
-            allInActive = true
             clientList.each { Client client ->
                 if (client.isActive()) {
                     allInActive = false
+
                 }
             }
 
             if (allInActive) {
                 break
             }
-            if((System.currentTimeMillis() - startTime) / 1000 > max_disconnect_time ) break
-
+            if((System.currentTimeMillis() - changedTime) / 1000 > max_disconnect_time ) break
+            changedTime = System.currentTimeMillis()
+            allInActive = true
             Thread.sleep(100)
         }
         def endTime = System.currentTimeMillis()
@@ -44,9 +46,9 @@ class TestUtil {
 
     public static void ensureClientsActive(def clientList, max_connect_time = MAX_CONNECT_TIME) {
         def startTime = System.currentTimeMillis()
-        boolean allActive = true
+        def changedTime = startTime
+        boolean allActive = false
         while (true) {
-            allActive = true
             clientList.each { Client client ->
                 if (!client.isActive()) {
                     allActive = false
@@ -56,10 +58,12 @@ class TestUtil {
             if (allActive) {
                 break
             }
-            if((System.currentTimeMillis() - startTime) / 1000 > max_connect_time ){
+            if((System.currentTimeMillis() - changedTime) / 1000 > max_connect_time ){
                 break
             }
-            Thread.sleep(500)
+            changedTime = System.currentTimeMillis()
+            allActive = true
+            Thread.sleep(100)
         }
         def endTime = System.currentTimeMillis()
         if(allActive){
@@ -83,9 +87,9 @@ class TestUtil {
             messageCountMap.put(reader,reader.messageCount)
         }
         def startTime = System.currentTimeMillis()
+        def changedTime = startTime
         def stillRecieving = true
         while(true){
-            stillRecieving = false
             for(Receiver reader in readerList){
                 def count = messageCountMap.get(reader)
                 if(count != reader.messageCount){
@@ -93,13 +97,18 @@ class TestUtil {
                     stillRecieving = true
                 }
             }
-            if(!stillRecieving && (System.currentTimeMillis() - startTime)  > max_message_wait) {
+            if(!stillRecieving ) {
                 break
             }
-            if((System.currentTimeMillis() - startTime) / 1000 > max_message_wait ){
+            if((System.currentTimeMillis() - changedTime)  > max_message_wait) {
                 break
             }
-            Thread.sleep(500)
+            if((System.currentTimeMillis() - changedTime) / 1000 > max_message_wait ){
+                break
+            }
+            stillRecieving = false
+            changedTime =  System.currentTimeMillis()
+            Thread.sleep(100)
         }
         def endTime = System.currentTimeMillis()
         if(!stillRecieving){
