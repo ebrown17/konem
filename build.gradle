@@ -113,7 +113,13 @@ spotbugs {
 
 test {
     jvmArgs = ["-Dio.netty.leakDetection.level=PARANOID"]
+    exclude '**/WebSocketClientConnectionSpec."Clients retry time is calculated correctly"'
 }
+
+/*tasks.withType(Test) {
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+}*/
+
 
 wrapper {
     gradleVersion = '5.4.1'

@@ -166,9 +166,9 @@ abstract class Server : ChannelReader, HandlerListener {
     workerGroup.shutdownGracefully()
     logger.info("shutdownServer server fully shutdown")
   }
-  val cScope = CoroutineScope(CoroutineName("cScope"))
+
   private fun handleConnect(remoteConnection: InetSocketAddress) {
-    cScope.launch {
+    serverScope.launch {
       withTimeout(twoSeconds) {
         delay(oneSecond)
         for (listener in connectionListeners) {
@@ -178,10 +178,8 @@ abstract class Server : ChannelReader, HandlerListener {
     }
   }
 
-  val dScope = CoroutineScope(CoroutineName("DiscScope"))
-
   private fun handleDisconnect(remoteConnection: InetSocketAddress) {
-    dScope.launch {
+    serverScope.launch {
       withTimeout(twoSeconds) {
         delay(oneSecond)
         for (listener in disconnectionListeners) {
