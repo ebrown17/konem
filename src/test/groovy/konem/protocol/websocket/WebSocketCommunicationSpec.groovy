@@ -48,17 +48,17 @@ class WebSocketCommunicationSpec extends Specification {
     def setup() {
         factory = new WebSocketClientFactory()
         server = new WebSocketServer()
-        server.addChannel(6060, "/test0", "/test1")
-        server.addChannel(6081, "/test2", "/test3")
-        server.addChannel(6082, "/test4", "/test5", "/test6")
-        server.addChannel(6083, "/test7", "/test8", "/test9")
+        server.addChannel(7060, "/test0", "/test1")
+        server.addChannel(7081, "/test2", "/test3")
+        server.addChannel(7082, "/test4", "/test5", "/test6")
+        server.addChannel(7083, "/test7", "/test8", "/test9")
 
     }
 
     def cleanup() {
         server.shutdownServer()
-        factory.shutdown()
         server = null
+        factory.shutdown()
         factory = null
         Thread.sleep(2000)
     }
@@ -76,8 +76,9 @@ class WebSocketCommunicationSpec extends Specification {
         Thread.sleep(sleepTime)
 
         def clientList = []
-
+        def totalMessages = 0
         configurations.each { config ->
+            totalMessages += (config.clients * (messages) * config.paths.size)
             config.paths.each { path ->
                 1.upto(config.clients) {
                     def client = factory.createClient("localhost", config.port, path)
@@ -88,25 +89,18 @@ class WebSocketCommunicationSpec extends Specification {
         }
         TestUtil.ensureClientsActive(clientList)
         when:
+        def msg = new KonemMessage(new Message.Data("send"))
         GParsPool.withPool(clientList.size()) {
             clientList.eachParallel { WebSocketClient client ->
                 1.upto(messages) {
-                    KonemMessage msg = new KonemMessage(new Message.Data("send"))
                     client.sendMessage(msg)
                 }
             }
         }
 
-        println("Before ${new Date()}")
-        TestUtil.waitForAllMessges(receiver, recieveTime)
-        println("After ${new Date()}")
+        TestUtil.waitForAllMessges(receiver, totalMessages, recieveTime)
+
         then:
-        def totalMessages = 0
-        configurations.each { config ->
-            config.paths.each { path ->
-                totalMessages += (config.clients * (messages))
-            }
-        }
         println "$configurations messages: $messages"
         println "${receiver.messageCount} == $totalMessages"
         assert receiver.messageCount == totalMessages
@@ -114,16 +108,16 @@ class WebSocketCommunicationSpec extends Specification {
 
         where:
         configurations                                                    | messages | sleepTime | recieveTime
-        [[port: 6060, paths: ["/test0"], clients: 1]]                     | 10_000   | 1000      | 2000
-        [[port: 6060, paths: ["/test0"], clients: 1],
-         [port: 6081, paths: ["/test2"], clients: 1]]                     | 10_000   | 1000      | 1000
-        [[port: 6060, paths: ["/test0"], clients: 5],
-         [port: 6081, paths: ["/test2"], clients: 5],
-         [port: 6082, paths: ["/test4", "/test5", "/test6"], clients: 5]] | 10_000   | 1000      | 1000
-        [[port: 6060, paths: ["/test0", "/test1"], clients: 5],
-         [port: 6081, paths: ["/test2", "/test3"], clients: 5],
-         [port: 6082, paths: ["/test4", "/test5", "/test6"], clients: 5],
-         [port: 6083, paths: ["/test7", "/test8", "/test9"], clients: 5]] | 10_000   | 1000      | 1000
+        [[port: 7060, paths: ["/test0"], clients: 1]]                     | 5_000    | 1000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 1],
+         [port: 7081, paths: ["/test2"], clients: 1]]                     | 1_000    | 1000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 5],
+         [port: 7081, paths: ["/test2"], clients: 5],
+         [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5]] | 1_000    | 1000      | 5000
+        [[port: 7060, paths: ["/test0", "/test1"], clients: 5],
+         [port: 7081, paths: ["/test2", "/test3"], clients: 5],
+         [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5],
+         [port: 7083, paths: ["/test7", "/test8", "/test9"], clients: 5]] | 1_000    | 1000      | 5000
     }
 
 
@@ -141,8 +135,9 @@ class WebSocketCommunicationSpec extends Specification {
         Thread.sleep(sleepTime)
 
         def clientList = []
-
+        def totalMessages = 0
         configurations.each { config ->
+            totalMessages += (config.clients * (messages) * config.paths.size)
             config.paths.each { path ->
                 1.upto(config.clients) {
                     def client = factory.createClient("localhost", config.port, path)
@@ -160,25 +155,17 @@ class WebSocketCommunicationSpec extends Specification {
         TestUtil.ensureClientsActive(clientList)
 
         when:
-
+        def msg = new KonemMessage(new Message.Data("send"))
         GParsPool.withPool(clientList.size()) {
             clientList.eachParallel { WebSocketClient client ->
                 1.upto(messages) {
-                    KonemMessage msg = new KonemMessage(new Message.Data("send"))
                     client.sendMessage(msg)
                 }
             }
         }
-        TestUtil.waitForAllMessges(receiverList, recieveTime)
+        TestUtil.waitForAllMessges(receiverList, totalMessages * 2, recieveTime)
 
         then:
-        def totalMessages = 0
-        configurations.each { config ->
-            config.paths.each { path ->
-                totalMessages += (config.clients * (messages))
-            }
-        }
-
         def clientMessagesRecieved = 0
         clientList.each { WebSocketClient client ->
             def receivers = client.readListeners
@@ -192,118 +179,119 @@ class WebSocketCommunicationSpec extends Specification {
         println "-----------------------------"
         where:
         configurations                                                    | messages | sleepTime | recieveTime
-        [[port: 6060, paths: ["/test0"], clients: 1]]                     | 10_000   | 1000      | 2000
-        [[port: 6060, paths: ["/test0"], clients: 1],
-         [port: 6081, paths: ["/test2"], clients: 1]]                     | 10_000   | 1000      | 1000
-        [[port: 6060, paths: ["/test0"], clients: 5],
-         [port: 6081, paths: ["/test2"], clients: 5],
-         [port: 6082, paths: ["/test4", "/test5", "/test6"], clients: 5]] | 10_000   | 1000      | 1000
-        [[port: 6060, paths: ["/test0", "/test1"], clients: 5],
-         [port: 6081, paths: ["/test2", "/test3"], clients: 5],
-         [port: 6082, paths: ["/test4", "/test5", "/test6"], clients: 5],
-         [port: 6083, paths: ["/test7", "/test8", "/test9"], clients: 5]] | 10_000   | 1000      | 1000
+        [[port: 7060, paths: ["/test0"], clients: 1]]                     | 5_000   | 1000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 1],
+         [port: 7081, paths: ["/test2"], clients: 1]]                     | 5_000    | 1000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 5],
+         [port: 7081, paths: ["/test2"], clients: 5],
+         [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5]] | 1_000    | 1000      | 5000
+        [[port: 7060, paths: ["/test0", "/test1"], clients: 5],
+         [port: 7081, paths: ["/test2", "/test3"], clients: 5],
+         [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5],
+         [port: 7083, paths: ["/test7", "/test8", "/test9"], clients: 5]] | 1_000    | 1000      | 5000
     }
 
 
+    def "Clients can see messages after a reconnect"() {
+        given:
+        def receiverSList = []
+        def receiverCList = []
+        def serverReceiver
+        serverReceiver = new GroovyKonemMessageReceiver({ addr, msg ->
+            serverReceiver.messageCount++
+            server.sendMessage(addr as InetSocketAddress, msg as KonemMessage)
+        })
+        receiverSList << serverReceiver
+        server.registerChannelReadListener(serverReceiver)
+        server.startServer()
+        Thread.sleep(sleepTime)
 
-     def "Clients can see messages after a reconnect"() {
-         given:
-         def receiverList = []
-         def serverReceiver
-         serverReceiver = new GroovyKonemMessageReceiver({ addr, msg ->
-             serverReceiver.messageCount++
-             server.sendMessage(addr as InetSocketAddress, msg as KonemMessage)
-         })
-         receiverList << serverReceiver
-         server.registerChannelReadListener(serverReceiver)
-         server.startServer()
-         Thread.sleep(sleepTime)
+        def clientList = []
+        def totalMessages = 0
+        configurations.each { config ->
+            totalMessages += (config.clients * (messages) * config.paths.size)
+            config.paths.each { path ->
+                1.upto(config.clients) {
+                    def client = factory.createClient("localhost", config.port, path)
+                    def clientReceiver
+                    clientReceiver = new GroovyKonemMessageReceiver({ addr, msg ->
+                        clientReceiver.messageCount++
+                    })
+                    clientList << client
+                    receiverCList << clientReceiver
+                    client.registerChannelReadListener(clientReceiver)
+                    client.connect()
+                }
+            }
+        }
+        TestUtil.ensureClientsActive(clientList)
 
-         def clientList = []
+        when:
+        def msg = new KonemMessage(new Message.Data("send"))
+        GParsPool.withPool(clientList.size()) {
+            clientList.eachParallel { WebSocketClient client ->
+                1.upto(messages) {
+                    client.sendMessage(msg)
+                }
+            }
+        }
+        print "Server "
+        TestUtil.waitForAllMessges(receiverSList, totalMessages, recieveTime)
+        print "Client "
+        TestUtil.waitForAllMessges(receiverCList, totalMessages, recieveTime)
+        clientList.each { WebSocketClient client ->
+            client.disconnect()
+        }
+        TestUtil.ensureDisconnected(clientList)
 
-         configurations.each { config ->
-             config.paths.each { path ->
-                 1.upto(config.clients) {
-                     def client = factory.createClient("localhost", config.port, path)
-                     def clientReceiver
-                     clientReceiver = new GroovyKonemMessageReceiver({ addr, msg ->
-                         clientReceiver.messageCount++
-                     })
-                     clientList << client
-                     receiverList << clientReceiver
-                     client.registerChannelReadListener(clientReceiver)
-                     client.connect()
-                 }
-             }
-         }
-         TestUtil.ensureClientsActive(clientList)
+        clientList.each { WebSocketClient client ->
+            client.connect()
+        }
 
-         when:
-         GParsPool.withPool(clientList.size()) {
-             clientList.eachParallel { WebSocketClient client ->
-                 1.upto(messages) {
-                     KonemMessage msg = new KonemMessage(new Message.Data("send"))
-                     client.sendMessage(msg)
-                 }
-             }
-         }
-         TestUtil.waitForAllMessges(receiverList, recieveTime)
+        TestUtil.ensureClientsActive(clientList)
 
-         clientList.each { WebSocketClient client ->
-             client.disconnect()
-         }
-         TestUtil.ensureDisconnected(clientList)
-
-         clientList.each { WebSocketClient client ->
-             client.connect()
-         }
-
-         TestUtil.ensureClientsActive(clientList)
-
-         GParsPool.withPool(clientList.size()) {
-             clientList.eachParallel { WebSocketClient client ->
-                 1.upto(messages) {
-                     KonemMessage msg = new KonemMessage(new Message.Data("send"))
-                     client.sendMessage(msg)
-                 }
-             }
-         }
-         TestUtil.waitForAllMessges(receiverList, recieveTime)
-
-         then:
-         def totalMessages = 0
-         configurations.each { config ->
-             config.paths.each { path ->
-                 totalMessages += (config.clients * (messages)) * 2
-             }
-         }
-
-         def clientMessagesRecieved = 0
-         clientList.each { WebSocketClient client ->
-             def receivers = client.readListeners
-             receivers.each {
-                 clientMessagesRecieved += it.messageCount
-             }
-         }
-
-         println "server recieved ${totalMessages} == $clientMessagesRecieved client messages"
-         totalMessages == clientMessagesRecieved
+        GParsPool.withPool(clientList.size()) {
+            clientList.eachParallel { WebSocketClient client ->
+                1.upto(messages) {
+                    client.sendMessage(msg)
+                }
+            }
+        }
+        totalMessages += totalMessages
+        print "Server "
+        TestUtil.waitForAllMessges(receiverSList, totalMessages, recieveTime)
+        print "Client "
+        TestUtil.waitForAllMessges(receiverCList, totalMessages, recieveTime)
 
 
-         println "-----------------------------"
-         where:
-         configurations                                                    | messages | sleepTime | recieveTime
-         [[port: 6060, paths: ["/test0"], clients: 1]]                     | 10_000   | 1000      | 1000
-         [[port: 6060, paths: ["/test0"], clients: 1],
-          [port: 6081, paths: ["/test2"], clients: 1]]                     | 10_000   | 1000      | 5000
-         [[port: 6060, paths: ["/test0"], clients: 5],
-          [port: 6081, paths: ["/test2"], clients: 5],
-          [port: 6082, paths: ["/test4", "/test5", "/test6"], clients: 5]] | 10_000   | 1000      | 5000
-         [[port: 6060, paths: ["/test0", "/test1"], clients: 5],
-          [port: 6081, paths: ["/test2", "/test3"], clients: 5],
-          [port: 6082, paths: ["/test4", "/test5", "/test6"], clients: 5],
-          [port: 6083, paths: ["/test7", "/test8", "/test9"], clients: 5]] | 10_000   | 1000      | 5000
-     }
+        then:
+
+        def clientMessagesRecieved = 0
+        clientList.each { WebSocketClient client ->
+            def receivers = client.readListeners
+            receivers.each {
+                clientMessagesRecieved += it.messageCount
+            }
+        }
+
+        println "server recieved ${totalMessages} == $clientMessagesRecieved client messages"
+        totalMessages == clientMessagesRecieved
+
+
+        println "-----------------------------"
+        where:
+        configurations                                                    | messages | sleepTime | recieveTime
+        [[port: 7060, paths: ["/test0"], clients: 1]]                     | 1_000    | 1000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 1],
+         [port: 7081, paths: ["/test2"], clients: 1]]                     | 5_000    | 1000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 5],
+         [port: 7081, paths: ["/test2"], clients: 5],
+         [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5]] | 1_000    | 1000      | 5000
+        [[port: 7060, paths: ["/test0", "/test1"], clients: 5],
+         [port: 7081, paths: ["/test2", "/test3"], clients: 5],
+         [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5],
+         [port: 7083, paths: ["/test7", "/test8", "/test9"], clients: 5]] | 1_000    | 1000      | 5000
+    }
     /*
      def "Server can broadcast to all clients on a port"() {
          given:

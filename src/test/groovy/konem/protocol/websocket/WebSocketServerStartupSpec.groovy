@@ -14,6 +14,7 @@ class WebSocketServerStartupSpec extends Specification {
 
     def cleanup() {
         server.shutdownServer()
+        server = null
     }
 
     def "Started with expected channel values"() {

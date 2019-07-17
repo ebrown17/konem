@@ -1,5 +1,6 @@
 package konem.protocol.websocket
 
+import spock.lang.IgnoreIf
 import spock.lang.Shared
 import spock.lang.Specification
 import konem.testUtil.TestUtil
@@ -39,6 +40,8 @@ class WebSocketClientConnectionSpec extends Specification {
     def cleanup() {
         server.shutdownServer()
         factory.shutdown()
+        server = null
+        factory = null
     }
 
 
@@ -187,6 +190,7 @@ class WebSocketClientConnectionSpec extends Specification {
 
     }
 
+    @IgnoreIf({System.getProperty('SKIP.LONG') == '1'} )
     def "Clients retry time is calculated correctly"() {
         given:
         def clientList = []
