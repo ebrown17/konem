@@ -426,162 +426,38 @@ class WebSocketCommunicationSpec extends Specification {
          [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5],
          [port: 7083, paths: ["/test7", "/test8", "/test9"], clients: 5]] | 505   | 1000      | 5000
     }
-    /*
-        def "Server can broadcast to all clients on all ports"() {
-            given:
-            server.startServer()
-            Thread.sleep(sleepTime)
 
-            def clientList = []
-            def receiverList = []
-            configurations.each { config ->
-                config.paths.each { path ->
-                    1.upto(config.clients) {
-                        def client = factory.createClient("localhost", config.port, path)
-                        ReadListener clientReader = new ReadListenerWebSocket() {
-                            int messageCount = 0
-
-                            @Override
-                            synchronized void read(InetSocketAddress addr, String message) {
-                                messageCount++
-                            }
-
-                            @Override
-                            synchronized void read(InetSocketAddress addr, JsonNode message) {
-                                messageCount++
-                            }
-                        }
-                        client.connect()
-                        clientList << client
-                        receiverList << clientReader
-                        client.registerChannelReadListener(clientReader)
-
-
-                    }
-                }
-            }
-            TestUtil.ensureClientsActive(clientList)
-
-            when:
-            configurations.each { config ->
-                config.paths.each { path ->
-                    1.upto(stringMessages) {
-                        server.broadcastOnAllChannels("Server Message $it")
-
-                    }
-                    1.upto(jsonMessages) {
-                        ObjectNode message = serializer.createObjectNode()
-                        message.put("server_message$it", "$it")
-                        server.broadcastOnAllChannels(message)
-                    }
-                }
-            }
-            TestUtil.waitForAllMessges(receiverList, recieveTime)
-
-            then:
-            def totalMessages = 0
-
-            def totalPaths = 0
-            configurations.each { config ->
-                totalPaths += config.paths.size()
-            }
-            configurations.each { config ->
-
-                config.paths.each { path ->
-                    totalMessages += ((totalPaths * (config.clients * stringMessages)) + (totalPaths * (config.clients * jsonMessages)))
-                }
-
-            }
-            def clientMessagesRecieved = 0
-            clientList.each { WebSocketClient client ->
-                def receivers = client.getReadListeners()
-                receivers.each {
-                    clientMessagesRecieved += it.messageCount
-                }
-            }
-
-            println "server sent $totalMessages == $clientMessagesRecieved client messages recieved"
-            totalMessages == clientMessagesRecieved
-            println "-----------------------------"
-            where:
-            configurations                                                     | stringMessages | jsonMessages | sleepTime | recieveTime
-            [[port: 6060, paths: ["/test0"], clients: 5]]                      | 5              | 5            | 2000      | 500
-            [[port: 6060, paths: ["/test0", "/test1"], clients: 5]]            | 11             | 15           | 2000      | 500
-            [[port: 6060, paths: ["/test0", "/test1"], clients: 5]]            | 5              | 5            | 2000      | 1500
-            [[port: 6060, paths: ["/test0", "/test1"], clients: 25]]           | 3              | 9            | 2000      | 1500
-            [[port: 6060, paths: ["/test0", "/test1"], clients: 25],
-             [port: 6081, paths: ["/test2", "/test3"], clients: 25]]           | 5              | 9            | 2000      | 4500
-            [[port: 6060, paths: ["/test0", "/test1"], clients: 25],
-             [port: 6081, paths: ["/test2", "/test3"], clients: 25],
-             [port: 6082, paths: ["/test4", "/test5", "/test6"], clients: 25]] | 15             | 9            | 2000      | 4500
-            [[port: 6060, paths: ["/test0", "/test1"], clients: 25],
-             [port: 6081, paths: ["/test2", "/test3"], clients: 25],
-             [port: 6082, paths: ["/test4", "/test5", "/test6"], clients: 25],
-             [port: 6083, paths: ["/test7", "/test8", "/test9"], clients: 25]] | 20             | 21           | 2000      | 4500
-            [[port: 6060, paths: ["/test0", "/test1"], clients: 11],
-             [port: 6081, paths: ["/test2", "/test3"], clients: 31],
-             [port: 6082, paths: ["/test4", "/test5", "/test6"], clients: 7],
-             [port: 6083, paths: ["/test7", "/test8", "/test9"], clients: 23]] | 20             | 21           | 2000      | 4500
-        }
 
         def "Server can receive and then respond to correct clients"() {
             given:
-            def receiverList = []
-            ReadListener serverReader = new ReadListenerWebSocket() {
-                int messageCount = 0
-
-                @Override
-                synchronized void read(InetSocketAddress addr, String message) {
-                    messageCount++
-                    server.sendMessage(addr, message)
-                }
-
-                @Override
-                synchronized void read(InetSocketAddress addr, JsonNode message) {
-                    messageCount++
-                    server.sendMessage(addr, message)
-                }
-            }
-            receiverList << serverReader
-            server.registerChannelReadListener(serverReader)
+            def receiverSList = []
+            def receiverCList = []
+            def serverReceiver
+            serverReceiver = new GroovyKonemMessageReceiver({ addr, msg ->
+                serverReceiver.messageCount++
+                server.sendMessage(addr as InetSocketAddress, msg as KonemMessage)
+            })
+            receiverSList << serverReceiver
+            server.registerChannelReadListener(serverReceiver)
             server.startServer()
             Thread.sleep(sleepTime)
 
             def clientList = []
-
+            def totalMessages = 0
             configurations.each { config ->
+                totalMessages += (config.clients * (messages) * config.paths.size)
                 config.paths.each { path ->
-
-                    def clientNum = 1
-
                     1.upto(config.clients) {
                         def client = factory.createClient("localhost", config.port, path)
-                        ReadListener clientReader = new ReadListenerWebSocket() {
-                            String clientId = "client-$clientNum-$path"
-                            def messageCount = 0
-
-                            def messageList = []
-
-                            @Override
-                            synchronized void read(InetSocketAddress addr, String message) {
-                                messageList << message
-                                messageCount++
-                            }
-
-                            @Override
-                            synchronized void read(InetSocketAddress addr, JsonNode message) {
-                                messageList << message.get("clientId").textValue()
-                                messageCount++
-                            }
-                        }
-
-                        clientNum++
-                        client.connect()
-                        receiverList << clientReader
+                        def clientReceiver
+                        clientReceiver = new GroovyKonemMessageReceiver("client-$it-$path", { addr, msg ->
+                            clientReceiver.messageCount++
+                            clientReceiver.messageList << msg
+                        })
                         clientList << client
-                        client.registerChannelReadListener(clientReader)
-
-
+                        receiverCList << clientReceiver
+                        client.registerChannelReadListener(clientReceiver)
+                        client.connect()
                     }
                 }
             }
@@ -590,50 +466,43 @@ class WebSocketCommunicationSpec extends Specification {
             when:
 
             clientList.each { WebSocketClient client ->
-
                 client.getReadListeners().each { receiver ->
-                    1.upto(stringMessages) {
-                        client.sendMessage(receiver.clientId)
-
-                    }
-                    1.upto(jsonMessages) {
-                        ObjectNode message = serializer.createObjectNode()
-                        message.put("clientId", "${receiver.clientId}")
-                        client.sendMessage(message)
-
+                    1.upto(messages) {
+                        client.sendMessage(new KonemMessage(new Message.Data(receiver.clientId)))
                     }
                 }
             }
 
-            TestUtil.waitForAllMessges(receiverList, recieveTime)
+            print "Server "
+            TestUtil.waitForAllMessges(receiverSList, clientList.size() * messages, recieveTime)
+            print "Client "
+            TestUtil.waitForAllMessges(receiverCList, clientList.size() * messages, recieveTime)
 
             then:
             clientList.each { WebSocketClient client ->
                 def receivers = client.getReadListeners()
                 receivers.each { receiver ->
-                    receiver.messageList.each {
-                        //println "$it == ${receiver.clientId}"
-                        assert it == receiver.clientId
+                    receiver.messageList.each { KonemMessage msg ->
+                        assert msg.getKonemMessage().data == receiver.clientId
                     }
                 }
             }
 
             where:
-            configurations                                                     | stringMessages | jsonMessages | sleepTime | recieveTime
-            [[port: 6060, paths: ["/test0"], clients: 1]]                      | 5              | 5            | 2000      | 500
-            [[port: 6060, paths: ["/test0", "/test1"], clients: 1]]            | 5              | 5            | 2000      | 500
-            [[port: 6060, paths: ["/test0", "/test1"], clients: 25]]           | 3              | 9            | 2000      | 1500
-            [[port: 6060, paths: ["/test0", "/test1"], clients: 25],
-             [port: 6081, paths: ["/test2", "/test3"], clients: 25]]           | 5              | 9            | 2000      | 2500
-            [[port: 6060, paths: ["/test0", "/test1"], clients: 25],
-             [port: 6081, paths: ["/test2", "/test3"], clients: 25],
-             [port: 6082, paths: ["/test4", "/test5", "/test6"], clients: 25]] | 15             | 9            | 2000      | 2500
-            [[port: 6060, paths: ["/test0", "/test1"], clients: 25],
-             [port: 6081, paths: ["/test2", "/test3"], clients: 25],
-             [port: 6082, paths: ["/test4", "/test5", "/test6"], clients: 25],
-             [port: 6083, paths: ["/test7", "/test8", "/test9"], clients: 25]] | 20             | 21           | 2000      | 2500
+            configurations                                                    | messages | sleepTime | recieveTime
+            [[port: 7060, paths: ["/test0"], clients: 1]]                     | 10    | 1000      | 5000
+            [[port: 7060, paths: ["/test0"], clients: 1],
+             [port: 7081, paths: ["/test2"], clients: 1]]                     | 50    | 1000      | 5000
+            [[port: 7060, paths: ["/test0"], clients: 5],
+             [port: 7081, paths: ["/test2"], clients: 5],
+             [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5]] | 100    | 1000      | 5000
+            [[port: 7060, paths: ["/test0", "/test1"], clients: 5],
+             [port: 7081, paths: ["/test2", "/test3"], clients: 5],
+             [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5],
+             [port: 7083, paths: ["/test7", "/test8", "/test9"], clients: 5]] | 100   | 1000      | 5000
         }
 
+    /*
         def "Reader can register for specific ws path and only get reads from that path"() {
             given:
             def receiverList = []
