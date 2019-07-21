@@ -14,14 +14,18 @@ interface DisconnectListener : StatusListener {
 
 class ConnectionListener(private val connected: (InetSocketAddress) -> Unit) : ConnectListener {
   override fun onConnection(address: InetSocketAddress) {
-    connected(address)
+    synchronized(this){
+      connected(address)
+    }
   }
 }
 
 class DisconnectionListener(private val disconnected: (InetSocketAddress) -> Unit) :
   DisconnectListener {
   override fun onDisconnection(address: InetSocketAddress) {
-    disconnected(address)
+    synchronized(this) {
+      disconnected(address)
+    }
   }
 }
 
@@ -31,10 +35,14 @@ class ConnectionStatusListener(
 ) : ConnectListener, DisconnectListener {
 
   override fun onConnection(address: InetSocketAddress) {
-    connected(address)
+    synchronized(this){
+      connected(address)
+    }
   }
 
   override fun onDisconnection(address: InetSocketAddress) {
-    disconnected(address)
+    synchronized(this) {
+      disconnected(address)
+    }
   }
 }

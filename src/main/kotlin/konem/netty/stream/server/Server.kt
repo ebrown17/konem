@@ -171,9 +171,9 @@ abstract class Server : ChannelReader, HandlerListener {
     serverScope.launch {
       withTimeout(twoSeconds) {
         delay(oneSecond)
-        for (listener in connectionListeners) {
-          listener.onConnection(remoteConnection)
-        }
+          for (listener in connectionListeners) {
+            listener.onConnection(remoteConnection)
+          }
       }
     }
   }

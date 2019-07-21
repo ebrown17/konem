@@ -83,7 +83,7 @@ class WebSocketServer : Server(), ServerTransmitter<KonemMessage> {
     }
   }
 
-  override fun registerChannelReadListener(vararg webSocketPaths: String, receiver: Receiver) {
+  override fun registerChannelReadListener( receiver: Receiver,vararg webSocketPaths: String) {
     if (webSocketPaths.isEmpty()) {
       throw IllegalArgumentException("webSocketPaths type can't be null or empty")
     }

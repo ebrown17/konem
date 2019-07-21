@@ -47,7 +47,7 @@ class WebSocketClient(
     readListeners.add(receiver)
   }
 
-  override fun registerChannelReadListener(vararg args: String, receiver: Receiver) {
+  override fun registerChannelReadListener(receiver: Receiver,vararg args: String) {
     registerChannelReadListener(receiver)
   }
 
