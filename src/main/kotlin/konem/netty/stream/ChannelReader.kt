@@ -16,7 +16,7 @@ interface ChannelReader {
    * WARNING -
    * Receivers registered with this method will receive all channel reads from all ports
    *
-   * @param receiver
+   * @param receiver receiver to handle read data
    */
   fun registerChannelReadListener(receiver: Receiver)
 
@@ -24,8 +24,8 @@ interface ChannelReader {
    * Registers a reader for the specified websocket path.
    * Any Request that comes in with specified type will be see by this reader.
    *
-   * @param webSocketPaths - webSocket paths you want to read
-   * @param reader - the listener to handle read data
+   * @param receiver receiver to handle read data
+   * @param webSocketPaths webSocket paths you want to read
    */
-  fun registerChannelReadListener(vararg args: String, receiver: Receiver)
+  fun registerChannelReadListener(receiver: Receiver, vararg args: String )
 }

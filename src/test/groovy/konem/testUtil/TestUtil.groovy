@@ -48,7 +48,7 @@ class TestUtil {
     public static void ensureClientsActive(def clientList, max_connect_time = MAX_CONNECT_TIME) {
         def startTime = System.currentTimeMillis()
         def changeTime = startTime
-        boolean allActive = false
+        boolean allActive = true
         while (true) {
             clientList.each { Client client ->
                 if (!client.isActive()) {
@@ -60,7 +60,7 @@ class TestUtil {
             if (allActive) {
                 break
             }
-            if ((System.currentTimeMillis() - changeTime) > max_connect_time) {
+            if ((System.currentTimeMillis() - startTime) > max_connect_time) {
                 break
             }
 
