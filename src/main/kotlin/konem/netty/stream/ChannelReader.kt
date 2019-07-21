@@ -27,5 +27,5 @@ interface ChannelReader {
    * @param receiver receiver to handle read data
    * @param webSocketPaths webSocket paths you want to read
    */
-  fun registerChannelReadListener(receiver: Receiver, vararg args: String )
+  fun registerChannelReadListener(receiver: Receiver, vararg args: String)
 }

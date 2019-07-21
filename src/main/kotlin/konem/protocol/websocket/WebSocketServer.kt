@@ -5,13 +5,12 @@ import konem.data.json.KonemMessage
 import konem.netty.stream.Receiver
 import konem.netty.stream.server.Server
 import konem.netty.stream.server.ServerTransmitter
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 import java.util.ArrayList
 import java.util.concurrent.ConcurrentHashMap
-
+@Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
 class WebSocketServer : Server(), ServerTransmitter<KonemMessage> {
 
   private val logger = LoggerFactory.getLogger(WebSocketServer::class.java)
@@ -83,7 +82,7 @@ class WebSocketServer : Server(), ServerTransmitter<KonemMessage> {
     }
   }
 
-  override fun registerChannelReadListener( receiver: Receiver,vararg webSocketPaths: String) {
+  override fun registerChannelReadListener(receiver: Receiver, vararg webSocketPaths: String) {
     if (webSocketPaths.isEmpty()) {
       throw IllegalArgumentException("webSocketPaths type can't be null or empty")
     }
@@ -124,10 +123,9 @@ class WebSocketServer : Server(), ServerTransmitter<KonemMessage> {
 
   override fun sendMessage(addr: InetSocketAddress, message: KonemMessage) {
     val channelPort = getRemoteHostToChannelMap()[addr]
-    if(channelPort != null){
+    if (channelPort != null) {
         val transceiver = getTransceiverMap()[channelPort] as WebSocketTransceiver
       transceiver.transmit(addr, message)
     }
-
   }
 }

@@ -27,13 +27,10 @@ fun main() {
   server.startServer()
   var count = 0
 
-
-  server.registerChannelReadListener(KonemMessageReceiver { addr, message ->
+  server.registerChannelReadListener(KonemMessageReceiver { _, message ->
     logger.info("KoneMessageReceiver: {} ", message)
     count++
   })
-
-
 
   server.registerConnectionStatusListener(
     ConnectionStatusListener(connected = { remoteAddr ->
@@ -130,7 +127,7 @@ fun main1() {
   println(jsonUnknown)
   println(unknownBack)
 
-  var receiver = KonemMessageReceiver { remote, message ->
+  var receiver = KonemMessageReceiver { _, message ->
     logger.info("KoneMessageReceiver: {} ", message)
   }
   receiver.handleChannelRead(InetSocketAddress(8080), jsonBeat)

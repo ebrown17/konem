@@ -8,6 +8,7 @@ import java.net.URI
 import java.net.URISyntaxException
 import java.util.ArrayList
 
+@Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
 class WebSocketClientFactory : ClientFactory() {
   private val logger = LoggerFactory.getLogger(WebSocketClientFactory::class.java)
   private val clientArrayList = ArrayList<WebSocketClient>()
