@@ -4,6 +4,7 @@ import konem.data.json.KonemMessage
 import konem.data.json.KonemMessageSerializer
 import konem.netty.stream.Receiver
 import konem.netty.stream.client.Client
+import konem.netty.stream.server.Server
 
 
 class TestUtil {
@@ -26,9 +27,11 @@ class TestUtil {
             }
 
             if (allInActive) {
+                Thread.sleep(100)
                 break
             }
             if ((System.currentTimeMillis() - changedTime) > max_disconnect_time) {
+                Thread.sleep(100)
                 break
             }
 
@@ -58,9 +61,11 @@ class TestUtil {
             }
 
             if (allActive) {
+                Thread.sleep(100)
                 break
             }
             if ((System.currentTimeMillis() - startTime) > max_connect_time) {
+                Thread.sleep(100)
                 break
             }
 
@@ -110,9 +115,11 @@ class TestUtil {
             }
             //println("${received.class} : ${expectedNum.class}")
             if (received == expectedNum) {
+                Thread.sleep(100)
                 break
             }
             if (noRecentMessage && (System.currentTimeMillis() - changedTime) > max_message_wait) {
+                Thread.sleep(100)
                 break
             }
 
@@ -126,5 +133,24 @@ class TestUtil {
         } else {
             println "Readers did not recieve all messages in the configured max_message_wait of ${MAX_TIME_BETWEEN_MESSAGE} seconds"
         }
+    }
+
+    static waitForServerActive(Server server){
+        def startTime = System.currentTimeMillis()
+        def endTime = 0
+        def change= 0
+        while(!server.allActive()){
+            Thread.sleep(500)
+            endTime = System.currentTimeMillis()
+            change  = endTime - startTime / 1000
+            if(change > 5){
+                println "Server not active in 5 seconds"
+                break
+            }
+
+        }
+
+        println "Server active in $change seconds"
+
     }
 }

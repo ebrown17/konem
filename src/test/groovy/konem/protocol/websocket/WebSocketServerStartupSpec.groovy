@@ -1,5 +1,6 @@
 package konem.protocol.websocket
 
+import konem.testUtil.TestUtil
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -25,7 +26,7 @@ class WebSocketServerStartupSpec extends Specification {
             server.addChannel(port, "/${port}")
         }
         server.startServer()
-
+        TestUtil.waitForServerActive(server)
         then:
         def portsConfigured = true
         ports.each { port ->
@@ -66,7 +67,7 @@ class WebSocketServerStartupSpec extends Specification {
             server.addChannel(port, paths[count++] as String[])
         }
         server.startServer()
-
+        TestUtil.waitForServerActive(server)
         then:
         def transMap = server.getTransceiverMap()
         def websockMap = server.websocketMap
@@ -123,7 +124,7 @@ class WebSocketServerStartupSpec extends Specification {
             server.addChannel(port, paths as String[])
         }
         server.startServer()
-
+        TestUtil.waitForServerActive(server)
         when:
         def websockMap = server.websocketMap
 

@@ -1,5 +1,6 @@
 package konem.protocol.websocket
 
+import org.junit.Test
 import spock.lang.IgnoreIf
 import spock.lang.Shared
 import spock.lang.Specification
@@ -42,12 +43,14 @@ class WebSocketClientConnectionSpec extends Specification {
         factory.shutdown()
         server = null
         factory = null
+        Thread.sleep(200)
     }
 
 
     def "All clients can connect to already started server"() {
         given:
         server.startServer()
+        TestUtil.waitForServerActive(server)
         def clientMap = [:]
 
         def clientList = []
@@ -59,19 +62,14 @@ class WebSocketClientConnectionSpec extends Specification {
                     def client = factory.createClient("localhost", config.port, path)
                     clientMap[config.port] << client
                     clientList << client
+                    client.connect()
                 }
             }
         }
 
-        when:
-
-        clientList.each { client ->
-            client.connect()
-        }
-
         TestUtil.ensureClientsActive(clientList)
 
-        then:
+        expect:
 
         clientList.each { WebSocketClient client ->
             assert client.isActive()
@@ -99,7 +97,7 @@ class WebSocketClientConnectionSpec extends Specification {
     def "Clients disconnect as expected"() {
         given:
         server.startServer()
-
+        TestUtil.waitForServerActive(server)
         def clientList = []
 
         configurations.each { config ->
@@ -138,6 +136,7 @@ class WebSocketClientConnectionSpec extends Specification {
     def "Clients can reconnect after disconnect called"() {
         given:
         server.startServer()
+        TestUtil.waitForServerActive(server)
         def clientList = []
 
         configurations.each { config ->
@@ -153,8 +152,6 @@ class WebSocketClientConnectionSpec extends Specification {
         when:
 
         1.upto(disconnects) {
-            Thread.sleep(sleepTime)
-
 
             clientList.each { WebSocketClient client ->
                 client.disconnect()
@@ -190,7 +187,7 @@ class WebSocketClientConnectionSpec extends Specification {
 
     }
 
-    @IgnoreIf({System.getProperty('SKIP.LONG') == '1'} )
+    @IgnoreIf({ System.getProperty('SKIP.LONG') == '1' })
     def "Clients retry time is calculated correctly"() {
         given:
         def clientList = []
@@ -203,14 +200,9 @@ class WebSocketClientConnectionSpec extends Specification {
                     clientList << client
                 }
             }
-            Thread.sleep(1000)
         }
-
-        when:
-
-        Thread.sleep(waitTime)
-
-        then:
+        TestUtil.ensureClientsActive(clientList)
+        expect:
 
         clientList.each { WebSocketClient client ->
             println "retries: ${client.retryCount} time retrying: ${(System.currentTimeMillis() - client.retryTime) / 1000L}"
@@ -219,15 +211,16 @@ class WebSocketClientConnectionSpec extends Specification {
 
 
         where:
-        configurations                                             | waitTime | retryCount
-        [[port: 6060, paths: ["/test"], clients: 1]]               | 1500     | 1
-        [[port: 6060, paths: ["/test"], clients: 1]]               | 15000    | 2
-        [[port: 6060, paths: ["/test"], clients: 1]]               | 22500    | 3
+        configurations                               | waitTime | retryCount
+        [[port: 6060, paths: ["/test"], clients: 1]] | 1500     | 1
+        [[port: 6060, paths: ["/test"], clients: 1]] | 15000    | 2
+        [[port: 6060, paths: ["/test"], clients: 1]] | 22500    | 3
     }
 
     def "Connecting to a port with a ws path that's not configured returns properly"() {
         given:
         server.startServer()
+        TestUtil.waitForServerActive(server)
         def clientList = []
 
         configurations.each { config ->
@@ -235,19 +228,12 @@ class WebSocketClientConnectionSpec extends Specification {
                 1.upto(config.clients) {
                     def client = factory.createClient("localhost", config.port, path)
                     clientList << client
+                    client.connect()
                 }
             }
         }
-        Thread.sleep(sleepTime)
-        when:
-
-        clientList.each { WebSocketClient client ->
-            client.connect()
-        }
-
-        Thread.sleep(1500)
-        then:
-
+        expect:
+        TestUtil.ensureClientsActive(clientList)
         clientList.each { WebSocketClient client ->
             assert !client.isActive()
         }

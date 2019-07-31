@@ -63,7 +63,7 @@ class WebSocketCommunicationSpec extends Specification {
         server = null
         factory.shutdown()
         factory = null
-        Thread.sleep(2000)
+        Thread.sleep(100)
     }
 
 
@@ -76,7 +76,7 @@ class WebSocketCommunicationSpec extends Specification {
 
         server.registerChannelReadListener(receiver)
         server.startServer()
-        Thread.sleep(sleepTime)
+        TestUtil.waitForServerActive(server)
 
         def clientList = []
         def totalMessages = 0
@@ -135,7 +135,7 @@ class WebSocketCommunicationSpec extends Specification {
         receiverList << serverReceiver
         server.registerChannelReadListener(serverReceiver)
         server.startServer()
-        Thread.sleep(sleepTime)
+        TestUtil.waitForServerActive(server)
 
         def clientList = []
         def totalMessages = 0
@@ -207,7 +207,7 @@ class WebSocketCommunicationSpec extends Specification {
         receiverSList << serverReceiver
         server.registerChannelReadListener(serverReceiver)
         server.startServer()
-        Thread.sleep(sleepTime)
+        TestUtil.waitForServerActive(server)
 
         def clientList = []
         def totalMessages = 0
@@ -299,7 +299,7 @@ class WebSocketCommunicationSpec extends Specification {
     def "Server's broadcastOnChannel sends to all clients on a port"() {
         given:
         server.startServer()
-        Thread.sleep(sleepTime)
+        TestUtil.waitForServerActive(server)
 
         def clientList = []
         def receiverCList = []
@@ -365,7 +365,7 @@ class WebSocketCommunicationSpec extends Specification {
     def "Server's broadcastOnAllChannels sends to all clients on a port"() {
         given:
         server.startServer()
-        Thread.sleep(sleepTime)
+        TestUtil.waitForServerActive(server)
 
         def clientList = []
         def receiverCList = []
@@ -443,7 +443,7 @@ class WebSocketCommunicationSpec extends Specification {
         receiverSList << serverReceiver
         server.registerChannelReadListener(serverReceiver)
         server.startServer()
-        Thread.sleep(sleepTime)
+        TestUtil.waitForServerActive(server)
 
         def clientList = []
         def totalMessages = 0
@@ -525,7 +525,7 @@ class WebSocketCommunicationSpec extends Specification {
 
         receiverSList << serverReceiver
         server.startServer()
-        Thread.sleep(sleepTime)
+        TestUtil.waitForServerActive(server)
 
         def clientList = []
         def totalMessages = 0
@@ -606,7 +606,7 @@ class WebSocketCommunicationSpec extends Specification {
 
         receiverSList << serverReceiver
         server.startServer()
-        Thread.sleep(sleepTime)
+        TestUtil.waitForServerActive(server)
 
         def clientList = []
         def totalMessages = 0
@@ -668,7 +668,7 @@ class WebSocketCommunicationSpec extends Specification {
 
         receiverSList << serverReceiver
         server.startServer()
-        Thread.sleep(sleepTime)
+        TestUtil.waitForServerActive(server)
 
         def clientList = []
         def receiverCList = []
@@ -744,7 +744,7 @@ class WebSocketCommunicationSpec extends Specification {
 
         receiverSList << serverReceiver
         server.startServer()
-        Thread.sleep(sleepTime)
+        TestUtil.waitForServerActive(server)
 
         def clientList = []
         def receiverCList = []
