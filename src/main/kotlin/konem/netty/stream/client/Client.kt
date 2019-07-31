@@ -19,7 +19,7 @@ abstract class Client(private val serverAddress: InetSocketAddress, config: Clie
   private val logger = LoggerFactory.getLogger(javaClass)
   private val transceiver: Transceiver<*> = config.transceiver
   protected val bootstrap: Bootstrap = config.bootstrap
-  protected val clietScope: CoroutineScope = config.scope
+  protected val clientScope: CoroutineScope = config.scope
 
   var channel: Channel? = null
 
@@ -85,7 +85,7 @@ abstract class Client(private val serverAddress: InetSocketAddress, config: Clie
   }
 
   private fun handleConnection() {
-    clietScope.launch {
+    clientScope.launch {
       delay(oneSecond)
       for (listener in connectionListeners) {
         listener.onConnection(serverAddress)
@@ -94,7 +94,7 @@ abstract class Client(private val serverAddress: InetSocketAddress, config: Clie
   }
 
   private fun handleDisconnection() {
-    clietScope.launch {
+    clientScope.launch {
       delay(oneSecond)
       for (listener in disconnectionListeners) {
         listener.onDisconnection(serverAddress)

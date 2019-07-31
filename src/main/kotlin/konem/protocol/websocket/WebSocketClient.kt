@@ -31,7 +31,7 @@ class WebSocketClient(
   }
 
   override fun handleChannelRead(addr: InetSocketAddress, webSocketPath: String, message: Any) {
-    clietScope.launch {
+    clientScope.launch {
       readMessage(addr, webSocketPath, message)
     }
   }
