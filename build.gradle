@@ -51,7 +51,8 @@ dependencies {
 
 
     implementation 'io.netty:netty-all:4.1.36.Final'
-    // implementation 'com.squareup.wire:wire-runtime:2.2.0'
+    implementation 'com.squareup.wire:wire-runtime:2.2.0'
+
 
     testImplementation 'org.spockframework:spock-core:1.2-groovy-2.5'
     testImplementation "org.codehaus.gpars:gpars:1.2.1"

@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package konem.data.protobuf;
+
+option java_package="konem.data.protobuf";
+
+message KonemPMessage {
+
+   MessageType messageType = 1;
+   Unknown unknown = 2;
+   Status status = 3;
+   HeartBeat heartBeat = 4;
+   Data data = 5;
+
+   enum MessageType {
+        UNKNOWN = 1;
+        STATUS = 2;
+        HEARTBEAT = 3;
+        DATA = 4;
+    }
+
+   message Unknown {
+       string unknown = 1;
+   }
+
+    message Status {
+        string shortName =1;
+        int32 errors =2;
+        int32 received = 3;
+        int32 sent =4;
+        string description = 5;
+
+    }
+    message HeartBeat {
+        string time = 1;
+    }
+
+    message Data {
+        string data = 1;
+    }
+
+}
