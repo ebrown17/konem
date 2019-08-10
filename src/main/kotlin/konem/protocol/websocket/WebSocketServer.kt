@@ -11,7 +11,7 @@ import java.net.InetSocketAddress
 import java.util.ArrayList
 import java.util.concurrent.ConcurrentHashMap
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
-class WebSocketServer : Server(), ServerTransmitter<KonemMessage> {
+class WebSocketServer : Server(), ServerTransmitter<KonemMessage>, WebSocketChannelReader {
 
   private val logger = LoggerFactory.getLogger(WebSocketServer::class.java)
 

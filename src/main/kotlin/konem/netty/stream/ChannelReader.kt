@@ -1,12 +1,6 @@
 package konem.netty.stream
 
-import java.net.InetSocketAddress
-
 interface ChannelReader {
-
-  fun handleChannelRead(addr: InetSocketAddress, webSocketPath: String, message: Any)
-
-  suspend fun readMessage(addr: InetSocketAddress, webSocketPath: String, message: Any)
 
   /**
    *
