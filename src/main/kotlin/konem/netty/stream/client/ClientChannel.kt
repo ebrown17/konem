@@ -6,8 +6,8 @@ import java.util.concurrent.atomic.AtomicLong
 
 abstract class ClientChannel : ChannelInitializer<Channel>() {
   companion object {
-    protected const val READ_IDLE_TIME = 10
-    protected const val HEARTBEAT_MISS_LIMIT = 2
+    const val READ_IDLE_TIME = 10
+    const val HEARTBEAT_MISS_LIMIT = 2
     val channelIds = AtomicLong(0L)
   }
 }
