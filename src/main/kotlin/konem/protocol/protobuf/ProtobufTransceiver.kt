@@ -11,17 +11,14 @@ class ProtobufTransceiver(channelPort: Int) : Transceiver<KonemPMessage>(channel
 
   fun handleMessage(addr: InetSocketAddress, message: KonemPMessage) {
     logger.trace("handleMessage from {} with {}", addr, message)
-    val reader = channelReaders[addr]
+    val reader = channelReaders[addr] as ProtobufChannelReader
     logger.trace("handleMessage channelReaders: {} reader got: {}", channelReaders.size, reader)
-    reader?.handleChannelRead(addr, noop, message)
+    reader.handleChannelRead(addr, message)
   }
-
 
   /**
    * Broadcast a message on all channels connected to this port's transceiver.
-   * Can also broadcast to a specific websocket path or paths
    * @param message
-   * @param websocketPaths
    */
   fun broadcastMessage(message: KonemPMessage) {
     logger.debug("broadcastMessage message: {}", message)
