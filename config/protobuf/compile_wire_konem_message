@@ -1,0 +1,1 @@
+java -jar wire-2.2.0/wire-compiler-2.2.0-jar-with-dependencies.jar --proto_path=. --java_out=../../src/main/kotlin konemwiremessage.proto

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+SRC_DIR=.
+DST_DIR=../../src/main/kotlin/
+
+protoc-3.9.1/bin/./protoc -I=$SRC_DIR --java_out=$DST_DIR $SRC_DIR/konemProtoMessage.proto

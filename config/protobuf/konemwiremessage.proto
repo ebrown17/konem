@@ -4,7 +4,7 @@ package konem.data.protobuf;
 
 option java_package="konem.data.protobuf";
 
-message KonemPMessage {
+message KonemMessage {
 
    MessageType messageType = 1;
    Unknown unknown = 2;
