@@ -6,6 +6,8 @@ import konem.data.json.Message
 import konem.netty.stream.ConnectionListener
 import konem.netty.stream.ConnectionStatusListener
 import konem.netty.stream.DisconnectionListener
+import konem.protocol.protobuf.ProtobufClientFactory
+import konem.protocol.protobuf.ProtobufServer
 import konem.protocol.websocket.KonemMessageReceiver
 import konem.protocol.websocket.WebSocketClientFactory
 import konem.protocol.websocket.WebSocketServer
@@ -20,7 +22,7 @@ private val cName = CoroutineName("onConnection")
 private val scopey = CoroutineScope(cName)
 
 @Suppress("MagicNumber")
-fun main() {
+fun main2() {
 
   val server = WebSocketServer()
   server.addChannel(8080, "/tester")
@@ -142,4 +144,13 @@ fun main1() {
   Thread.sleep(1000)
   logger.info("{}", KonemMessage(Message.Heartbeat()))
   logger.info("{}", KonemMessage(Message.Unknown()))
+}
+
+fun main(){
+  val server = ProtobufServer()
+  server.addChannel(8085)
+  server.startServer()
+
+  val client = ProtobufClientFactory().createClient("localhost",8085)
+  client.connect()
 }

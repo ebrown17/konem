@@ -5,7 +5,7 @@ import java.net.InetSocketAddress
 
 interface ProtobufChannelReader : ChannelReader {
 
-  fun handleChannelRead(addr: InetSocketAddress, message: Any)
+  fun handleChannelRead(addr: InetSocketAddress,port: Int, message: Any)
 
-  suspend fun readMessage(addr: InetSocketAddress, message: Any)
+  suspend fun readMessage(addr: InetSocketAddress,port: Int, message: Any)
 }

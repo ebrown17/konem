@@ -103,6 +103,10 @@ class WebSocketServer : Server(), ServerTransmitter<KonemMessage>, WebSocketChan
     }
   }
 
+  override fun registerChannelReadListener(port: Int, receiver: Receiver) {
+
+  }
+
   private fun isPathConfiguredOnPort(port: Int, path: String): Boolean {
     val configuredPaths = websocketMap[port]
     return configuredPaths?.contains(path) ?: false

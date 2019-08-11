@@ -33,13 +33,17 @@ class ProtobufClient(private val serverAddress: InetSocketAddress, config: Clien
     registerChannelReadListener(receiver)
   }
 
-  override fun handleChannelRead(addr: InetSocketAddress, message: Any) {
+  override fun handleChannelRead(addr: InetSocketAddress,port: Int, message: Any) {
     clientScope.launch {
-      readMessage(addr, message)
+      readMessage(addr,port, message)
     }
   }
 
-  override suspend fun readMessage(addr: InetSocketAddress, message: Any) {
+  override fun registerChannelReadListener(port: Int, receiver: Receiver) {
+
+  }
+
+  override suspend fun readMessage(addr: InetSocketAddress,port: Int, message: Any) {
     logger.trace("readMessage got message: {}", message)
     for (listener in readListeners) {
       listener.handleChannelRead(addr, message)
