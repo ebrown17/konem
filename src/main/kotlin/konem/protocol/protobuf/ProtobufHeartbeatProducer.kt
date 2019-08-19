@@ -1,16 +1,22 @@
 package konem.protocol.protobuf
 
-import konem.data.protobuf.KonemPMessage
+import com.google.protobuf.Timestamp
+import konem.data.protobuf.KonemProtoMessage
 import konem.netty.stream.HeartbeatProducerHandler
 import java.util.*
 
 class ProtobufHeartbeatProducer(transceiver:  ProtobufTransceiver) :
-  HeartbeatProducerHandler<KonemPMessage>(transceiver) {
+  HeartbeatProducerHandler<KonemProtoMessage.KonemMessage>(transceiver) {
 
-  val builder = KonemPMessage.Builder().heartBeat.newBuilder()
+  private val heartBuilder = KonemProtoMessage.KonemMessage.newBuilder().heartBeatBuilder
+  private val timestampBuilder = Timestamp.newBuilder()
+  private val konemMessageBuilder: KonemProtoMessage.KonemMessage.Builder =  KonemProtoMessage.KonemMessage.newBuilder()
 
-  override fun generateHeartBeat(): KonemPMessage {
-    val heartbeat =builder.time(Date().toString()).build()
-    return KonemPMessage.Builder().heartBeat(heartbeat).build()
+  private val messageType = KonemProtoMessage.KonemMessage.MessageType.HEARTBEAT
+
+  override fun generateHeartBeat(): KonemProtoMessage.KonemMessage {
+    val timestamp = timestampBuilder.setSeconds(Date().time).build()
+    val heartbeat =heartBuilder.setDate(timestamp).build()
+    return konemMessageBuilder.setMessageType(messageType).setHeartBeat(heartbeat).build()
   }
 }

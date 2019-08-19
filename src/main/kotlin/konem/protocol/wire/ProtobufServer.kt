@@ -1,6 +1,7 @@
-package konem.protocol.protobuf
+package konem.protocol.wire
 
 import io.netty.bootstrap.ServerBootstrap
+import konem.data.protobuf.KonemMessage
 import konem.data.protobuf.KonemProtoMessage
 import konem.netty.stream.Receiver
 import konem.netty.stream.server.Server
@@ -11,7 +12,7 @@ import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 import java.util.concurrent.ConcurrentHashMap
 
-class ProtobufServer : Server(), ServerTransmitter<KonemProtoMessage.KonemMessage>, ProtobufChannelReader {
+class ProtobufServer : Server(), ServerTransmitter<KonemMessage>, ProtobufChannelReader {
 
   private val logger = LoggerFactory.getLogger(ProtobufServer::class.java)
 
@@ -26,8 +27,12 @@ class ProtobufServer : Server(), ServerTransmitter<KonemProtoMessage.KonemMessag
 
     val transceiver = ProtobufTransceiver(port)
 
-    return addChannel(port, transceiver)
-
+    return if(addChannel(port, transceiver)){
+      readListeners[port] = ArrayList()
+      true
+    } else{
+      false
+    }
   }
 
   override fun createServerBootstrap(port: Int): ServerBootstrap {
@@ -60,12 +65,12 @@ class ProtobufServer : Server(), ServerTransmitter<KonemProtoMessage.KonemMessag
     registerChannelReadListener(receiver)
   }
 
-  override fun broadcastOnChannel(port: Int, message: KonemProtoMessage.KonemMessage, vararg args: String) {
+  override fun broadcastOnChannel(port: Int, message: KonemMessage, vararg args: String) {
     val transceiver = getTransceiverMap()[port] as ProtobufTransceiver
     transceiver.broadcastMessage(message)
   }
 
-  override fun broadcastOnAllChannels(message: KonemProtoMessage.KonemMessage, vararg args: String) {
+  override fun broadcastOnAllChannels(message: KonemMessage, vararg args: String) {
     val transceiverMap = getTransceiverMap()
     for (transceiver in transceiverMap.values) {
       transceiver as ProtobufTransceiver
@@ -73,7 +78,7 @@ class ProtobufServer : Server(), ServerTransmitter<KonemProtoMessage.KonemMessag
     }
   }
 
-  override fun sendMessage(addr: InetSocketAddress, message: KonemProtoMessage.KonemMessage) {
+  override fun sendMessage(addr: InetSocketAddress, message: KonemMessage) {
     val channelPort = getRemoteHostToChannelMap()[addr]
     if (channelPort != null) {
       val transceiver = getTransceiverMap()[channelPort] as ProtobufTransceiver

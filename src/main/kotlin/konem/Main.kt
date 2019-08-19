@@ -3,14 +3,15 @@ package konem
 import konem.data.json.KonemMessage
 import konem.data.json.KonemMessageSerializer
 import konem.data.json.Message
+import konem.data.protobuf.KonemProtoMessage
 import konem.netty.stream.ConnectionListener
 import konem.netty.stream.ConnectionStatusListener
 import konem.netty.stream.DisconnectionListener
-import konem.protocol.protobuf.ProtobufClientFactory
-import konem.protocol.protobuf.ProtobufServer
+import konem.netty.stream.Receiver
 import konem.protocol.websocket.KonemMessageReceiver
 import konem.protocol.websocket.WebSocketClientFactory
 import konem.protocol.websocket.WebSocketServer
+import konem.protocol.wire.KonemPMessageReceiver
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import org.slf4j.LoggerFactory
@@ -146,11 +147,37 @@ fun main1() {
   logger.info("{}", KonemMessage(Message.Unknown()))
 }
 
-fun main(){
-  val server = ProtobufServer()
+fun main() {
+  val server = konem.protocol.wire.ProtobufServer()
   server.addChannel(8085)
   server.startServer()
 
-  val client = ProtobufClientFactory().createClient("localhost",8085)
+
+  server.registerChannelReadListener(KonemPMessageReceiver { inetSocketAddress, konemMessage ->
+    logger.info("xxxx KoneMessageReceiver: {} ", konemMessage.toString())
+  })
+
+  val client =  konem.protocol.wire.ProtobufClientFactory().createClient("localhost", 8085)
   client.connect()
+
+  client.registerConnectionListener(ConnectionListener {
+    println("CLuient connected")
+   client.sendMessage(wireMessage("Client connected to $it"))
+  })
+
+
+  Thread.sleep(2000)
+
+
+}
+
+fun wireMessage(data: String): konem.data.protobuf.KonemMessage{
+  return konem.data.protobuf.KonemMessage.Builder().messageType(konem.data.protobuf.KonemMessage.MessageType.DATA).data(konem.data.protobuf.KonemMessage.Data(data)).build()
+}
+
+fun newMessage(data: String): KonemProtoMessage.KonemMessage {
+  return KonemProtoMessage.KonemMessage.newBuilder()
+    .setMessageType(KonemProtoMessage.KonemMessage.MessageType.DATA)
+    .setData(KonemProtoMessage.KonemMessage.Data.newBuilder().setData(data).build()).build()
+
 }

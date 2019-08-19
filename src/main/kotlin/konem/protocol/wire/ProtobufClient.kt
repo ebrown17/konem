@@ -1,6 +1,6 @@
-package konem.protocol.protobuf
+package konem.protocol.wire
 
-import konem.data.protobuf.KonemProtoMessage
+import konem.data.protobuf.KonemMessage
 import konem.netty.stream.Receiver
 import konem.netty.stream.client.Client
 import konem.netty.stream.client.ClientBootstrapConfig
@@ -10,13 +10,13 @@ import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 
 class ProtobufClient(private val serverAddress: InetSocketAddress, config: ClientBootstrapConfig) :
-  Client(serverAddress, config), ClientTransmitter<KonemProtoMessage.KonemMessage>, ProtobufChannelReader {
+  Client(serverAddress, config), ClientTransmitter<KonemMessage>, ProtobufChannelReader {
 
   private val logger = LoggerFactory.getLogger(ProtobufClient::class.java)
   private val transceiver = config.transceiver as ProtobufTransceiver
   val readListeners = mutableListOf<Receiver>()
 
-  override fun sendMessage(message: KonemProtoMessage.KonemMessage) {
+  override fun sendMessage(message: KonemMessage) {
     if (!isActive()) {
       logger.warn("sendMessage attempted to send data on null or closed channel")
       return
