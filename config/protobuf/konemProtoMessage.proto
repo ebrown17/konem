@@ -4,6 +4,8 @@ package konem.data.protobuf;
 
 option java_package="konem.data.protobuf";
 
+import "google/protobuf/timestamp.proto";
+
 message KonemMessage {
 
    MessageType messageType = 1;
@@ -32,7 +34,7 @@ message KonemMessage {
 
     }
     message HeartBeat {
-        string time = 1;
+    		google.protobuf.Timestamp date = 1;    
     }
 
     message Data {
