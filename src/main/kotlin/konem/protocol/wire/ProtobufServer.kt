@@ -2,11 +2,9 @@ package konem.protocol.wire
 
 import io.netty.bootstrap.ServerBootstrap
 import konem.data.protobuf.KonemMessage
-import konem.data.protobuf.KonemProtoMessage
 import konem.netty.stream.Receiver
 import konem.netty.stream.server.Server
 import konem.netty.stream.server.ServerTransmitter
-import konem.protocol.websocket.WebSocketTransceiver
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress

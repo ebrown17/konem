@@ -3,11 +3,9 @@ package konem
 import konem.data.json.KonemMessage
 import konem.data.json.KonemMessageSerializer
 import konem.data.json.Message
-import konem.data.protobuf.KonemProtoMessage
 import konem.netty.stream.ConnectionListener
 import konem.netty.stream.ConnectionStatusListener
 import konem.netty.stream.DisconnectionListener
-import konem.netty.stream.Receiver
 import konem.protocol.websocket.KonemMessageReceiver
 import konem.protocol.websocket.WebSocketClientFactory
 import konem.protocol.websocket.WebSocketServer
@@ -171,13 +169,10 @@ fun main() {
 
 }
 
-fun wireMessage(data: String): konem.data.protobuf.KonemMessage{
-  return konem.data.protobuf.KonemMessage.Builder().messageType(konem.data.protobuf.KonemMessage.MessageType.DATA).data(konem.data.protobuf.KonemMessage.Data(data)).build()
+fun wireMessage(test: String): konem.data.protobuf.KonemMessage{
+  return konem.data.protobuf.KonemMessage (
+    messageType = konem.data.protobuf.KonemMessage.MessageType.DATA,
+    data =  konem.data.protobuf.KonemMessage.Data(test)
+    )
 }
 
-fun newMessage(data: String): KonemProtoMessage.KonemMessage {
-  return KonemProtoMessage.KonemMessage.newBuilder()
-    .setMessageType(KonemProtoMessage.KonemMessage.MessageType.DATA)
-    .setData(KonemProtoMessage.KonemMessage.Data.newBuilder().setData(data).build()).build()
-
-}

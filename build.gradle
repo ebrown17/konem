@@ -8,6 +8,7 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
+        classpath 'com.squareup.wire:wire-gradle-plugin:3.0.0-rc01'
     }
 }
 
@@ -18,11 +19,11 @@ plugins {
     id "com.github.spotbugs" version "2.0.0"
     id 'idea'
     id "io.gitlab.arturbosch.detekt" version "1.0.0-RC16"
-
 }
 
 apply plugin: 'kotlin' // or 'kotlin-multiplatform' for multiplatform projects
 apply plugin: 'kotlinx-serialization'
+apply plugin: 'com.squareup.wire'
 
 group 'konem'
 version '0.1'
@@ -51,8 +52,9 @@ dependencies {
 
 
     implementation 'io.netty:netty-all:4.1.36.Final'
-    implementation 'com.squareup.wire:wire-runtime:2.2.0'
-    implementation 'com.google.protobuf:protobuf-java:3.9.1'
+    implementation 'com.squareup.wire:wire-runtime:3.0.0-rc01'
+
+  //  implementation 'com.google.protobuf:protobuf-java:3.9.1'
 
 
     testImplementation 'org.spockframework:spock-core:1.2-groovy-2.5'
@@ -119,6 +121,13 @@ test {
 
 wrapper {
     gradleVersion = '5.4.1'
+}
+
+wire {
+        kotlin {
+            out "${projectDir}/src/main/kotlin"
+        }
+    
 }
 
 mainClassName = "konem.MainKt"
