@@ -9,11 +9,11 @@ import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 
-class ProtobufClient(private val serverAddress: InetSocketAddress, config: ClientBootstrapConfig) :
-  Client(serverAddress, config), ClientTransmitter<KonemMessage>, ProtobufChannelReader {
+class WireClient(private val serverAddress: InetSocketAddress, config: ClientBootstrapConfig) :
+  Client(serverAddress, config), ClientTransmitter<KonemMessage>, WireChannelReader {
 
-  private val logger = LoggerFactory.getLogger(ProtobufClient::class.java)
-  private val transceiver = config.transceiver as ProtobufTransceiver
+  private val logger = LoggerFactory.getLogger(WireClient::class.java)
+  private val transceiver = config.transceiver as WireTransceiver
   val readListeners = mutableListOf<Receiver>()
 
   override fun sendMessage(message: KonemMessage) {
@@ -33,17 +33,16 @@ class ProtobufClient(private val serverAddress: InetSocketAddress, config: Clien
     registerChannelReadListener(receiver)
   }
 
-  override fun handleChannelRead(addr: InetSocketAddress,port: Int, message: Any) {
+  override fun handleChannelRead(addr: InetSocketAddress, port: Int, message: Any) {
     clientScope.launch {
-      readMessage(addr,port, message)
+      readMessage(addr, port, message)
     }
   }
 
   override fun registerChannelReadListener(port: Int, receiver: Receiver) {
-
   }
 
-  override suspend fun readMessage(addr: InetSocketAddress,port: Int, message: Any) {
+  override suspend fun readMessage(addr: InetSocketAddress, port: Int, message: Any) {
     logger.trace("readMessage got message: {}", message)
     for (listener in readListeners) {
       listener.handleChannelRead(addr, message)
@@ -51,6 +50,6 @@ class ProtobufClient(private val serverAddress: InetSocketAddress, config: Clien
   }
 
   override fun toString(): String {
-    return "ProtobufClient{Transceiver=$transceiver}"
+    return "WireClient{Transceiver=$transceiver}"
   }
 }

@@ -3,7 +3,7 @@ package konem.protocol.websocket
 import konem.data.json.KonemMessage
 import konem.data.json.KonemMessageSerializer
 import konem.netty.stream.ReceiverHandler
-import kotlinx.serialization.json.JsonParsingException
+import kotlinx.serialization.json.JsonDecodingException
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 
@@ -19,7 +19,7 @@ open class KonemMessageReceiver(private val receive: (InetSocketAddress, KonemMe
       try {
         val kMessage = serializer.toKonemMessage(message)
         receive(addr, kMessage)
-      } catch (e: JsonParsingException) {
+      } catch (e: JsonDecodingException) {
         logger.error("JsonParsingException in serializing to KonemMessage with message: {} ", e.message)
       }
     }

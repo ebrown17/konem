@@ -8,10 +8,10 @@ import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender
 import io.netty.handler.timeout.IdleStateHandler
 import konem.netty.stream.ExceptionHandler
 
-class ProtobufClientChannel(private val transceiver: ProtobufTransceiver) :
+class ProtobufClientChannel(private val transceiver: WireTransceiver) :
   ClientChannel() {
 
- override fun initChannel(channel: Channel) {
+  override fun initChannel(channel: Channel) {
     val pipeline = channel.pipeline()
 
     pipeline.addLast("frameDecoder", ProtobufVarint32FrameDecoder())
@@ -19,10 +19,13 @@ class ProtobufClientChannel(private val transceiver: ProtobufTransceiver) :
     pipeline.addLast("frameEncoder", ProtobufVarint32LengthFieldPrepender())
     pipeline.addLast("protobufEncoder", WireEncoder())
     pipeline.addLast("idleStateHandler", IdleStateHandler(READ_IDLE_TIME, 0, 0))
-    pipeline.addLast("messagehandler", ProtobufMessageHandler(channelIds.incrementAndGet(), transceiver))
+    pipeline.addLast(
+      "messagehandler",
+      WireMessageHandler(channelIds.incrementAndGet(), transceiver)
+    )
     pipeline.addLast(
       "heartBeatHandler",
-      ProtobufHeartbeatReceiver(READ_IDLE_TIME, HEARTBEAT_MISS_LIMIT)
+      WireHeartbeatReceiver(READ_IDLE_TIME, HEARTBEAT_MISS_LIMIT)
     )
     pipeline.addLast("exceptionHandler", ExceptionHandler())
   }

@@ -5,14 +5,14 @@ import konem.netty.stream.Transceiver
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 
-class ProtobufTransceiver(channelPort: Int) : Transceiver<KonemMessage>(channelPort) {
-  private val logger = LoggerFactory.getLogger(ProtobufTransceiver::class.java)
+class WireTransceiver(channelPort: Int) : Transceiver<KonemMessage>(channelPort) {
+  private val logger = LoggerFactory.getLogger(WireTransceiver::class.java)
 
   fun handleMessage(addr: InetSocketAddress, message: KonemMessage) {
     logger.trace("handleMessage from {} with {}", addr, message)
-    val reader = channelReaders[addr] as ProtobufChannelReader
+    val reader = channelReaders[addr] as WireChannelReader
     logger.trace("handleMessage channelReaders: {} reader got: {}", channelReaders.size, reader)
-    reader.handleChannelRead(addr,channelPort, message)
+    reader.handleChannelRead(addr, channelPort, message)
   }
 
   /**

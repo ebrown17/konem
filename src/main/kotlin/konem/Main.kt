@@ -9,10 +9,11 @@ import konem.netty.stream.DisconnectionListener
 import konem.protocol.websocket.KonemMessageReceiver
 import konem.protocol.websocket.WebSocketClientFactory
 import konem.protocol.websocket.WebSocketServer
-import konem.protocol.wire.KonemPMessageReceiver
+import konem.protocol.wire.WireMessageReceiver
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import org.slf4j.LoggerFactory
+import java.lang.Thread.sleep
 import java.net.InetSocketAddress
 import kotlin.system.measureTimeMillis
 
@@ -134,45 +135,44 @@ fun main1() {
   receiver.handleChannelRead(InetSocketAddress(8080), jsonBeat)
   receiver.handleChannelRead(InetSocketAddress(8080), jsonStatus)
   receiver.handleChannelRead(InetSocketAddress(8080), jsonUnknown)
-  Thread.sleep(1000)
+  sleep(1000)
   logger.info("{}", KonemMessage(Message.Heartbeat()))
 
-  Thread.sleep(1000)
+  sleep(1000)
   logger.info("{}", KonemMessage(Message.Status()))
 
-  Thread.sleep(1000)
+  sleep(1000)
   logger.info("{}", KonemMessage(Message.Heartbeat()))
   logger.info("{}", KonemMessage(Message.Unknown()))
 }
 
 fun main() {
-  val server = konem.protocol.wire.ProtobufServer()
+  val server = konem.protocol.wire.WireServer()
   server.addChannel(8085)
   server.startServer()
 
-
-  server.registerChannelReadListener(KonemPMessageReceiver { inetSocketAddress, konemMessage ->
+  server.registerChannelReadListener(WireMessageReceiver { inetSocketAddress, konemMessage ->
     logger.info("xxxx KoneMessageReceiver: {} ", konemMessage.toString())
   })
 
-  val client =  konem.protocol.wire.ProtobufClientFactory().createClient("localhost", 8085)
+  val client = konem.protocol.wire.ProtobufClientFactory().createClient("localhost", 8085)
   client.connect()
 
   client.registerConnectionListener(ConnectionListener {
     println("CLuient connected")
-   client.sendMessage(wireMessage("Client connected to $it"))
+    client.sendMessage(wireMessage("Client connected to $it"))
+    repeat(10){ time ->
+      client.sendMessage(wireMessage("Client send $time"))
+      sleep(100)
+    }
   })
 
 
-  Thread.sleep(2000)
-
-
 }
 
-fun wireMessage(test: String): konem.data.protobuf.KonemMessage{
-  return konem.data.protobuf.KonemMessage (
+fun wireMessage(test: String): konem.data.protobuf.KonemMessage {
+  return konem.data.protobuf.KonemMessage(
     messageType = konem.data.protobuf.KonemMessage.MessageType.DATA,
-    data =  konem.data.protobuf.KonemMessage.Data(test)
-    )
+    data = konem.data.protobuf.KonemMessage.Data(test)
+  )
 }
-

@@ -9,7 +9,7 @@ import konem.data.protobuf.KonemMessage
 @ChannelHandler.Sharable
 class WireEncoder : MessageToMessageEncoder<KonemMessage>() {
   @Throws(Exception::class)
-  override fun encode(   ctx: ChannelHandlerContext,  msg: KonemMessage,  out: MutableList<Any> ) {
+  override fun encode(ctx: ChannelHandlerContext, msg: KonemMessage, out: MutableList<Any>) {
     out.add(wrappedBuffer(msg.encode()))
   }
 }

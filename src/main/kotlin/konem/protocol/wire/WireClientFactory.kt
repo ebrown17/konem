@@ -9,15 +9,15 @@ import java.util.ArrayList
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
 class ProtobufClientFactory : ClientFactory() {
   private val logger = LoggerFactory.getLogger(ProtobufClientFactory::class.java)
-  private val clientArrayList = ArrayList<ProtobufClient>()
+  private val clientArrayList = ArrayList<WireClient>()
 
   override fun createClient(
     host: String,
     port: Int,
     vararg args: String
-  ): ProtobufClient {
+  ): WireClient {
     val address = InetSocketAddress(host, port)
-    val transceiver = ProtobufTransceiver(port)
+    val transceiver = WireTransceiver(port)
     return createClient(address, createClientConfig(transceiver))
   }
 
@@ -25,12 +25,12 @@ class ProtobufClientFactory : ClientFactory() {
     address: InetSocketAddress,
     config: ClientBootstrapConfig,
     vararg args: String
-  ): ProtobufClient {
-    val transceiver = config.transceiver as ProtobufTransceiver
+  ): WireClient {
+    val transceiver = config.transceiver as WireTransceiver
     val bootstrap = config.bootstrap
     val clientChannel = ProtobufClientChannel(transceiver)
     bootstrap.handler(clientChannel)
-    val client = ProtobufClient(address, config)
+    val client = WireClient(address, config)
     clientArrayList.add(client)
     return client
   }

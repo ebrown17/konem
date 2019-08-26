@@ -22,5 +22,4 @@ class WireDecoder : MessageToMessageDecoder<ByteBuf>() {
 
     out.add(adapter.decode(array))
   }
-
 }

@@ -51,10 +51,10 @@ class WebSocketClient(
     registerChannelReadListener(receiver)
   }
 
+  // TODO need to allow registering on a specific port
   override fun registerChannelReadListener(port: Int, receiver: Receiver) {
-
+    registerChannelReadListener(receiver)
   }
-
 
   override fun toString(): String {
     return "WebSocketClient{WsUrl=$fullWSPath, $transceiver}"
