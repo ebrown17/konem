@@ -7,8 +7,8 @@ import java.net.InetSocketAddress
 import java.util.ArrayList
 
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
-class ProtobufClientFactory : ClientFactory() {
-  private val logger = LoggerFactory.getLogger(ProtobufClientFactory::class.java)
+class WireClientFactory : ClientFactory() {
+  private val logger = LoggerFactory.getLogger(WireClientFactory::class.java)
   private val clientArrayList = ArrayList<WireClient>()
 
   override fun createClient(
@@ -28,7 +28,7 @@ class ProtobufClientFactory : ClientFactory() {
   ): WireClient {
     val transceiver = config.transceiver as WireTransceiver
     val bootstrap = config.bootstrap
-    val clientChannel = ProtobufClientChannel(transceiver)
+    val clientChannel = WireClientChannel(transceiver)
     bootstrap.handler(clientChannel)
     val client = WireClient(address, config)
     clientArrayList.add(client)

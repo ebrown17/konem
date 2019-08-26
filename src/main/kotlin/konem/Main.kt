@@ -9,6 +9,7 @@ import konem.netty.stream.DisconnectionListener
 import konem.protocol.websocket.KonemMessageReceiver
 import konem.protocol.websocket.WebSocketClientFactory
 import konem.protocol.websocket.WebSocketServer
+import konem.protocol.wire.WireClientFactory
 import konem.protocol.wire.WireMessageReceiver
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -155,19 +156,17 @@ fun main() {
     logger.info("xxxx KoneMessageReceiver: {} ", konemMessage.toString())
   })
 
-  val client = konem.protocol.wire.ProtobufClientFactory().createClient("localhost", 8085)
+  val client = WireClientFactory().createClient("localhost", 8085)
   client.connect()
 
   client.registerConnectionListener(ConnectionListener {
     println("CLuient connected")
     client.sendMessage(wireMessage("Client connected to $it"))
-    repeat(10){ time ->
+    repeat(10) { time ->
       client.sendMessage(wireMessage("Client send $time"))
       sleep(100)
     }
   })
-
-
 }
 
 fun wireMessage(test: String): konem.data.protobuf.KonemMessage {

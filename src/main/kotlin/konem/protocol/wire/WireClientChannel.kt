@@ -8,7 +8,7 @@ import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender
 import io.netty.handler.timeout.IdleStateHandler
 import konem.netty.stream.ExceptionHandler
 
-class ProtobufClientChannel(private val transceiver: WireTransceiver) :
+class WireClientChannel(private val transceiver: WireTransceiver) :
   ClientChannel() {
 
   override fun initChannel(channel: Channel) {
