@@ -6,7 +6,6 @@ import konem.data.json.KonemMessageSerializer
 import konem.data.json.Message
 import konem.netty.stream.ConnectionListener
 import konem.netty.stream.ConnectionStatusListener
-import konem.netty.stream.Receiver
 import konem.testUtil.GroovyKonemMessageReceiver
 import konem.testUtil.TestUtil
 import org.slf4j.Logger
@@ -101,7 +100,7 @@ class WebSocketCommunicationSpec extends Specification {
             }
         }
 
-        TestUtil.waitForAllMessges(receiver, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(receiver, totalMessages, recieveTime)
 
         then:
         println "$configurations messages: $messages"
@@ -166,7 +165,7 @@ class WebSocketCommunicationSpec extends Specification {
                 }
             }
         }
-        TestUtil.waitForAllMessges(receiverList, totalMessages * 2, recieveTime)
+        TestUtil.waitForAllMessages(receiverList, totalMessages * 2, recieveTime)
 
         then:
         def clientMessagesRecieved = 0
@@ -239,9 +238,9 @@ class WebSocketCommunicationSpec extends Specification {
             }
         }
         print "Server "
-        TestUtil.waitForAllMessges(receiverSList, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(receiverSList, totalMessages, recieveTime)
         print "Client "
-        TestUtil.waitForAllMessges(receiverCList, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(receiverCList, totalMessages, recieveTime)
         clientList.each { WebSocketClient client ->
             client.disconnect()
         }
@@ -262,9 +261,9 @@ class WebSocketCommunicationSpec extends Specification {
         }
         totalMessages += totalMessages
         print "Server "
-        TestUtil.waitForAllMessges(receiverSList, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(receiverSList, totalMessages, recieveTime)
         print "Client "
-        TestUtil.waitForAllMessges(receiverCList, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(receiverCList, totalMessages, recieveTime)
 
 
         then:
@@ -333,7 +332,7 @@ class WebSocketCommunicationSpec extends Specification {
             }
 
         }
-        TestUtil.waitForAllMessges(receiverCList, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(receiverCList, totalMessages, recieveTime)
 
         then:
         def clientMessagesRecieved = 0
@@ -401,7 +400,7 @@ class WebSocketCommunicationSpec extends Specification {
             }
         }
 
-        TestUtil.waitForAllMessges(receiverCList, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(receiverCList, totalMessages, recieveTime)
 
         then:
         def clientMessagesRecieved = 0
@@ -477,9 +476,9 @@ class WebSocketCommunicationSpec extends Specification {
         }
 
         print "Server "
-        TestUtil.waitForAllMessges(receiverSList, clientList.size() * messages, recieveTime)
+        TestUtil.waitForAllMessages(receiverSList, clientList.size() * messages, recieveTime)
         print "Client "
-        TestUtil.waitForAllMessges(receiverCList, clientList.size() * messages, recieveTime)
+        TestUtil.waitForAllMessages(receiverCList, clientList.size() * messages, recieveTime)
 
         then:
         clientList.each { WebSocketClient client ->
@@ -561,7 +560,7 @@ class WebSocketCommunicationSpec extends Specification {
             }
         }
 
-        TestUtil.waitForAllMessges(serverReceiver, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(serverReceiver, totalMessages, recieveTime)
         then:
         println "${serverReceiver.messageCount} == ${totalMessages}"
 
@@ -627,7 +626,7 @@ class WebSocketCommunicationSpec extends Specification {
 
         when:
 
-        TestUtil.waitForAllMessges(receiverSList, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(receiverSList, totalMessages, recieveTime)
 
         then:
 
@@ -693,7 +692,7 @@ class WebSocketCommunicationSpec extends Specification {
 
         when:
 
-        TestUtil.waitForAllMessges(receiverCList, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(receiverCList, totalMessages, recieveTime)
 
         then:
         def clientMessagesRecieved = 0

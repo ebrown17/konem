@@ -5,6 +5,7 @@ import konem.data.json.KonemMessageSerializer
 import konem.netty.stream.Receiver
 import konem.netty.stream.client.Client
 import konem.netty.stream.server.Server
+import okio.ByteString
 
 
 class TestUtil {
@@ -87,7 +88,20 @@ class TestUtil {
         return serializer.toKonemMessage(json)
     }
 
-    public static waitForAllMessges(def readerList, int expectedNum, max_message_wait) {
+    static final def msgType = konem.data.protobuf.KonemMessage.MessageType.DATA
+
+    static konem.data.protobuf.KonemMessage createWireMessage(String data) {
+
+        return new konem.data.protobuf.KonemMessage(msgType,
+                null,
+                null,
+                null,
+                new konem.data.protobuf.KonemMessage.Data(data,ByteString.EMPTY), ByteString.EMPTY)
+
+
+    }
+
+    public static waitForAllMessages(def readerList, int expectedNum, max_message_wait) {
         def messageCountMap = [:]
         for (Receiver reader in readerList) {
             messageCountMap.put(reader, 0)
@@ -135,15 +149,15 @@ class TestUtil {
         }
     }
 
-    static waitForServerActive(Server server){
+    static waitForServerActive(Server server) {
         def startTime = System.currentTimeMillis()
         def endTime = 0
-        def change= 0
-        while(!server.allActive()){
+        def change = 0
+        while (!server.allActive()) {
             Thread.sleep(500)
             endTime = System.currentTimeMillis()
-            change  = endTime - startTime / 1000
-            if(change > 5){
+            change = endTime - startTime / 1000
+            if (change > 5) {
                 println "Server not active in 5 seconds"
                 break
             }
