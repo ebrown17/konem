@@ -1,35 +1,31 @@
 buildscript {
-    ext.kotlin_version = '1.3.50'
+    apply from: "dependencies.gradle"
 
     repositories {
         jcenter()
     }
 
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
-        classpath 'com.squareup.wire:wire-gradle-plugin:3.0.0-rc01'
+        classpath dependency.plugins.kotlin
+        classpath dependency.plugins.kotlinSerialization
+        classpath dependency.plugins.wire
     }
 }
 
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.3.50'
+    id 'org.jetbrains.kotlin.jvm' version "$kotlinVersion"
+    id "io.gitlab.arturbosch.detekt" version "$detektVersion"
     id 'groovy'
     id 'application'
-    id "com.github.spotbugs" version "2.0.0"
     id 'idea'
-    id "io.gitlab.arturbosch.detekt" version "1.0.1"
 }
 
-apply plugin: 'kotlin' // or 'kotlin-multiplatform' for multiplatform projects
+apply plugin: 'kotlin'
 apply plugin: 'kotlinx-serialization'
 apply plugin: 'com.squareup.wire'
 
-group 'konem'
-version '0.1'
-
-sourceCompatibility = 1.8
-
+group = GROUP
+version = VERSION_NAME
 description = "Kotlin Netty Medium"
 
 repositories {
@@ -41,32 +37,40 @@ configurations {
 }
 
 dependencies {
-    implementation 'org.codehaus.groovy:groovy-all:2.5.5'
-    implementation 'org.slf4j:slf4j-api:1.7.26'
-    implementation 'ch.qos.logback:logback-classic:1.2.3'
+    implementation dependency.groovy
+    implementation dependency.slf4j
+    implementation dependency.logback
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.0'
-    // Kotlinx Serialization
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.12.0"
+    implementation dependency.kotlin.stdlib.jdk8
+    implementation dependency.kotlin.coroutines.core
+    implementation dependency.kotlin.kotlinSerialization
 
 
-    implementation 'io.netty:netty-all:4.1.36.Final'
-    implementation 'com.squareup.wire:wire-runtime:3.0.0-rc01'
+    implementation dependency.netty
+    implementation dependency.wire
 
-    testImplementation 'org.spockframework:spock-core:1.2-groovy-2.5'
-    testImplementation "org.codehaus.gpars:gpars:1.2.1"
-    testImplementation 'junit:junit:4.12'
+    testImplementation dependency.spock
+    testImplementation dependency.gpars
+    testImplementation dependency.junit
 
-    ktlint "com.pinterest:ktlint:0.33.0"
+    ktlint dependency.ktlint
 }
 
 compileKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = versions.jvmTarget
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = versions.jvmTarget
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+compileJava {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 task ktlint(type: JavaExec, group: "verification") {
@@ -75,7 +79,6 @@ task ktlint(type: JavaExec, group: "verification") {
     main = "com.pinterest.ktlint.Main"
     args "src/**/*.kt"
 }
-//check.dependsOn ktlint
 
 task ktlintFormat(type: JavaExec, group: "formatting") {
     description = "Fix Kotlin code style deviations."
@@ -87,27 +90,21 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
 
 detekt {
     input = files("src/main/kotlin")
+    parallel = true
+    ignoreFailures = true
     config = files("config/detekt/yaml/pinpak-detekt-config.yml")
-    filters = "**/*.Main.kt"
+    filters = "**/*.Main.kt,**/protobuf/*.KonemMessage"
+
 
     reports {
         html {
             enabled = true
-            destination = file("config/detekt/reports/report.html")
-        }
-    }
-}
 
-spotbugs {
-    sourceSets = [sourceSets.main]
-    ignoreFailures = true
-    effort = "max"
-    reportLevel = "low"
-    spotbugsMain {
-        reports.xml.enabled = false
-        reports.html.enabled = true
+        }
+        xml {enabled = false}
+        txt {enabled = false}
+
     }
-    excludeFilter = file("config/spotbugs/spotbugs-exclude.xml")
 }
 
 test {
