@@ -62,12 +62,12 @@ class KonemMessage(
   override fun equals(other: Any?): Boolean {
     if (other === this) return true
     if (other !is KonemMessage) return false
-    return unknownFields == other.unknownFields &&
-        messageType == other.messageType &&
-        unknown == other.unknown &&
-        status == other.status &&
-        heartBeat == other.heartBeat &&
-        data == other.data
+    return unknownFields == other.unknownFields
+        && messageType == other.messageType
+        && unknown == other.unknown
+        && status == other.status
+        && heartBeat == other.heartBeat
+        && data == other.data
   }
 
   override fun hashCode(): Int {
@@ -105,10 +105,10 @@ class KonemMessage(
   companion object {
     @JvmField
     val ADAPTER: ProtoAdapter<KonemMessage> = object : ProtoAdapter<KonemMessage>(
-      FieldEncoding.LENGTH_DELIMITED,
+      FieldEncoding.LENGTH_DELIMITED, 
       KonemMessage::class
     ) {
-      override fun encodedSize(value: KonemMessage): Int =
+      override fun encodedSize(value: KonemMessage): Int = 
         MessageType.ADAPTER.encodedSizeWithTag(1, value.messageType) +
         Unknown.ADAPTER.encodedSizeWithTag(2, value.unknown) +
         Status.ADAPTER.encodedSizeWithTag(3, value.status) +
@@ -210,8 +210,8 @@ class KonemMessage(
     override fun equals(other: Any?): Boolean {
       if (other === this) return true
       if (other !is Unknown) return false
-      return unknownFields == other.unknownFields &&
-          unknown == other.unknown
+      return unknownFields == other.unknownFields
+          && unknown == other.unknown
     }
 
     override fun hashCode(): Int {
@@ -235,10 +235,10 @@ class KonemMessage(
     companion object {
       @JvmField
       val ADAPTER: ProtoAdapter<Unknown> = object : ProtoAdapter<Unknown>(
-        FieldEncoding.LENGTH_DELIMITED,
+        FieldEncoding.LENGTH_DELIMITED, 
         Unknown::class
       ) {
-        override fun encodedSize(value: Unknown): Int =
+        override fun encodedSize(value: Unknown): Int = 
           ProtoAdapter.STRING.encodedSizeWithTag(1, value.unknown) +
           value.unknownFields.size
 
@@ -307,12 +307,12 @@ class KonemMessage(
     override fun equals(other: Any?): Boolean {
       if (other === this) return true
       if (other !is Status) return false
-      return unknownFields == other.unknownFields &&
-          shortName == other.shortName &&
-          errors == other.errors &&
-          received == other.received &&
-          sent == other.sent &&
-          description == other.description
+      return unknownFields == other.unknownFields
+          && shortName == other.shortName
+          && errors == other.errors
+          && received == other.received
+          && sent == other.sent
+          && description == other.description
     }
 
     override fun hashCode(): Int {
@@ -350,10 +350,10 @@ class KonemMessage(
     companion object {
       @JvmField
       val ADAPTER: ProtoAdapter<Status> = object : ProtoAdapter<Status>(
-        FieldEncoding.LENGTH_DELIMITED,
+        FieldEncoding.LENGTH_DELIMITED, 
         Status::class
       ) {
-        override fun encodedSize(value: Status): Int =
+        override fun encodedSize(value: Status): Int = 
           ProtoAdapter.STRING.encodedSizeWithTag(1, value.shortName) +
           ProtoAdapter.INT32.encodedSizeWithTag(2, value.errors) +
           ProtoAdapter.INT32.encodedSizeWithTag(3, value.received) +
@@ -422,8 +422,8 @@ class KonemMessage(
     override fun equals(other: Any?): Boolean {
       if (other === this) return true
       if (other !is HeartBeat) return false
-      return unknownFields == other.unknownFields &&
-          time == other.time
+      return unknownFields == other.unknownFields
+          && time == other.time
     }
 
     override fun hashCode(): Int {
@@ -447,10 +447,10 @@ class KonemMessage(
     companion object {
       @JvmField
       val ADAPTER: ProtoAdapter<HeartBeat> = object : ProtoAdapter<HeartBeat>(
-        FieldEncoding.LENGTH_DELIMITED,
+        FieldEncoding.LENGTH_DELIMITED, 
         HeartBeat::class
       ) {
-        override fun encodedSize(value: HeartBeat): Int =
+        override fun encodedSize(value: HeartBeat): Int = 
           ProtoAdapter.STRING.encodedSizeWithTag(1, value.time) +
           value.unknownFields.size
 
@@ -499,8 +499,8 @@ class KonemMessage(
     override fun equals(other: Any?): Boolean {
       if (other === this) return true
       if (other !is Data) return false
-      return unknownFields == other.unknownFields &&
-          data == other.data
+      return unknownFields == other.unknownFields
+          && data == other.data
     }
 
     override fun hashCode(): Int {
@@ -524,10 +524,10 @@ class KonemMessage(
     companion object {
       @JvmField
       val ADAPTER: ProtoAdapter<Data> = object : ProtoAdapter<Data>(
-        FieldEncoding.LENGTH_DELIMITED,
+        FieldEncoding.LENGTH_DELIMITED, 
         Data::class
       ) {
-        override fun encodedSize(value: Data): Int =
+        override fun encodedSize(value: Data): Int = 
           ProtoAdapter.STRING.encodedSizeWithTag(1, value.data) +
           value.unknownFields.size
 
