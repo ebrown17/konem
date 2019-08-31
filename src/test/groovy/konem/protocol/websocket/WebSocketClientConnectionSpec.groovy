@@ -1,6 +1,5 @@
 package konem.protocol.websocket
 
-import org.junit.Test
 import spock.lang.IgnoreIf
 import spock.lang.Shared
 import spock.lang.Specification
