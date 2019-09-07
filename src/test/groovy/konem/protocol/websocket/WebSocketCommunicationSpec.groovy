@@ -99,7 +99,7 @@ class WebSocketCommunicationSpec extends Specification {
             }
         }
 
-        TestUtil.waitForAllMessages(receiver, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(receiver, totalMessages, receiveTime)
 
         then:
         println "$configurations messages: $messages"
@@ -108,7 +108,7 @@ class WebSocketCommunicationSpec extends Specification {
         println "--------------------------------"
 
         where:
-        configurations                                                    | messages | sleepTime | recieveTime
+        configurations                                                    | messages | sleepTime | receiveTime
         [[port: 7060, paths: ["/test0"], clients: 1]]                     | 5_000    | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 1],
          [port: 7081, paths: ["/test2"], clients: 1]]                     | 1_000    | 1000      | 5000
@@ -164,7 +164,7 @@ class WebSocketCommunicationSpec extends Specification {
                 }
             }
         }
-        TestUtil.waitForAllMessages(receiverList, totalMessages * 2, recieveTime)
+        TestUtil.waitForAllMessages(receiverList, totalMessages * 2, receiveTime)
 
         then:
         def clientMessagesRecieved = 0
@@ -179,7 +179,7 @@ class WebSocketCommunicationSpec extends Specification {
         totalMessages == clientMessagesRecieved
         println "-----------------------------"
         where:
-        configurations                                                    | messages | sleepTime | recieveTime
+        configurations                                                    | messages | sleepTime | receiveTime
         [[port: 7060, paths: ["/test0"], clients: 1]]                     | 5_000    | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 1],
          [port: 7081, paths: ["/test2"], clients: 1]]                     | 5_000    | 1000      | 5000
@@ -237,9 +237,9 @@ class WebSocketCommunicationSpec extends Specification {
             }
         }
         print "Server "
-        TestUtil.waitForAllMessages(receiverSList, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(receiverSList, totalMessages, receiveTime)
         print "Client "
-        TestUtil.waitForAllMessages(receiverCList, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(receiverCList, totalMessages, receiveTime)
         clientList.each { WebSocketClient client ->
             client.disconnect()
         }
@@ -260,9 +260,9 @@ class WebSocketCommunicationSpec extends Specification {
         }
         totalMessages += totalMessages
         print "Server "
-        TestUtil.waitForAllMessages(receiverSList, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(receiverSList, totalMessages, receiveTime)
         print "Client "
-        TestUtil.waitForAllMessages(receiverCList, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(receiverCList, totalMessages, receiveTime)
 
 
         then:
@@ -281,7 +281,7 @@ class WebSocketCommunicationSpec extends Specification {
 
         println "-----------------------------"
         where:
-        configurations                                                    | messages | sleepTime | recieveTime
+        configurations                                                    | messages | sleepTime | receiveTime
         [[port: 7060, paths: ["/test0"], clients: 1]]                     | 1_000    | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 1],
          [port: 7081, paths: ["/test2"], clients: 1]]                     | 5_000    | 1000      | 5000
@@ -331,7 +331,7 @@ class WebSocketCommunicationSpec extends Specification {
             }
 
         }
-        TestUtil.waitForAllMessages(receiverCList, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(receiverCList, totalMessages, receiveTime)
 
         then:
         def clientMessagesRecieved = 0
@@ -347,7 +347,7 @@ class WebSocketCommunicationSpec extends Specification {
         totalMessages == clientMessagesRecieved
         println "-----------------------------"
         where:
-        configurations                                                    | messages | sleepTime | recieveTime
+        configurations                                                    | messages | sleepTime | receiveTime
         [[port: 7060, paths: ["/test0"], clients: 1]]                     | 1_000    | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 1],
          [port: 7081, paths: ["/test2"], clients: 1]]                     | 5_000    | 1000      | 5000
@@ -399,7 +399,7 @@ class WebSocketCommunicationSpec extends Specification {
             }
         }
 
-        TestUtil.waitForAllMessages(receiverCList, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(receiverCList, totalMessages, receiveTime)
 
         then:
         def clientMessagesRecieved = 0
@@ -415,7 +415,7 @@ class WebSocketCommunicationSpec extends Specification {
         totalMessages == clientMessagesRecieved
         println "-----------------------------"
         where:
-        configurations                                                    | messages | sleepTime | recieveTime
+        configurations                                                    | messages | sleepTime | receiveTime
         [[port: 7060, paths: ["/test0"], clients: 1]]                     | 1_000    | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 1],
          [port: 7081, paths: ["/test2"], clients: 1]]                     | 606      | 1000      | 5000
@@ -475,9 +475,9 @@ class WebSocketCommunicationSpec extends Specification {
         }
 
         print "Server "
-        TestUtil.waitForAllMessages(receiverSList, clientList.size() * messages, recieveTime)
+        TestUtil.waitForAllMessages(receiverSList, clientList.size() * messages, receiveTime)
         print "Client "
-        TestUtil.waitForAllMessages(receiverCList, clientList.size() * messages, recieveTime)
+        TestUtil.waitForAllMessages(receiverCList, clientList.size() * messages, receiveTime)
 
         then:
         clientList.each { WebSocketClient client ->
@@ -490,7 +490,7 @@ class WebSocketCommunicationSpec extends Specification {
         }
 
         where:
-        configurations                                                    | messages | sleepTime | recieveTime
+        configurations                                                    | messages | sleepTime | receiveTime
         [[port: 7060, paths: ["/test0"], clients: 1]]                     | 10       | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 1],
          [port: 7081, paths: ["/test2"], clients: 1]]                     | 50       | 1000      | 5000
@@ -559,14 +559,14 @@ class WebSocketCommunicationSpec extends Specification {
             }
         }
 
-        TestUtil.waitForAllMessages(serverReceiver, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(serverReceiver, totalMessages, receiveTime)
         then:
         println "${serverReceiver.messageCount} == ${totalMessages}"
 
         assert serverReceiver.messageCount == totalMessages
         println "-----------------------------"
         where:
-        receiverPaths        | configurations                                           | messages | sleepTime | recieveTime
+        receiverPaths        | configurations                                           | messages | sleepTime | receiveTime
         ["/test0"]           | [[port: 7060, paths: ["/test0"], clients: 1]]            | 5        | 1000      | 1000
         [""]                 | [[port: 7060, paths: ["/test0"], clients: 1]]            | 5        | 1000      | 5000
         [""]                 | [[port: 7060, paths: ["/test0", "/test1"], clients: 1]]  | 5        | 1000      | 5000
@@ -625,7 +625,7 @@ class WebSocketCommunicationSpec extends Specification {
 
         when:
 
-        TestUtil.waitForAllMessages(receiverSList, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(receiverSList, totalMessages, receiveTime)
 
         then:
 
@@ -637,7 +637,7 @@ class WebSocketCommunicationSpec extends Specification {
         serverSize == totalMessages
         println "-----------------------------"
         where:
-        configurations                                                     | sleepTime | recieveTime
+        configurations                                                     | sleepTime | receiveTime
         [[port: 7060, paths: ["/test0"], clients: 1]]                      | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 50]]                     | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 50],
@@ -691,7 +691,7 @@ class WebSocketCommunicationSpec extends Specification {
 
         when:
 
-        TestUtil.waitForAllMessages(receiverCList, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(receiverCList, totalMessages, receiveTime)
 
         then:
         def clientMessagesRecieved = 0
@@ -709,7 +709,7 @@ class WebSocketCommunicationSpec extends Specification {
         assert serverSize == totalMessages
         println "-----------------------------"
         where:
-        configurations                                                     | sleepTime | recieveTime
+        configurations                                                     | sleepTime | receiveTime
         [[port: 7060, paths: ["/test0"], clients: 1]]                      | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 50]]                     | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 50],
@@ -776,7 +776,7 @@ class WebSocketCommunicationSpec extends Specification {
         assert disconnections == clientList.size()
         println "-----------------------------"
         where:
-        configurations                                                     | sleepTime | recieveTime
+        configurations                                                     | sleepTime | receiveTime
         [[port: 7060, paths: ["/test0"], clients: 1]]                      | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 50]]                     | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 50],

@@ -1,6 +1,8 @@
 package konem.protocol.wire
 
 import konem.data.protobuf.KonemMessage
+import konem.netty.stream.ConnectionListener
+import konem.netty.stream.ConnectionStatusListener
 import konem.testUtil.GroovyWireMessageReciever
 import konem.testUtil.TestUtil
 import spock.lang.Shared
@@ -30,13 +32,13 @@ class WireCommunicationSpec extends Specification {
 
     def "Server readers can register before server starts and then see messages"() {
         given:
-        def receiver
-        receiver = new GroovyWireMessageReciever({ addr, msg ->
-            receiver.messageCount++
+        def serverReceiver
+        serverReceiver = new GroovyWireMessageReciever({ addr, msg ->
+            serverReceiver.messageCount++
         })
 
         configurations.each { config ->
-            server.registerChannelReadListener(config.port, receiver)
+            server.registerChannelReadListener(config.port, serverReceiver)
         }
 
         server.startServer()
@@ -61,14 +63,14 @@ class WireCommunicationSpec extends Specification {
                 client.sendMessage(TestUtil.createWireMessage(data))
             }
         }
-        TestUtil.waitForAllMessages(receiver, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(serverReceiver, totalMessages, receiveTime)
 
         then:
 
-        receiver.messageCount == totalMessages
+        serverReceiver.messageCount == totalMessages
 
         where:
-        configurations              | messages | recieveTime
+        configurations              | messages | receiveTime
         [[port: 6060, clients: 1]]  | 5        | 500
         [[port: 6060, clients: 10]] | 5        | 500
         [[port: 6060, clients: 1],
@@ -87,15 +89,15 @@ class WireCommunicationSpec extends Specification {
 
     def "Server readers can register after server starts and then see messages"() {
         given:
-        def receiver
-        receiver = new GroovyWireMessageReciever({ addr, msg ->
-            receiver.messageCount++
+        def serverReceiver
+        serverReceiver = new GroovyWireMessageReciever({ addr, msg ->
+            serverReceiver.messageCount++
         })
 
         server.startServer()
 
         configurations.each { config ->
-            server.registerChannelReadListener(config.port, receiver)
+            server.registerChannelReadListener(config.port, serverReceiver)
         }
 
         TestUtil.waitForServerActive(server)
@@ -119,14 +121,14 @@ class WireCommunicationSpec extends Specification {
                 client.sendMessage(TestUtil.createWireMessage(data))
             }
         }
-        TestUtil.waitForAllMessages(receiver, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(serverReceiver, totalMessages, receiveTime)
 
         then:
 
-        receiver.messageCount == totalMessages
+        serverReceiver.messageCount == totalMessages
 
         where:
-        configurations              | messages | recieveTime
+        configurations              | messages | receiveTime
         [[port: 6060, clients: 1]]  | 5        | 500
         [[port: 6060, clients: 10]] | 5        | 500
         [[port: 6060, clients: 1],
@@ -146,15 +148,15 @@ class WireCommunicationSpec extends Specification {
     def "Clients can register reader before connect and then see messages"() {
         given:
         def serverReceiverList = []
-        def receiver
-        receiver = new GroovyWireMessageReciever({ addr, msg ->
-            receiver.messageCount++
+        def serverReceiver
+        serverReceiver = new GroovyWireMessageReciever({ addr, msg ->
+            serverReceiver.messageCount++
             server.sendMessage(addr, msg)
         })
-        serverReceiverList << receiver
+        serverReceiverList << serverReceiver
 
         configurations.each { config ->
-            server.registerChannelReadListener(config.port, receiver)
+            server.registerChannelReadListener(config.port, serverReceiver)
         }
 
         server.startServer()
@@ -189,9 +191,9 @@ class WireCommunicationSpec extends Specification {
             }
         }
         print "Server "
-        TestUtil.waitForAllMessages(serverReceiverList, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(serverReceiverList, totalMessages, receiveTime)
         print "Client "
-        TestUtil.waitForAllMessages(clientReceiverList, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(clientReceiverList, totalMessages, receiveTime)
         then:
 
         def clientMessagesRecieved = 0
@@ -202,13 +204,13 @@ class WireCommunicationSpec extends Specification {
             }
         }
 
-        println "server recieved ${receiver.messageCount} == $clientMessagesRecieved client messages"
-        assert receiver.messageCount == clientMessagesRecieved
+        println "server recieved ${serverReceiver.messageCount} == $clientMessagesRecieved client messages"
+        assert serverReceiver.messageCount == clientMessagesRecieved
         assert clientMessagesRecieved == totalMessages
 
         println "-----------------------------"
         where:
-        configurations              | messages | recieveTime
+        configurations              | messages | receiveTime
         [[port: 6060, clients: 1]]  | 5        | 500
         [[port: 6060, clients: 25]] | 5        | 500
         [[port: 6060, clients: 25]] | 500      | 4000
@@ -228,15 +230,15 @@ class WireCommunicationSpec extends Specification {
     def "Clients can register reader after connect and then see messages"() {
         given:
         def serverReceiverList = []
-        def receiver
-        receiver = new GroovyWireMessageReciever({ addr, msg ->
-            receiver.messageCount++
+        def serverReceiver
+        serverReceiver = new GroovyWireMessageReciever({ addr, msg ->
+            serverReceiver.messageCount++
             server.sendMessage(addr, msg)
         })
-        serverReceiverList << receiver
+        serverReceiverList << serverReceiver
 
         configurations.each { config ->
-            server.registerChannelReadListener(config.port, receiver)
+            server.registerChannelReadListener(config.port, serverReceiver)
         }
 
         server.startServer()
@@ -271,9 +273,9 @@ class WireCommunicationSpec extends Specification {
             }
         }
         print "Server "
-        TestUtil.waitForAllMessages(serverReceiverList, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(serverReceiverList, totalMessages, receiveTime)
         print "Client "
-        TestUtil.waitForAllMessages(clientReceiverList, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(clientReceiverList, totalMessages, receiveTime)
         then:
 
         def clientMessagesRecieved = 0
@@ -284,13 +286,13 @@ class WireCommunicationSpec extends Specification {
             }
         }
 
-        println "server recieved ${receiver.messageCount} == $clientMessagesRecieved client messages"
-        assert receiver.messageCount == clientMessagesRecieved
+        println "server recieved ${serverReceiver.messageCount} == $clientMessagesRecieved client messages"
+        assert serverReceiver.messageCount == clientMessagesRecieved
         assert clientMessagesRecieved == totalMessages
 
         println "-----------------------------"
         where:
-        configurations              | messages | recieveTime
+        configurations              | messages | receiveTime
         [[port: 6060, clients: 1]]  | 5        | 500
         [[port: 6060, clients: 25]] | 5        | 500
         [[port: 6060, clients: 25]] | 500      | 4000
@@ -310,15 +312,15 @@ class WireCommunicationSpec extends Specification {
     def "Client readers can see messages after a reconnect"() {
         given:
         def serverReceiverList = []
-        def receiver
-        receiver = new GroovyWireMessageReciever({ addr, msg ->
-            receiver.messageCount++
+        def serverReceiver
+        serverReceiver = new GroovyWireMessageReciever({ addr, msg ->
+            serverReceiver.messageCount++
             server.sendMessage(addr, msg)
         })
-        serverReceiverList << receiver
+        serverReceiverList << serverReceiver
 
         configurations.each { config ->
-            server.registerChannelReadListener(config.port, receiver)
+            server.registerChannelReadListener(config.port, serverReceiver)
         }
 
         server.startServer()
@@ -353,9 +355,9 @@ class WireCommunicationSpec extends Specification {
             }
         }
         print "Server "
-        TestUtil.waitForAllMessages(serverReceiverList, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(serverReceiverList, totalMessages, receiveTime)
         print "Client "
-        TestUtil.waitForAllMessages(clientReceiverList, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(clientReceiverList, totalMessages, receiveTime)
 
         clientList.each { WireClient client ->
             client.disconnect()
@@ -376,9 +378,9 @@ class WireCommunicationSpec extends Specification {
         }
         totalMessages += totalMessages
         print "Server "
-        TestUtil.waitForAllMessages(serverReceiverList, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(serverReceiverList, totalMessages, receiveTime)
         print "Client "
-        TestUtil.waitForAllMessages(clientReceiverList, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(clientReceiverList, totalMessages, receiveTime)
 
         then:
 
@@ -390,13 +392,13 @@ class WireCommunicationSpec extends Specification {
             }
         }
 
-        println "server recieved ${receiver.messageCount} == $clientMessagesRecieved client messages"
-        assert receiver.messageCount == clientMessagesRecieved
+        println "server recieved ${serverReceiver.messageCount} == $clientMessagesRecieved client messages"
+        assert serverReceiver.messageCount == clientMessagesRecieved
         assert clientMessagesRecieved == totalMessages
 
         println "-----------------------------"
         where:
-        configurations              | messages | recieveTime
+        configurations              | messages | receiveTime
         [[port: 6060, clients: 1]]  | 5        | 500
         [[port: 6060, clients: 1]]  | 25       | 500
         [[port: 6060, clients: 33]] | 7        | 500
@@ -459,7 +461,7 @@ class WireCommunicationSpec extends Specification {
         }
 
         print "Client "
-        TestUtil.waitForAllMessages(clientReceiverList, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(clientReceiverList, totalMessages, receiveTime)
 
         then:
         def clientMessagesRecieved = 0
@@ -474,7 +476,7 @@ class WireCommunicationSpec extends Specification {
         assert totalMessages == clientMessagesRecieved
         println "-----------------------------"
         where:
-        broadcastPorts     | configurations              | messages | recieveTime
+        broadcastPorts     | configurations              | messages | receiveTime
         [6060]             | [[port: 6060, clients: 1]]  | 5        | 500
         []                 | [[port: 6060, clients: 1]]  | 5        | 500
         [6060]             | [[port: 6060, clients: 5]]  | 5        | 500
@@ -536,7 +538,7 @@ class WireCommunicationSpec extends Specification {
             totalMessages += (totalClients * messages)
         }
 
-        TestUtil.waitForAllMessages(clientReceiverList, totalMessages, recieveTime)
+        TestUtil.waitForAllMessages(clientReceiverList, totalMessages, receiveTime)
 
         then:
         def clientMessagesRecieved = 0
@@ -552,8 +554,8 @@ class WireCommunicationSpec extends Specification {
         totalMessages == clientMessagesRecieved
         println "-----------------------------"
         where:
-        configurations             | messages | recieveTime
-        [[port: 6060, clients: 1]] | 5        | 500
+        configurations              | messages | receiveTime
+        [[port: 6060, clients: 1]]  | 5        | 500
         [[port: 6060, clients: 1]]  | 25       | 500
         [[port: 6060, clients: 33]] | 7        | 500
         [[port: 6060, clients: 33],
@@ -574,15 +576,15 @@ class WireCommunicationSpec extends Specification {
     def "Server can receive and then respond to correct clients"() {
         given:
         def serverReceiverList = []
-        def receiver
-        receiver = new GroovyWireMessageReciever({ addr, msg ->
-            receiver.messageCount++
+        def serverReceiver
+        serverReceiver = new GroovyWireMessageReciever({ addr, msg ->
+            serverReceiver.messageCount++
             server.sendMessage(addr, msg)
         })
-        serverReceiverList << receiver
+        serverReceiverList << serverReceiver
 
         configurations.each { config ->
-            server.registerChannelReadListener(config.port, receiver)
+            server.registerChannelReadListener(config.port, serverReceiver)
         }
 
         server.startServer()
@@ -591,13 +593,12 @@ class WireCommunicationSpec extends Specification {
         def clientList = []
         def clientReceiverList = []
         def totalMessages = 0
-
         configurations.each { config ->
             totalMessages += (config.clients * (messages))
             1.upto(config.clients) {
                 def client = factory.createClient("localhost", config.port)
                 def clientReceiver
-                clientReceiver = new GroovyWireMessageReciever("client-$it-${config.port}",{ addr, msg ->
+                clientReceiver = new GroovyWireMessageReciever("client-$it-${config.port}", { addr, msg ->
                     clientReceiver.messageCount++
                     clientReceiver.messageList << msg
                 })
@@ -609,7 +610,7 @@ class WireCommunicationSpec extends Specification {
         }
         TestUtil.ensureClientsActive(clientList)
         when:
-        for(WireClient client :clientList){
+        for (WireClient client : clientList) {
             client.getReadListeners().each { rdr ->
                 1.upto(messages) {
                     client.sendMessage(TestUtil.createWireMessage("${rdr.clientId}"))
@@ -617,15 +618,15 @@ class WireCommunicationSpec extends Specification {
             }
         }
         print "Server "
-        TestUtil.waitForAllMessages(serverReceiverList, clientList.size() * messages, recieveTime)
+        TestUtil.waitForAllMessages(serverReceiverList, clientList.size() * messages, receiveTime)
         print "Client "
-        TestUtil.waitForAllMessages(clientReceiverList, clientList.size() * messages, recieveTime)
+        TestUtil.waitForAllMessages(clientReceiverList, clientList.size() * messages, receiveTime)
 
         then:
         clientList.each { WireClient client ->
             def readers = client.readListeners
             clientReceiverList.each { rdr ->
-                rdr.messageList.each {  KonemMessage message ->
+                rdr.messageList.each { KonemMessage message ->
                     //println "${message.getData().data} == ${rdr.clientId}"
                     assert message.getData().data == rdr.clientId
                 }
@@ -633,22 +634,217 @@ class WireCommunicationSpec extends Specification {
         }
 
         where:
-        configurations             | messages | recieveTime
-        [[port: 6060, clients: 1]] | 5        | 500
+        configurations              | messages | receiveTime
+        [[port: 6060, clients: 1]]  | 5        | 500
         [[port: 6060, clients: 10]] | 5        | 500
         [[port: 6060, clients: 10],
          [port: 6081, clients: 10]] | 5        | 500
         [[port: 6060, clients: 10],
          [port: 6081, clients: 10],
          [port: 6082, clients: 10],
-         [port: 6083, clients: 10]] | 25        | 4000
+         [port: 6083, clients: 10]] | 25       | 4000
     }
 
-    // def "Clients ConnectionListener is called after connect and able to send message"() {}
+    def "Clients ConnectionListener is called after connect and able to send message"() {
+        given:
+        def serverReceiverList = []
 
-    //  def "Server's ConnectionListener is called after a client connects and able to send message to client"() { }
+        def serverReceiver
+        serverReceiver = new GroovyWireMessageReciever({ addr, msg ->
+            serverReceiver.messageCount++
+        })
 
-    //  def "ConnectionStatusListener's connect and disconnect listeners are called"() { }
+        server.registerChannelReadListener(serverReceiver)
+        serverReceiverList << serverReceiver
+
+        def connectionList = []
+        server.registerConnectionListener(new ConnectionListener({ addr ->
+            connectionList << addr
+        }))
+
+        server.startServer()
+        TestUtil.waitForServerActive(server)
+
+        def msg = TestUtil.createWireMessage("send")
+
+        def clientList = []
+        def totalMessages = 0
+        configurations.each { config ->
+            totalMessages += config.clients
+            1.upto(config.clients) {
+                def client = factory.createClient("localhost", config.port)
+                client.registerConnectionListener(new ConnectionListener({ addr ->
+                    client.sendMessage(msg)
+                }))
+                clientList << client
+                client.connect()
+            }
+        }
+        TestUtil.ensureClientsActive(clientList)
+        when:
+        print "Server "
+        TestUtil.waitForAllMessages(serverReceiverList, totalMessages, receiveTime)
+
+        then:
+        def serverMessages = serverReceiver.messageCount
+        println "server recieved $serverMessages == $totalMessages client messages sent"
+        assert serverMessages == totalMessages
+        println "server connections ${connectionList.size()} == $totalMessages clients "
+        def serverSize = connectionList.size()
+        assert serverSize == totalMessages
+        println "-----------------------------"
+        where:
+        configurations              | receiveTime
+        [[port: 6060, clients: 1]]  | 5000
+        [[port: 6060, clients: 50]] | 5000
+        [[port: 6060, clients: 20],
+         [port: 6081, clients: 20]] | 5000
+        [[port: 6060, clients: 50],
+         [port: 6081, clients: 50],
+         [port: 6082, clients: 50],
+         [port: 6083, clients: 50]] | 5000
+    }
+
+    def "Server's ConnectionListener is called after a client connects and able to send message to client"() {
+        given:
+        def message = TestUtil.createWireMessage("send")
+        def serverReceiverList = []
+
+        def serverReceiver
+        serverReceiver = new GroovyWireMessageReciever({ addr, msg ->
+            serverReceiver.messageCount++
+
+        })
+
+        server.registerChannelReadListener(serverReceiver)
+        serverReceiverList << serverReceiver
+
+        def connectionList = []
+        server.registerConnectionListener(new ConnectionListener({ addr ->
+            connectionList << addr
+            server.sendMessage(addr, message)
+        }))
+
+        server.startServer()
+        TestUtil.waitForServerActive(server)
+
+        def clientList = []
+        def clientReceiverList = []
+        def totalMessages = 0
+        configurations.each { config ->
+            totalMessages += config.clients
+            1.upto(config.clients) {
+                def client = factory.createClient("localhost", config.port)
+                def clientReceiver
+                clientReceiver = new GroovyWireMessageReciever({ addr, msg ->
+                    clientReceiver.messageCount++
+                })
+                clientList << client
+                clientReceiverList << clientReceiver
+                client.registerChannelReadListener(clientReceiver)
+                client.connect()
+            }
+        }
+        TestUtil.ensureClientsActive(clientList)
+        when:
+        print "Server "
+        TestUtil.waitForAllMessages(clientReceiverList, totalMessages, receiveTime)
+
+        then:
+        def clientMessagesRecieved = 0
+        clientList.each { WireClient client ->
+            def receivers = client.readListeners
+            receivers.each {
+                clientMessagesRecieved += it.messageCount
+            }
+        }
+
+        println "Server sent $totalMessages == $clientMessagesRecieved client messages got"
+        assert totalMessages == clientMessagesRecieved
+        println "server connections ${connectionList.size()} == $totalMessages clients "
+        def serverSize = connectionList.size()
+        assert serverSize == totalMessages
+        println "-----------------------------"
+        where:
+        configurations              | receiveTime
+        [[port: 6060, clients: 1]]  | 5000
+        [[port: 6060, clients: 50]] | 5000
+        [[port: 6060, clients: 20],
+         [port: 6081, clients: 20]] | 5000
+        [[port: 6060, clients: 50],
+         [port: 6081, clients: 50],
+         [port: 6082, clients: 50],
+         [port: 6083, clients: 50]] | 5000
+    }
+
+    def "ConnectionStatusListener's connect and disconnect listeners are called"() {
+        given:
+        def message = TestUtil.createWireMessage("send")
+        def serverReceiverList = []
+        def serverReceiver
+        serverReceiver = new GroovyWireMessageReciever({ addr, msg ->
+            serverReceiver.messageCount++
+        })
+
+        server.registerChannelReadListener(serverReceiver)
+
+        def connections = 0
+        def disconnections = 0
+        server.registerConnectionStatusListener(new ConnectionStatusListener(
+                { addr ->
+                    connections++
+                    server.sendMessage(addr, message)
+                },
+                { addr ->
+                    disconnections++
+                }))
+
+        serverReceiverList << serverReceiver
+        server.startServer()
+        TestUtil.waitForServerActive(server)
+
+        def clientList = []
+        def clientReceiverList = []
+        def totalMessages = 0
+        configurations.each { config ->
+            totalMessages += config.clients
+            1.upto(config.clients) {
+                def client = factory.createClient("localhost", config.port)
+                clientList << client
+                def clientReceiver
+                clientReceiver = new GroovyWireMessageReciever({ addr, msg ->
+                    clientReceiver.messageCount++
+                    client.disconnect()
+                })
+                client.registerChannelReadListener(clientReceiver)
+                clientReceiverList << clientReceiver
+                client.connect()
+
+            }
+        }
+        TestUtil.ensureClientsActive(clientList)
+
+        when:
+        TestUtil.ensureDisconnected(clientList)
+        Thread.sleep(receiveTime)
+        then:
+        println "ConnectionStatusListener saw connections: $connections  == ${clientList.size()} clients "
+        assert connections == clientList.size()
+        println "ConnectionStatusListener saw disconnections: $disconnections  == ${clientList.size()} clients "
+        assert disconnections == clientList.size()
+        println "-----------------------------"
+        where:
+        configurations              | receiveTime
+        [[port: 6060, clients: 1]]  | 2000
+        [[port: 6060, clients: 50]] | 2000
+        [[port: 6060, clients: 20],
+         [port: 6081, clients: 20]] | 2000
+        [[port: 6060, clients: 25],
+         [port: 6081, clients: 50],
+         [port: 6082, clients: 25],
+         [port: 6083, clients: 50]] | 2000
+
+    }
 
 }
 
