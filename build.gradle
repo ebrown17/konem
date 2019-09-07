@@ -73,7 +73,7 @@ task ktlint(type: JavaExec, group: "verification") {
     description = "Check Kotlin code style."
     classpath = configurations.ktlint
     main = "com.pinterest.ktlint.Main"
-    args "src/**/*.kt"
+    args "src/**/*.kt,!src/**/*KoneMessage.kt"
 }
 
 task ktlintFormat(type: JavaExec, group: "formatting") {
@@ -89,8 +89,7 @@ detekt {
     parallel = true
     ignoreFailures = true
     config = files("config/detekt/yaml/pinpak-detekt-config.yml")
-    filters = "**/*.Main.kt,**/protobuf/*.KonemMessage"
-
+    filters = "**/*.Main.kt,**/protobuf/*.KonemMessage.kt"
 
     reports {
         html {
@@ -99,14 +98,12 @@ detekt {
         }
         xml {enabled = false}
         txt {enabled = false}
-
     }
 }
 
 test {
     jvmArgs = ["-Dio.netty.leakDetection.level=PARANOID"]
     systemProperties 'SKIP.LONG': '1'
-
 }
 
 wrapper {

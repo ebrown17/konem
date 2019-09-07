@@ -91,13 +91,12 @@ class WebSocketCommunicationSpec extends Specification {
         TestUtil.ensureClientsActive(clientList)
         when:
         def msg = new KonemMessage(new Message.Data("send"))
-        GParsPool.withPool(clientList.size()) {
-            clientList.eachParallel { WebSocketClient client ->
-                1.upto(messages) {
-                    client.sendMessage(msg)
-                }
+        clientList.each { WebSocketClient client ->
+            1.upto(messages) {
+                client.sendMessage(msg)
             }
         }
+
 
         TestUtil.waitForAllMessages(receiver, totalMessages, receiveTime)
 
@@ -157,11 +156,9 @@ class WebSocketCommunicationSpec extends Specification {
 
         when:
         def msg = new KonemMessage(new Message.Data("send"))
-        GParsPool.withPool(clientList.size()) {
-            clientList.eachParallel { WebSocketClient client ->
-                1.upto(messages) {
-                    client.sendMessage(msg)
-                }
+        clientList.each { WebSocketClient client ->
+            1.upto(messages) {
+                client.sendMessage(msg)
             }
         }
         TestUtil.waitForAllMessages(receiverList, totalMessages * 2, receiveTime)
@@ -229,11 +226,9 @@ class WebSocketCommunicationSpec extends Specification {
 
         when:
         def msg = new KonemMessage(new Message.Data("send"))
-        GParsPool.withPool(clientList.size()) {
-            clientList.eachParallel { WebSocketClient client ->
-                1.upto(messages) {
-                    client.sendMessage(msg)
-                }
+        clientList.each { WebSocketClient client ->
+            1.upto(messages) {
+                client.sendMessage(msg)
             }
         }
         print "Server "
@@ -251,11 +246,9 @@ class WebSocketCommunicationSpec extends Specification {
 
         TestUtil.ensureClientsActive(clientList)
 
-        GParsPool.withPool(clientList.size()) {
-            clientList.eachParallel { WebSocketClient client ->
-                1.upto(messages) {
-                    client.sendMessage(msg)
-                }
+        clientList.each { WebSocketClient client ->
+            1.upto(messages) {
+                client.sendMessage(msg)
             }
         }
         totalMessages += totalMessages
@@ -551,11 +544,9 @@ class WebSocketCommunicationSpec extends Specification {
 
         when:
         def msg = new KonemMessage(new Message.Data("send"))
-        GParsPool.withPool(clientList.size()) {
-            clientList.eachParallel { WebSocketClient client ->
-                1.upto(messages) {
-                    client.sendMessage(msg)
-                }
+        clientList.each { WebSocketClient client ->
+            1.upto(messages) {
+                client.sendMessage(msg)
             }
         }
 
@@ -688,7 +679,7 @@ class WebSocketCommunicationSpec extends Specification {
             }
         }
         TestUtil.ensureClientsActive(clientList)
-
+        Thread.sleep(sleepTime)
         when:
 
         TestUtil.waitForAllMessages(receiverCList, totalMessages, receiveTime)
@@ -735,10 +726,10 @@ class WebSocketCommunicationSpec extends Specification {
                 { addr ->
                     connections++
                     server.sendMessage(addr, new KonemMessage(new Message.Data("Send")))
-        },
-                {addr ->
+                },
+                { addr ->
                     disconnections++
-        }))
+                }))
 
         receiverSList << serverReceiver
         server.startServer()
@@ -768,7 +759,7 @@ class WebSocketCommunicationSpec extends Specification {
 
         when:
         TestUtil.ensureDisconnected(clientList)
-        Thread.sleep(sleepTime*2)
+        Thread.sleep(sleepTime )
         then:
         println "ConnectionStatusListener saw connections: $connections  == ${clientList.size()} clients "
         assert connections == clientList.size()
@@ -777,13 +768,13 @@ class WebSocketCommunicationSpec extends Specification {
         println "-----------------------------"
         where:
         configurations                                                     | sleepTime | receiveTime
-        [[port: 7060, paths: ["/test0"], clients: 1]]                      | 1000      | 5000
-        [[port: 7060, paths: ["/test0"], clients: 50]]                     | 1000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 1]]                      | 2000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 50]]                     | 2000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 50],
-         [port: 7081, paths: ["/test2", "/test3"], clients: 50]]           | 1000      | 5000
+         [port: 7081, paths: ["/test2", "/test3"], clients: 50]]           | 2000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 50],
          [port: 7081, paths: ["/test2", "/test3"], clients: 50],
-         [port: 7082, paths: ["/test5", "/test4", "/test6"], clients: 75]] | 1000      | 5000
+         [port: 7082, paths: ["/test5", "/test4", "/test6"], clients: 75]] | 2000      | 5000
     }
 
 }
