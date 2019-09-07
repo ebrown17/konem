@@ -1,6 +1,5 @@
 package konem.protocol.websocket
 
-import groovyx.gpars.GParsPool
 import konem.data.json.KonemMessage
 import konem.data.json.KonemMessageSerializer
 import konem.data.json.Message
