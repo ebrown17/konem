@@ -104,7 +104,13 @@ class WebSocketServer : Server(), ServerTransmitter<KonemMessage>, WebSocketChan
   }
   // TODO need to allow registering on a specific port
   override fun registerChannelReadListener(port: Int, receiver: Receiver) {
+    TODO("not implemented")
   }
+
+  override fun registerChannelReadListener(port: Int, receiver: Receiver, vararg args: String) {
+    TODO("not implemented")
+  }
+
 
   private fun isPathConfiguredOnPort(port: Int, path: String): Boolean {
     val configuredPaths = websocketMap[port]

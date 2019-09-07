@@ -58,10 +58,6 @@ class WireServer : Server(), ServerTransmitter<KonemMessage>, WireChannelReader 
     }
   }
 
-  override fun registerChannelReadListener(receiver: Receiver, vararg args: String) {
-    registerChannelReadListener(receiver)
-  }
-
   override fun broadcastOnChannel(port: Int, message: KonemMessage, vararg args: String) {
     val transceiver = getTransceiverMap()[port] as WireTransceiver
     transceiver.broadcastMessage(message)

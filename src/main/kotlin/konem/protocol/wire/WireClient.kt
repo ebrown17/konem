@@ -29,17 +29,14 @@ class WireClient(private val serverAddress: InetSocketAddress, config: ClientBoo
     readListeners.add(receiver)
   }
 
-  override fun registerChannelReadListener(receiver: Receiver, vararg args: String) {
-    registerChannelReadListener(receiver)
+  override fun registerChannelReadListener(port: Int, receiver: Receiver) {
+    TODO("not implemented")
   }
 
   override fun handleChannelRead(addr: InetSocketAddress, port: Int, message: Any) {
     clientScope.launch {
       readMessage(addr, port, message)
     }
-  }
-
-  override fun registerChannelReadListener(port: Int, receiver: Receiver) {
   }
 
   override suspend fun readMessage(addr: InetSocketAddress, port: Int, message: Any) {
