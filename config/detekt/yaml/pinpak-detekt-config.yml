@@ -372,7 +372,7 @@ performance:
     excludes: "**/test/**,**/androidTest/**,**/*.Test.kt,**/*.Spec.kt,**/*.Spek.kt"
   SpreadOperator:
     active: true
-    excludes: "**/test/**,**/androidTest/**,**/*.Test.kt,**/*.Spec.kt,**/*.Spek.kt"
+    excludes: "**/test/**,**/androidTest/**,**/*.Test.kt,**/*.Spec.kt,**/*.Spek.kt,**/websocket/**"
   UnnecessaryTemporaryInstantiation:
     active: true
 
@@ -467,6 +467,7 @@ style:
     active: false
   MaxLineLength:
     active: true
+      excludes: "**/*.WebSocketFrameHandler.k"
     maxLineLength: 120
     excludePackageStatements: true
     excludeImportStatements: true

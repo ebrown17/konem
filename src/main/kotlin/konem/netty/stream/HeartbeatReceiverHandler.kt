@@ -12,8 +12,9 @@ import org.slf4j.LoggerFactory
  * If the heartbeat miss limit is reached the channel is closed and the client's reconnect logic is
  * started.
  *
- * By default every channel read will reset the miss count. To only reset on a heartbeat, you must override the channelRead
- * method and add appropriate logic. The method
+ * By default every channel read will reset the miss count. To only reset on a heartbeat, you must override the
+ * channelRead method and add appropriate logic. The method
+ *
  * [resetMissCounter ][HeartbeatReceiverHandler.resetMissCounter] can be called to reset the miss count.
  *
  * @param expectedInterval The expected heartbeat interval in seconds. This will be used to determine if server

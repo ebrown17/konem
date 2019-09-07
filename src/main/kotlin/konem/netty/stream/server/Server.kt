@@ -92,38 +92,39 @@ abstract class Server : ChannelReader, HandlerListener {
     val socketAddress = portAddressMap[port]
     if (socketAddress == null) {
       logger.error("called with unconfigured port: {}", port)
-    } else {
-      if (isActive(port)) {
-        logger.warn("called or an already active channel: {}", port)
-        return
-      }
-      val bootstrap = bootstrapMap[port]
-      if (bootstrap != null) {
-        val channelFuture = bootstrap.bind(socketAddress)
-        channelFuture.await()
-        if (channelFuture.isSuccess) {
-          logger.debug("startChannel now listening for connections on port {}", port)
-          val channel = channelFuture.channel()
-          val closeListener = ChannelFutureListener { future: ChannelFuture ->
-            logger.info("Channel {} closed unexpectedly, closed with {}", port, future.cause())
-            channel.close()
-          }
-
-          var listenerList = channelListenerMap[port]
-          if (listenerList == null) {
-            listenerList = ArrayList<ChannelFutureListener>()
-          }
-          listenerList.add(closeListener)
-
-          channel.closeFuture().addListener(closeListener)
-
-          channelMap[port] = channel
-          channelListenerMap[port] = listenerList
-        } else {
-          logger.error("startChannel failed to bind to port {} ", port)
+      return
+    }
+    if (isActive(port)) {
+      logger.warn("called or an already active channel: {}", port)
+      return
+    }
+    val bootstrap = bootstrapMap[port]
+    if (bootstrap != null) {
+      val channelFuture = bootstrap.bind(socketAddress)
+      channelFuture.await()
+      if (channelFuture.isSuccess) {
+        logger.debug("startChannel now listening for connections on port {}", port)
+        val channel = channelFuture.channel()
+        val closeListener = ChannelFutureListener { future: ChannelFuture ->
+          logger.info("Channel {} closed unexpectedly, closed with {}", port, future.cause())
+          channel.close()
         }
+
+        var listenerList = channelListenerMap[port]
+        if (listenerList == null) {
+          listenerList = ArrayList<ChannelFutureListener>()
+        }
+        listenerList.add(closeListener)
+
+        channel.closeFuture().addListener(closeListener)
+
+        channelMap[port] = channel
+        channelListenerMap[port] = listenerList
+      } else {
+        logger.error("startChannel failed to bind to port {} ", port)
       }
     }
+
   }
 
   private fun closeChannel(port: Int) {
@@ -171,9 +172,9 @@ abstract class Server : ChannelReader, HandlerListener {
     serverScope.launch {
       withTimeout(twoSeconds) {
         delay(oneSecond)
-          for (listener in connectionListeners) {
-            listener.onConnection(remoteConnection)
-          }
+        for (listener in connectionListeners) {
+          listener.onConnection(remoteConnection)
+        }
       }
     }
   }
