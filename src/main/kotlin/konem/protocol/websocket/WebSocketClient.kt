@@ -39,7 +39,7 @@ class WebSocketClient(
   override suspend fun readMessage(addr: InetSocketAddress, webSocketPath: String, message: Any) {
     logger.trace("readMessage got message: {}", message)
     for (listener in readListeners) {
-      listener.handleChannelRead(addr, message)
+      listener.receive(addr, message)
     }
   }
 
@@ -51,14 +51,12 @@ class WebSocketClient(
     registerChannelReadListener(receiver)
   }
 
-  // TODO need to allow registering on a specific port for all paths
   override fun registerChannelReadListener(port: Int, receiver: Receiver) {
-    registerChannelReadListener(receiver)
+    TODO("not implemented")
   }
   
-  // TODO need to allow registering on a specific port for all paths
   override fun registerChannelReadListener(port: Int, receiver: Receiver, vararg args: String) {
-    registerChannelReadListener(receiver)
+    TODO("not implemented")
   }
 
   override fun toString(): String {

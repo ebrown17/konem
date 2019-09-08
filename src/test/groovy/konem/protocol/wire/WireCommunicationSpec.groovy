@@ -198,7 +198,7 @@ class WireCommunicationSpec extends Specification {
 
         def clientMessagesRecieved = 0
         clientList.each { WireClient client ->
-            def receivers = client.readListeners
+            def receivers = client.receiveListeners
             receivers.each {
                 clientMessagesRecieved += it.messageCount
             }
@@ -280,7 +280,7 @@ class WireCommunicationSpec extends Specification {
 
         def clientMessagesRecieved = 0
         clientList.each { WireClient client ->
-            def receivers = client.readListeners
+            def receivers = client.receiveListeners
             receivers.each {
                 clientMessagesRecieved += it.messageCount
             }
@@ -386,7 +386,7 @@ class WireCommunicationSpec extends Specification {
 
         def clientMessagesRecieved = 0
         clientList.each { WireClient client ->
-            def receivers = client.readListeners
+            def receivers = client.receiveListeners
             receivers.each {
                 clientMessagesRecieved += it.messageCount
             }
@@ -466,7 +466,7 @@ class WireCommunicationSpec extends Specification {
         then:
         def clientMessagesRecieved = 0
         clientList.each { WireClient client ->
-            def receivers = client.readListeners
+            def receivers = client.receiveListeners
             receivers.each {
                 clientMessagesRecieved += it.messageCount
             }
@@ -543,7 +543,7 @@ class WireCommunicationSpec extends Specification {
         then:
         def clientMessagesRecieved = 0
         clientList.each { WireClient client ->
-            def receivers = client.getReadListeners()
+            def receivers = client.getReceiveListeners()
             receivers.each {
                 clientMessagesRecieved += it.messageCount
             }
@@ -611,7 +611,7 @@ class WireCommunicationSpec extends Specification {
         TestUtil.ensureClientsActive(clientList)
         when:
         for (WireClient client : clientList) {
-            client.getReadListeners().each { rdr ->
+            client.getReceiveListeners().each { rdr ->
                 1.upto(messages) {
                     client.sendMessage(TestUtil.createWireMessage("${rdr.clientId}"))
                 }
@@ -624,7 +624,7 @@ class WireCommunicationSpec extends Specification {
 
         then:
         clientList.each { WireClient client ->
-            def readers = client.readListeners
+            def readers = client.receiveListeners
             clientReceiverList.each { rdr ->
                 rdr.messageList.each { KonemMessage message ->
                     //println "${message.getData().data} == ${rdr.clientId}"
@@ -753,7 +753,7 @@ class WireCommunicationSpec extends Specification {
         then:
         def clientMessagesRecieved = 0
         clientList.each { WireClient client ->
-            def receivers = client.readListeners
+            def receivers = client.receiveListeners
             receivers.each {
                 clientMessagesRecieved += it.messageCount
             }

@@ -8,13 +8,15 @@ import konem.netty.stream.client.ClientTransmitter
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
+import java.util.concurrent.ConcurrentHashMap
 
 class WireClient(private val serverAddress: InetSocketAddress, config: ClientBootstrapConfig) :
   Client(serverAddress, config), ClientTransmitter<KonemMessage>, WireChannelReader {
 
   private val logger = LoggerFactory.getLogger(WireClient::class.java)
   private val transceiver = config.transceiver as WireTransceiver
-  val readListeners = mutableListOf<Receiver>()
+  private val receiveListeners: ConcurrentHashMap<Int, ArrayList<Receiver>> =
+    ConcurrentHashMap()
 
   override fun sendMessage(message: KonemMessage) {
     if (!isActive()) {
@@ -26,11 +28,18 @@ class WireClient(private val serverAddress: InetSocketAddress, config: ClientBoo
   }
 
   override fun registerChannelReadListener(receiver: Receiver) {
-    readListeners.add(receiver)
+    for(receiveListenerList in receiveListeners.values){
+      receiveListenerList.add(receiver)
+    }
   }
 
   override fun registerChannelReadListener(port: Int, receiver: Receiver) {
-    TODO("not implemented")
+    var receiveListenerList = receiveListeners[port]
+    if (receiveListenerList == null) {
+      receiveListenerList = arrayListOf()
+    }
+    receiveListenerList.add(receiver)
+    receiveListeners[port] = receiveListenerList
   }
 
   override fun handleChannelRead(addr: InetSocketAddress, port: Int, message: Any) {
@@ -41,8 +50,12 @@ class WireClient(private val serverAddress: InetSocketAddress, config: ClientBoo
 
   override suspend fun readMessage(addr: InetSocketAddress, port: Int, message: Any) {
     logger.trace("readMessage got message: {}", message)
-    for (listener in readListeners) {
-      listener.handleChannelRead(addr, message)
+     val receiveListenerList =  receiveListeners[port]
+
+    if (receiveListenerList != null) {
+      for (listener in receiveListenerList) {
+        listener.receive(addr, message)
+      }
     }
   }
 

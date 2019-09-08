@@ -9,7 +9,7 @@ abstract class ReceiverHandler<I> : Receiver {
 
   private val logger = LoggerFactory.getLogger(javaClass)
 
-  override fun handleChannelRead(addr: InetSocketAddress, msg: Any) {
+  override fun receive(addr: InetSocketAddress, msg: Any) {
     try {
       read(addr, msg as I)
     } catch (e: ClassCastException) {

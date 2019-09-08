@@ -64,7 +64,7 @@ class WebSocketServer : Server(), ServerTransmitter<KonemMessage>, WebSocketChan
     val readerListenerList = readListeners[webSocketPath]
     if (readerListenerList != null) {
       for (listener in readerListenerList) {
-        listener.handleChannelRead(addr, message)
+        listener.receive(addr, message)
       }
     }
   }

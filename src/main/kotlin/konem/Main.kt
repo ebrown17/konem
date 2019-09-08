@@ -133,9 +133,9 @@ fun main1() {
   var receiver = KonemMessageReceiver { _, message ->
     logger.info("KoneMessageReceiver: {} ", message)
   }
-  receiver.handleChannelRead(InetSocketAddress(8080), jsonBeat)
-  receiver.handleChannelRead(InetSocketAddress(8080), jsonStatus)
-  receiver.handleChannelRead(InetSocketAddress(8080), jsonUnknown)
+  receiver.receive(InetSocketAddress(8080), jsonBeat)
+  receiver.receive(InetSocketAddress(8080), jsonStatus)
+  receiver.receive(InetSocketAddress(8080), jsonUnknown)
   sleep(1000)
   logger.info("{}", KonemMessage(Message.Heartbeat()))
 

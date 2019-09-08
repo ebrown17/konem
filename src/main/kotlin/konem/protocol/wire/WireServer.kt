@@ -14,7 +14,7 @@ class WireServer : Server(), ServerTransmitter<KonemMessage>, WireChannelReader 
 
   private val logger = LoggerFactory.getLogger(WireServer::class.java)
 
-  private val readListeners: ConcurrentHashMap<Int, ArrayList<Receiver>> =
+  private val receiveListeners: ConcurrentHashMap<Int, ArrayList<Receiver>> =
     ConcurrentHashMap()
 
   override fun addChannel(port: Int, vararg args: String): Boolean {
@@ -26,7 +26,7 @@ class WireServer : Server(), ServerTransmitter<KonemMessage>, WireChannelReader 
     val transceiver = WireTransceiver(port)
 
     return if (addChannel(port, transceiver)) {
-      readListeners[port] = ArrayList()
+      receiveListeners[port] = ArrayList()
       true
     } else {
       false
@@ -44,16 +44,16 @@ class WireServer : Server(), ServerTransmitter<KonemMessage>, WireChannelReader 
       throw IllegalArgumentException("port type can't be null or port is not configured: port " + port)
     }
 
-    var readerListenerList = readListeners[port]
+    var readerListenerList = receiveListeners[port]
     if (readerListenerList == null) {
       readerListenerList = arrayListOf()
     }
     readerListenerList.add(receiver)
-    readListeners[port] = readerListenerList
+    receiveListeners[port] = readerListenerList
   }
 
   override fun registerChannelReadListener(receiver: Receiver) {
-    for (list in readListeners.values) {
+    for (list in receiveListeners.values) {
       list.add(receiver)
     }
   }
@@ -87,10 +87,10 @@ class WireServer : Server(), ServerTransmitter<KonemMessage>, WireChannelReader 
 
   override suspend fun readMessage(addr: InetSocketAddress, port: Int, message: Any) {
     logger.trace("readMessage got message: {}", message)
-    val readerListenerList = readListeners[port]
+    val readerListenerList = receiveListeners[port]
     if (readerListenerList != null) {
       for (listener in readerListenerList) {
-        listener.handleChannelRead(addr, message)
+        listener.receive(addr, message)
       }
     }
   }
