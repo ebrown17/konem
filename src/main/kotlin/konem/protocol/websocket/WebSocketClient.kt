@@ -15,7 +15,7 @@ class WebSocketClient(
   config: ClientBootstrapConfig,
   private val fullWSPath: URI
 ) : Client(serverAddress, config),
-  ClientTransmitter<KonemMessage>, WebSocketChannelReader {
+  ClientTransmitter<KonemMessage>, WebSocketClientChannelReader {
 
   private val logger = LoggerFactory.getLogger(WebSocketClient::class.java)
   private val transceiver = config.transceiver as WebSocketTransceiver
@@ -39,7 +39,7 @@ class WebSocketClient(
   override suspend fun readMessage(addr: InetSocketAddress, webSocketPath: String, message: Any) {
     logger.trace("readMessage got message: {}", message)
     for (listener in readListeners) {
-      listener.receive(addr, message)
+      listener.handle(addr, message)
     }
   }
 
@@ -49,14 +49,6 @@ class WebSocketClient(
 
   override fun registerChannelReadListener(receiver: Receiver, vararg args: String) {
     registerChannelReadListener(receiver)
-  }
-
-  override fun registerChannelReadListener(port: Int, receiver: Receiver) {
-    TODO("not implemented")
-  }
-  
-  override fun registerChannelReadListener(port: Int, receiver: Receiver, vararg args: String) {
-    TODO("not implemented")
   }
 
   override fun toString(): String {

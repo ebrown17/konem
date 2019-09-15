@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 import java.util.concurrent.ConcurrentHashMap
 
-class WireServer : Server(), ServerTransmitter<KonemMessage>, WireChannelReader {
+class WireServer : Server(), ServerTransmitter<KonemMessage>, WireServerChannelReader {
 
   private val logger = LoggerFactory.getLogger(WireServer::class.java)
 
@@ -90,7 +90,7 @@ class WireServer : Server(), ServerTransmitter<KonemMessage>, WireChannelReader 
     val readerListenerList = receiveListeners[port]
     if (readerListenerList != null) {
       for (listener in readerListenerList) {
-        listener.receive(addr, message)
+        listener.handle(addr, message)
       }
     }
   }

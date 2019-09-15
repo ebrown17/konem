@@ -133,9 +133,9 @@ fun main1() {
   var receiver = KonemMessageReceiver { _, message ->
     logger.info("KoneMessageReceiver: {} ", message)
   }
-  receiver.receive(InetSocketAddress(8080), jsonBeat)
-  receiver.receive(InetSocketAddress(8080), jsonStatus)
-  receiver.receive(InetSocketAddress(8080), jsonUnknown)
+  receiver.handle(InetSocketAddress(8080), jsonBeat)
+  receiver.handle(InetSocketAddress(8080), jsonStatus)
+  receiver.handle(InetSocketAddress(8080), jsonUnknown)
   sleep(1000)
   logger.info("{}", KonemMessage(Message.Heartbeat()))
 
@@ -152,7 +152,7 @@ fun main() {
   server.addChannel(8085)
   server.startServer()
 
-  server.registerChannelReadListener(WireMessageReceiver { inetSocketAddress, konemMessage ->
+  server.registerChannelReadListener(WireMessageReceiver {  inetSocketAddress, konemMessage ->
     logger.info("xxxx KoneMessageReceiver: {} ", konemMessage.toString())
   })
 
