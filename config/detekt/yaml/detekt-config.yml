@@ -467,7 +467,6 @@ style:
     active: false
   MaxLineLength:
     active: true
-      excludes: "**/*.WebSocketFrameHandler.k"
     maxLineLength: 120
     excludePackageStatements: true
     excludeImportStatements: true

@@ -10,6 +10,6 @@ interface WireChannelReader {
   suspend fun readMessage(addr: InetSocketAddress, port: Int, message: Any)
 }
 
-interface WireClientChannelReader : ChannelReader,WireChannelReader { }
+interface WireClientChannelReader : ChannelReader, WireChannelReader
 
-interface WireServerChannelReader : ServerChannelReader, WireChannelReader { }
+interface WireServerChannelReader : ServerChannelReader, WireChannelReader

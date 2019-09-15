@@ -14,7 +14,7 @@ class WireClient(private val serverAddress: InetSocketAddress, config: ClientBoo
 
   private val logger = LoggerFactory.getLogger(WireClient::class.java)
   private val transceiver = config.transceiver as WireTransceiver
-  private val receiveListeners:  ArrayList<Receiver> =  ArrayList()
+  private val receiveListeners: ArrayList<Receiver> = ArrayList()
 
   override fun sendMessage(message: KonemMessage) {
     if (!isActive()) {

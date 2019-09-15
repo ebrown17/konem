@@ -88,8 +88,8 @@ detekt {
     input = files("src/main/kotlin")
     parallel = true
     ignoreFailures = true
-    config = files("config/detekt/yaml/pinpak-detekt-config.yml")
-    filters = "**/*.Main.kt,**/protobuf/*.KonemMessage.kt"
+    config = files("config/detekt/yaml/detekt-config.yml")
+    filters = "**/*.Main.kt,**/protobuf/*.KonemMessage.kt,**/*.WebSocketFrameHandler.kt"
 
     reports {
         html {

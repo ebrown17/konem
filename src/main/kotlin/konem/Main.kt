@@ -152,7 +152,7 @@ fun main() {
   server.addChannel(8085)
   server.startServer()
 
-  server.registerChannelReadListener(WireMessageReceiver {  inetSocketAddress, konemMessage ->
+  server.registerChannelReadListener(WireMessageReceiver { inetSocketAddress, konemMessage ->
     logger.info("xxxx KoneMessageReceiver: {} ", konemMessage.toString())
   })
 

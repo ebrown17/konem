@@ -12,12 +12,9 @@ interface ChannelReader {
    * @param receiver receiver to handle read data
    */
   fun registerChannelReadListener(receiver: Receiver)
-
-
 }
 
-
-interface ServerChannelReader: ChannelReader{
+interface ServerChannelReader : ChannelReader {
   /**
    *
    * Registers a Receiver on specific port

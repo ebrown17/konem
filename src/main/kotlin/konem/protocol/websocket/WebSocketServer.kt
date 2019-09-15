@@ -111,7 +111,6 @@ class WebSocketServer : Server(), ServerTransmitter<KonemMessage>, WebSocketServ
     TODO("not implemented")
   }
 
-
   private fun isPathConfiguredOnPort(port: Int, path: String): Boolean {
     val configuredPaths = websocketMap[port]
     return configuredPaths?.contains(path) ?: false

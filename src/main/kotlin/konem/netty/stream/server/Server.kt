@@ -124,7 +124,6 @@ abstract class Server : ChannelReader, HandlerListener {
         logger.error("startChannel failed to bind to port {} ", port)
       }
     }
-
   }
 
   private fun closeChannel(port: Int) {
