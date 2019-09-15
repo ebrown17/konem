@@ -759,7 +759,7 @@ class WebSocketCommunicationSpec extends Specification {
 
         when:
         TestUtil.ensureDisconnected(clientList)
-        Thread.sleep(sleepTime )
+        Thread.sleep(sleepTime)
         then:
         println "ConnectionStatusListener saw connections: $connections  == ${clientList.size()} clients "
         assert connections == clientList.size()
@@ -775,6 +775,179 @@ class WebSocketCommunicationSpec extends Specification {
         [[port: 7060, paths: ["/test0"], clients: 50],
          [port: 7081, paths: ["/test2", "/test3"], clients: 50],
          [port: 7082, paths: ["/test5", "/test4", "/test6"], clients: 75]] | 2000      | 5000
+    }
+
+    def "Server receiver gets all messages when registered on port"() {
+        given:
+        def receiverSList = []
+        configurations.each { config ->
+            config.readers.each {
+                def serverReceiver
+                serverReceiver = new GroovyKonemMessageReceiver({ addr, msg ->
+                    serverReceiver.messageCount++
+                })
+                server.registerChannelReadListener(it, serverReceiver)
+                receiverSList << serverReceiver
+            }
+        }
+        server.startServer()
+        TestUtil.waitForServerActive(server)
+
+        def clientList = []
+        def totalMessages = 0
+        configurations.each { config ->
+            config.readers.each { readPort ->
+
+                configurations.each { test ->
+
+                    if (test.port == readPort) {
+                        totalMessages += (test.clients * (messages) * test.paths.size)
+                    }
+                }
+            }
+
+
+            config.paths.each { path ->
+                1.upto(config.clients) {
+                    def client = factory.createClient("localhost", config.port, path)
+                    clientList << client
+                    client.connect()
+                }
+            }
+        }
+        TestUtil.ensureClientsActive(clientList)
+        when:
+        def msg = new KonemMessage(new Message.Data("send"))
+        clientList.each { WebSocketClient client ->
+            1.upto(messages) {
+                client.sendMessage(msg)
+            }
+        }
+
+
+        TestUtil.waitForAllMessages(receiverSList, totalMessages, receiveTime)
+
+        def serverRecMsgCount = 0
+        receiverSList.each { receiver ->
+            receiver.each {
+                serverRecMsgCount += it.messageCount
+            }
+        }
+
+
+        then:
+        println "$configurations messages: $messages"
+        println "$serverRecMsgCount == $totalMessages"
+        assert serverRecMsgCount == totalMessages
+        println "--------------------------------"
+
+        where:
+        configurations                                                                     | messages | sleepTime | receiveTime
+        [[port: 7060, paths: ["/test0"], clients: 1, readers: [7060]]]                     | 1_000    | 1000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 1, readers: [7060]],
+         [port: 7081, paths: ["/test2"], clients: 1, readers: [7081]]]                     | 5_001    | 1000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 5, readers: [7060]],
+         [port: 7081, paths: ["/test2"], clients: 1, readers: []]]                         | 1_001    | 1000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 5, readers: []],
+         [port: 7081, paths: ["/test2"], clients: 5, readers: []],
+         [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5, readers: [7082]]] | 1_000    | 1000      | 5000
+        [[port: 7060, paths: ["/test0", "/test1"], clients: 5, readers: [7060]],
+         [port: 7081, paths: ["/test2", "/test3"], clients: 5, readers: [7081]],
+         [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5, readers: [7060]],
+         [port: 7083, paths: ["/test7", "/test8", "/test9"], clients: 5, readers: []]]     | 1_000    | 1000      | 5000
+    }
+
+
+    def "Server receiver gets all messages when registered on port and path"() {
+        given:
+        def receiverSList = []
+        configurations.each { config ->
+            config.readers.each { reader ->
+                def serverReceiver
+                serverReceiver = new GroovyKonemMessageReceiver({ addr, msg ->
+                    serverReceiver.messageCount++
+                })
+                println reader
+                reader.paths.each { path ->
+                    server.registerChannelReadListener(reader.port, serverReceiver, path)
+                }
+
+                receiverSList << serverReceiver
+            }
+        }
+        server.startServer()
+        TestUtil.waitForServerActive(server)
+
+        def clientList = []
+        def totalMessages = 0
+        configurations.each { config ->
+            config.readers.each { reader ->
+                configurations.each { test ->
+                    if (test.port == reader.port) {
+                        reader.paths.each {
+                            if (test.paths.contains(it)) {
+                                totalMessages += (config.clients * (messages))
+                            }
+                        }
+                    }
+                }
+            }
+
+
+            config.paths.each { path ->
+                1.upto(config.clients) {
+                    def client = factory.createClient("localhost", config.port, path)
+                    clientList << client
+                    client.connect()
+                }
+            }
+        }
+        TestUtil.ensureClientsActive(clientList)
+        when:
+        def msg = new KonemMessage(new Message.Data("send"))
+        clientList.each { WebSocketClient client ->
+            1.upto(messages) {
+                client.sendMessage(msg)
+            }
+        }
+
+
+        TestUtil.waitForAllMessages(receiverSList, totalMessages, receiveTime)
+
+        def serverRecMsgCount = 0
+        receiverSList.each { receiver ->
+            receiver.each {
+                serverRecMsgCount += it.messageCount
+            }
+        }
+
+
+        then:
+        println "$configurations messages: $messages"
+        println "$serverRecMsgCount == $totalMessages"
+        assert serverRecMsgCount == totalMessages
+        println "--------------------------------"
+
+        where:
+        configurations                                                                                                                    | messages | sleepTime | receiveTime
+        [[port: 7060, paths: ["/test0"], clients: 1, readers: [[port: 7060, paths: ["/test0"]]]]]                                         | 11       | 1000      | 5000
+        [[port: 7060, paths: ["/test0", "/test1"], clients: 1, readers: [[port: 7060, paths: ["/test0"]]]]]                               | 101      | 1000      | 5000
+        [[port: 7060, paths: ["/test0", "/test1"], clients: 1, readers: [[port: 7060, paths: ["/test0", "/test1"]]]]]                     | 299      | 1000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 5, readers: [[port: 7060, paths: ["/test0"]]]]]                                         | 1_000    | 1000      | 5000
+        [[port: 7060, paths: ["/test0", "/test1"], clients: 5, readers: [[port: 7060, paths: ["/test0"]]]]]                               | 1_000    | 1000      | 5000
+        [[port: 7060, paths: ["/test0", "/test1"], clients: 5, readers: [[port: 7060, paths: ["/test0", "/test1"]]]]]                     | 1_000    | 1000      | 5000
+
+        [[port: 7060, paths: ["/test0"], clients: 1, readers: [[port: 7060, paths: ["/test0"]]]],
+         [port: 7081, paths: ["/test2"], clients: 1, readers: [[port: 7081, paths: ["/test2"]]]]]                                         | 1_000    | 1000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 5, readers: [[port: 7060, paths: ["/test0"]]]],
+         [port: 7081, paths: ["/test2"], clients: 3, readers: [[port: 7081, paths: ["/test2"]]]],
+         [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5, readers: [[port: 7082, paths: ["/test4", "/test5", "/test6"]]]],
+         [port: 7083, paths: ["/test7", "/test8", "/test9"], clients: 9, readers: [[port: 7083, paths: ["/test7", "/test8", "/test9"]]]]] | 11       | 1000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 5, readers: [[port: 7060, paths: []]]],
+         [port: 7081, paths: ["/test2"], clients: 7, readers: [[port: 7081, paths: ["/test0"]]]],
+         [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 11, readers: [[port: 7082, paths: ["/test4", "/test5", "/test6"]]]],
+         [port: 7083, paths: ["/test7", "/test8", "/test9"], clients: 5, readers: [[port: 7083, paths: ["/test7", "/test9"]]]]]           | 11       | 1000      | 5000
+
     }
 
 }
