@@ -6,8 +6,8 @@ import konem.netty.stream.ServerChannelReader
 import java.net.InetSocketAddress
 
 interface WebSocketChannelReader {
-  fun handleChannelRead(addr: InetSocketAddress, webSocketPath: String, message: Any)
-  suspend fun readMessage(addr: InetSocketAddress, webSocketPath: String, message: Any)
+  fun handleChannelRead(addr: InetSocketAddress, channelPort: Int, webSocketPath: String, message: Any)
+  suspend fun readMessage(addr: InetSocketAddress, channelPort: Int, webSocketPath: String, message: Any)
 }
 
 interface WebSocketClientChannelReader : ChannelReader, WebSocketChannelReader {

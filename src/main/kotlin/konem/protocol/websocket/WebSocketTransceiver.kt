@@ -16,7 +16,7 @@ class WebSocketTransceiver(channelPort: Int) : Transceiver<WebSocketFrame>(chann
     logger.trace("handleMessage from {} with {}", addr, message)
     val reader = channelReaders[addr] as WebSocketChannelReader
     logger.trace("handleMessage channelReaders: {} reader got: {}", channelReaders.size, reader)
-    reader.handleChannelRead(addr, webSocketPath, message)
+    reader.handleChannelRead(addr, channelPort, webSocketPath, message)
   }
 
   /**

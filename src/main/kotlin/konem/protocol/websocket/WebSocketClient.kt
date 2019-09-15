@@ -30,13 +30,13 @@ class WebSocketClient(
     transceiver.transmit(serverAddress, message)
   }
 
-  override fun handleChannelRead(addr: InetSocketAddress, webSocketPath: String, message: Any) {
+  override fun handleChannelRead(addr: InetSocketAddress, channelPort: Int, webSocketPath: String, message: Any) {
     clientScope.launch {
-      readMessage(addr, webSocketPath, message)
+      readMessage(addr, channelPort, webSocketPath, message)
     }
   }
 
-  override suspend fun readMessage(addr: InetSocketAddress, webSocketPath: String, message: Any) {
+  override suspend fun readMessage(addr: InetSocketAddress, channelPort: Int, webSocketPath: String, message: Any) {
     logger.trace("readMessage got message: {}", message)
     for (listener in readListeners) {
       listener.handle(addr, message)
