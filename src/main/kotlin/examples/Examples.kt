@@ -1,4 +1,4 @@
-package konem
+package examples
 
 import konem.data.json.KonemMessage
 import konem.data.json.KonemMessageSerializer
@@ -23,7 +23,7 @@ private val cName = CoroutineName("onConnection")
 private val scopey = CoroutineScope(cName)
 
 @Suppress("MagicNumber")
-fun main2() {
+fun websocketServerExamples() {
 
   val server = WebSocketServer()
   server.addChannel(8080, "/tester")
@@ -80,7 +80,7 @@ fun main2() {
 }
 
 @Suppress("MagicNumber")
-fun main1() {
+fun konemJsonMessageSerializer() {
   logger.info("hello from main")
   val serializer = KonemMessageSerializer()
   var count = 0
@@ -147,12 +147,12 @@ fun main1() {
   logger.info("{}", KonemMessage(Message.Unknown()))
 }
 
-fun main() {
+fun wireServerExamples() {
   val server = konem.protocol.wire.WireServer()
   server.addChannel(8085)
   server.startServer()
 
-  server.registerChannelReadListener(WireMessageReceiver { inetSocketAddress, konemMessage ->
+  server.registerChannelReadListener(WireMessageReceiver { _, konemMessage ->
     logger.info("xxxx KoneMessageReceiver: {} ", konemMessage.toString())
   })
 

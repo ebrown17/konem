@@ -16,7 +16,6 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version "$kotlinVersion"
     id "io.gitlab.arturbosch.detekt" version "$detektVersion"
     id 'groovy'
-    id 'application'
     id 'idea'
 }
 
@@ -89,7 +88,7 @@ detekt {
     parallel = true
     ignoreFailures = true
     config = files("config/detekt/yaml/detekt-config.yml")
-    filters = "**/*.Main.kt,**/protobuf/*.KonemMessage.kt,**/*.WebSocketFrameHandler.kt"
+    filters = "**/*.Examples.kt,**/protobuf/*.KonemMessage.kt,**/*.WebSocketFrameHandler.kt"
 
     reports {
         html {
@@ -115,5 +114,3 @@ wire {
         out "${projectDir}/src/main/kotlin"
     }
 }
-
-mainClassName = "konem.MainKt"

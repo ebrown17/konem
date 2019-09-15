@@ -416,7 +416,7 @@ potential-bugs:
 
 style:
   active: true
-  excludes: "**/data/protobuf/**,**/Main.kt"
+  excludes: "**/data/protobuf/**,**/Examples.kt"
   CollapsibleIfStatements:
     active: false
   DataClassContainsFunctions:
