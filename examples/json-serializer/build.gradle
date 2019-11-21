@@ -1,0 +1,7 @@
+dependencies{
+    implementation libs.kotlin.stdlib.jdk8
+
+    implementation project(':konem')
+
+    api libs.wire
+}

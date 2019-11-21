@@ -1,0 +1,7 @@
+dependencies{
+    implementation libs.kotlin.stdlib.jdk8
+    implementation libs.slf4j
+    implementation libs.logback
+    implementation project(':konem')
+
+}
