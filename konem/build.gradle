@@ -1,0 +1,83 @@
+apply plugin: 'com.squareup.wire'
+
+description = "Kotlin Netty Medium"
+
+
+configurations {
+    ktlint
+}
+
+
+dependencies {
+    implementation libs.groovy
+    implementation libs.slf4j
+    implementation libs.logback
+
+    implementation libs.kotlin.stdlib.jdk8
+    implementation libs.kotlin.coroutines.core
+    implementation libs.kotlin.kotlinSerialization
+
+
+    implementation libs.netty
+    implementation libs.wire
+
+    testImplementation libs.spock
+    testImplementation libs.junit
+
+    ktlint libs.ktlint
+}
+
+compileTestKotlin {
+    kotlinOptions.jvmTarget = jvmTargetVersion
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+}
+
+task ktlint(type: JavaExec, group: "verification") {
+    description = "Check Kotlin code style."
+    classpath = configurations.ktlint
+    main = "com.pinterest.ktlint.Main"
+    args "src/**/*.kt,!src/**/*KoneMessage.kt"
+}
+
+task ktlintFormat(type: JavaExec, group: "formatting") {
+    description = "Fix Kotlin code style deviations."
+    classpath += files("config/ktlint")
+    classpath = configurations.ktlint
+    main = "com.pinterest.ktlint.Main"
+    args "-F", "src/**/*.kt"
+}
+
+detekt {
+    input = files("src/main/kotlin")
+    parallel = true
+    ignoreFailures = true
+    config = files("config/detekt/yaml/detekt-config.yml")
+    filters = "**/*.Examples.kt,**/protobuf/*.KonemMessage.kt,**/*.WebSocketFrameHandler.kt"
+
+    reports {
+        html {
+            enabled = true
+
+        }
+        xml {enabled = false}
+        txt {enabled = false}
+    }
+}
+
+test {
+    jvmArgs = ["-Dio.netty.leakDetection.level=PARANOID"]
+    systemProperties 'SKIP.LONG': '1'
+}
+
+wire {
+
+    sourcePath {
+        srcDir "${projectDir}/config/proto"
+    }
+
+    kotlin {
+        out "${projectDir}/src/main/kotlin"
+    }
+}

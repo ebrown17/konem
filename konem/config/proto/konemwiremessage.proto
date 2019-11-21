@@ -1,0 +1,40 @@
+syntax ="proto2";
+
+package konem.data.protobuf;
+
+option java_package="konem.data.protobuf";
+
+enum MessageType {
+    UNKNOWN = 0;
+    STATUS = 1;
+    HEARTBEAT = 2;
+    DATA = 3;
+}
+
+message Unknown {
+   required string unknown = 1;
+}
+
+message Status {
+    required string shortName =1;
+    required int32 errors =2;
+    required int32 received = 3;
+    required int32 sent =4;
+    required string description = 5;
+}
+
+message HeartBeat {
+    required string time = 1;
+}
+
+message Data {
+    required string data = 1;
+}
+
+message KonemMessage {
+    required MessageType messageType = 1;
+    optional Unknown unknown = 2;
+    optional Status status = 3;
+    optional HeartBeat heartBeat = 4;
+    optional Data data = 5;
+}
