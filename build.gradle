@@ -30,6 +30,13 @@ allprojects {
         jcenter()
     }
 
+    dependencies{
+        implementation libs.kotlin.stdlib.jdk8
+        implementation libs.groovy
+        implementation libs.slf4j
+        implementation libs.logback
+    }
+
     compileKotlin {
         kotlinOptions.jvmTarget = jvmTargetVersion
         sourceCompatibility = JavaVersion.VERSION_1_8

@@ -9,14 +9,9 @@ configurations {
 
 
 dependencies {
-    implementation libs.groovy
-    implementation libs.slf4j
-    implementation libs.logback
 
-    implementation libs.kotlin.stdlib.jdk8
     implementation libs.kotlin.coroutines.core
     implementation libs.kotlin.kotlinSerialization
-
 
     implementation libs.netty
     implementation libs.wire
@@ -71,6 +66,14 @@ test {
     systemProperties 'SKIP.LONG': '1'
 }
 
+task buildProtos{
+    doLast{
+        println("Building protos")
+    }
+}
+
+
+
 wire {
 
     sourcePath {
@@ -81,3 +84,4 @@ wire {
         out "${projectDir}/src/main/kotlin"
     }
 }
+
