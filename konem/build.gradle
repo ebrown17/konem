@@ -7,7 +7,6 @@ configurations {
     ktlint
 }
 
-
 dependencies {
 
     implementation libs.kotlin.coroutines.core

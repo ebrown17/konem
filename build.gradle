@@ -31,14 +31,6 @@ allprojects {
     }
     
     dependencies{
-        implementation libs.groovy
-        implementation libs.slf4j
-        implementation libs.logback
-
-        implementation libs.kotlin.stdlib.jdk8
-    }
-
-    dependencies{
         implementation libs.kotlin.stdlib.jdk8
         implementation libs.groovy
         implementation libs.slf4j
