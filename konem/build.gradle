@@ -66,14 +66,6 @@ test {
     systemProperties 'SKIP.LONG': '1'
 }
 
-task buildProtos{
-    doLast{
-        println("Building protos")
-    }
-}
-
-
-
 wire {
 
     sourcePath {
