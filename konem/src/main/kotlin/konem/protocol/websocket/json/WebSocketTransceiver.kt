@@ -13,9 +13,9 @@ class WebSocketTransceiver(channelPort: Int) : Transceiver<WebSocketFrame>(chann
   private val serializer = KonemMessageSerializer()
 
   fun handleMessage(addr: InetSocketAddress, webSocketPath: String, message: String) {
-    logger.trace("handleMessage from {} with {}", addr, message)
+    logger.trace("from {} with {}", addr, message)
     val reader = channelReaders[addr] as WebSocketChannelReader
-    logger.trace("handleMessage channelReaders: {} reader got: {}", channelReaders.size, reader)
+    logger.trace("channelReaders: {} reader got: {}", channelReaders.size, reader)
     reader.handleChannelRead(addr, channelPort, webSocketPath, message)
   }
 
@@ -26,7 +26,7 @@ class WebSocketTransceiver(channelPort: Int) : Transceiver<WebSocketFrame>(chann
    */
   fun transmit(addr: InetSocketAddress, message: KonemMessage) {
     synchronized(activeLock) {
-      logger.debug("sendMessage to addr: {} with {}", addr, message)
+      logger.debug("to addr: {} with {}", addr, message)
       val handler = activeHandlers[addr]
       val kMessage = serializer.toJson(message)
       val frame = TextWebSocketFrame(kMessage)

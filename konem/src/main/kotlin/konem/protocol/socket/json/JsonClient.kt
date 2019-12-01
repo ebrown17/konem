@@ -1,6 +1,6 @@
-package konem.protocol.socket.wire
+package konem.protocol.socket.json
 
-import konem.data.protobuf.KonemMessage
+import konem.data.json.KonemMessage
 import konem.netty.stream.Receiver
 import konem.netty.stream.client.Client
 import konem.netty.stream.client.ClientBootstrapConfig
@@ -9,19 +9,19 @@ import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 
-class WireClient(private val serverAddress: InetSocketAddress, config: ClientBootstrapConfig) :
-  Client(serverAddress, config), ClientTransmitter<KonemMessage>, WireClientChannelReader {
+class JsonClient(private val serverAddress: InetSocketAddress, config: ClientBootstrapConfig) :
+  Client(serverAddress, config), ClientTransmitter<KonemMessage>, JsonClientChannelReader {
 
-  private val logger = LoggerFactory.getLogger(WireClient::class.java)
-  private val transceiver = config.transceiver as WireTransceiver
+  private val logger = LoggerFactory.getLogger(JsonClient::class.java)
+  private val transceiver = config.transceiver as JsonTransceiver
   private val receiveListeners: ArrayList<Receiver> = ArrayList()
 
   override fun sendMessage(message: KonemMessage) {
     if (!isActive()) {
-      logger.warn("sendMessage attempted to send data on null or closed channel")
+      logger.warn("attempted to send data on null or closed channel")
       return
     }
-    logger.trace("sendMessage remote: {} message: {}", channel?.remoteAddress(), message)
+    logger.trace("remote: {} message: {}", channel?.remoteAddress(), message)
     transceiver.transmit(serverAddress, message)
   }
 
@@ -36,10 +36,10 @@ class WireClient(private val serverAddress: InetSocketAddress, config: ClientBoo
   }
 
   override suspend fun readMessage(addr: InetSocketAddress, port: Int, message: Any) {
-    logger.trace("readMessage got message: {}", message)
-      for (listener in receiveListeners) {
-        listener.handle(addr, message)
-      }
+    logger.trace("got message: {}", message)
+    for (listener in receiveListeners) {
+      listener.handle(addr, message)
+    }
   }
 
   override fun toString(): String {
