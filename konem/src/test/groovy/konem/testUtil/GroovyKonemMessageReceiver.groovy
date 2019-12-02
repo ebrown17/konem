@@ -4,7 +4,7 @@ import konem.data.json.KonemMessage
 import konem.protocol.websocket.json.KonemMessageReceiver
 import kotlin.Unit
 import kotlin.jvm.functions.Function2
-import org.jetbrains.annotations.NotNull
+import com.sun.istack.internal.NotNull
 
 class GroovyKonemMessageReceiver extends KonemMessageReceiver {
     int messageCount = 0

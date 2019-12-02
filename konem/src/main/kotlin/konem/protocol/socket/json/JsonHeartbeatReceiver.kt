@@ -1,25 +1,25 @@
-package konem.protocol.socket.wire
+package konem.protocol.socket.json
 
 import io.netty.channel.ChannelHandlerContext
-import konem.data.protobuf.KonemMessage
-import konem.data.protobuf.MessageType
+import konem.data.json.KonemMessage
+import konem.data.json.Message
 import konem.netty.stream.HeartbeatReceiverHandler
 import org.slf4j.LoggerFactory
 
-class WireHeartbeatReceiver(expectedInterval: Int, missLimit: Int) :
+class JsonHeartbeatReceiver(expectedInterval: Int, missLimit: Int) :
   HeartbeatReceiverHandler<KonemMessage>(expectedInterval, missLimit) {
 
-  private val logger = LoggerFactory.getLogger(WireHeartbeatReceiver::class.java)
+  private val logger = LoggerFactory.getLogger(JsonHeartbeatReceiver::class.java)
 
   override fun channelRead(ctx: ChannelHandlerContext, message: Any) {
 
     when (message) {
       is KonemMessage -> {
-        when (message.messageType) {
-          MessageType.HEARTBEAT -> {
+        when (message.konemMessage) {
+          is Message.Data -> {
             logger.trace(
               "received {} from {}",
-              message.messageType,
+              Message.Data,
               ctx.channel().remoteAddress()
             )
             resetMissCounter()

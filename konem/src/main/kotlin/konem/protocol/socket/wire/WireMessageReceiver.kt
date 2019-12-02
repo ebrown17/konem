@@ -15,7 +15,7 @@ open class WireMessageReceiver(private val receive: (InetSocketAddress, KonemMes
         when (message) {
           is KonemMessage -> receive(addr, message)
           else -> {
-            logger.error("read got unexpected message type: {} ", message.javaClass)
+            logger.error("got unexpected message type: {} ", message.javaClass)
           }
         }
     }

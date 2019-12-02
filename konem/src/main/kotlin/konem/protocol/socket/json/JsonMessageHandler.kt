@@ -9,20 +9,13 @@ import org.slf4j.LoggerFactory
 class JsonMessageHandler(
   handlerId: Long,
   val transceiver: JsonTransceiver
-) : Handler<KonemMessage>(handlerId, transceiver) {
+) : Handler<String>(handlerId, transceiver) {
 
   private val logger = LoggerFactory.getLogger(JsonMessageHandler::class.java)
 
-  override fun channelRead0(ctx: ChannelHandlerContext, message: KonemMessage) {
+  override fun channelRead0(ctx: ChannelHandlerContext, message: String) {
     logger.info("{} sent: {}", remoteAddress, message.toString())
+    transceiver.handleMessage(remoteAddress, message)
 
-    when (message.konemMessage) {
-      is Message.Data -> {
-        transceiver.handleMessage(remoteAddress, message)
-      }
-      else -> {
-        ctx.fireChannelRead(message)
-      }
-    }
   }
 }

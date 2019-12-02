@@ -2,6 +2,7 @@ package konem.testUtil
 
 import konem.data.json.KonemMessage
 import konem.data.json.KonemMessageSerializer
+import konem.data.json.Message
 import konem.data.protobuf.Data
 import konem.data.protobuf.MessageType
 import konem.netty.stream.Receiver
@@ -87,7 +88,8 @@ class TestUtil {
 
 
     static KonemMessage createKonemMessage(String json) {
-        return serializer.toKonemMessage(json)
+        return new KonemMessage( new Message.Data(json))
+
     }
 
     static final def msgType = MessageType.DATA

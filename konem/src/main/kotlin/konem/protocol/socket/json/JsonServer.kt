@@ -1,7 +1,7 @@
-package konem.protocol.socket.wire
+package konem.protocol.socket.json
 
 import io.netty.bootstrap.ServerBootstrap
-import konem.data.protobuf.KonemMessage
+import konem.data.json.KonemMessage
 import konem.netty.stream.Receiver
 import konem.netty.stream.server.Server
 import konem.netty.stream.server.ServerTransmitter
@@ -10,20 +10,20 @@ import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 import java.util.concurrent.ConcurrentHashMap
 
-class WireServer : Server(), ServerTransmitter<KonemMessage>, WireServerChannelReader {
+class JsonServer : Server(), ServerTransmitter<KonemMessage>, JsonServerChannelReader {
 
-  private val logger = LoggerFactory.getLogger(WireServer::class.java)
+  private val logger = LoggerFactory.getLogger(JsonServer::class.java)
 
   private val receiveListeners: ConcurrentHashMap<Int, ArrayList<Receiver>> =
     ConcurrentHashMap()
 
   override fun addChannel(port: Int, vararg args: String): Boolean {
     if (isPortConfigured(port)) {
-      logger.warn("addChannel port {} already in use; not creating channel", port)
+      logger.warn("port {} already in use; not creating channel", port)
       return false
     }
 
-    val transceiver = WireTransceiver(port)
+    val transceiver = JsonTransceiver(port)
 
     return if (addChannel(port, transceiver)) {
       receiveListeners[port] = ArrayList()
@@ -35,7 +35,7 @@ class WireServer : Server(), ServerTransmitter<KonemMessage>, WireServerChannelR
 
   override fun createServerBootstrap(port: Int): ServerBootstrap {
     val transceiver = getTransceiverMap()[port]
-    val channel = WireServerChannel(transceiver as WireTransceiver)
+    val channel = JsonServerChannel(transceiver as JsonTransceiver)
     return createServerBootstrap(channel)
   }
 
@@ -59,14 +59,14 @@ class WireServer : Server(), ServerTransmitter<KonemMessage>, WireServerChannelR
   }
 
   override fun broadcastOnChannel(port: Int, message: KonemMessage, vararg args: String) {
-    val transceiver = getTransceiverMap()[port] as WireTransceiver
+    val transceiver = getTransceiverMap()[port] as JsonTransceiver
     transceiver.broadcastMessage(message)
   }
 
   override fun broadcastOnAllChannels(message: KonemMessage, vararg args: String) {
     val transceiverMap = getTransceiverMap()
     for (transceiver in transceiverMap.values) {
-      transceiver as WireTransceiver
+      transceiver as JsonTransceiver
       transceiver.broadcastMessage(message)
     }
   }
@@ -74,7 +74,7 @@ class WireServer : Server(), ServerTransmitter<KonemMessage>, WireServerChannelR
   override fun sendMessage(addr: InetSocketAddress, message: KonemMessage) {
     val channelPort = getRemoteHostToChannelMap()[addr]
     if (channelPort != null) {
-      val transceiver = getTransceiverMap()[channelPort] as WireTransceiver
+      val transceiver = getTransceiverMap()[channelPort] as JsonTransceiver
       transceiver.transmit(addr, message)
     }
   }
