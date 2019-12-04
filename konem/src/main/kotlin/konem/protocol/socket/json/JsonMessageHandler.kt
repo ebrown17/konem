@@ -14,7 +14,7 @@ class JsonMessageHandler(
   private val logger = LoggerFactory.getLogger(JsonMessageHandler::class.java)
 
   override fun channelRead0(ctx: ChannelHandlerContext, message: String) {
-    logger.info("{} sent: {}", remoteAddress, message.toString())
+    logger.info("{} sent: {}", remoteAddress, message)
     transceiver.handleMessage(remoteAddress, message)
 
   }

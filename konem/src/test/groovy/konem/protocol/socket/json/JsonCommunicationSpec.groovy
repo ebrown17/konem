@@ -72,7 +72,7 @@ class JsonCommunicationSpec extends Specification {
         where:
         configurations              | messages | receiveTime
         [[port: 6060, clients: 1]]  | 1        | 500
-/*        [[port: 6060, clients: 10]] | 5        | 500
+        [[port: 6060, clients: 10]] | 5        | 500
         [[port: 6060, clients: 1],
          [port: 6081, clients: 1]]  | 5        | 500
         [[port: 6060, clients: 3],
@@ -84,7 +84,7 @@ class JsonCommunicationSpec extends Specification {
         [[port: 6060, clients: 3],
          [port: 6081, clients: 14],
          [port: 6082, clients: 21],
-         [port: 6083, clients: 51]] | 500      | 2000*/
+         [port: 6083, clients: 51]] | 500      | 2000
     }
 
     def "Server readers can register after server starts and then see messages"() {
@@ -627,7 +627,7 @@ class JsonCommunicationSpec extends Specification {
             clientReceiverList.each { rdr ->
                 rdr.messageList.each { KonemMessage message ->
                     //println "${message.getData().data} == ${rdr.clientId}"
-                    assert message.getData().data == rdr.clientId
+                    assert message.getKonemMessage().data == rdr.clientId
                 }
             }
         }
