@@ -11,7 +11,7 @@ open class ExceptionHandler : ChannelDuplexHandler() {
 
   @Throws(Exception::class)
   override fun channelRead(ctx: ChannelHandlerContext, message: Any) {
-    logger.warn("channelRead: end of pipeline reached without handling: {}", message.toString())
+    logger.warn("end of pipeline reached without handling: {}", message.toString())
   }
 
   override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {

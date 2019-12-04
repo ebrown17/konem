@@ -42,15 +42,15 @@ abstract class Client(private val serverAddress: InetSocketAddress, config: Clie
   @Throws(InterruptedException::class)
   fun connect() {
     if (isActive()) {
-      logger.warn("connect called while connection already active")
+      logger.warn("called while connection already active")
       return
     }
     if (retryListener != null && retryListener!!.isAttemptingConnection) {
-      logger.warn("connect called while connection attempt already in progress")
+      logger.warn("called while connection attempt already in progress")
       return
     }
     if (retryListener == null) {
-      logger.info("connect creating new connection listener")
+      logger.info("creating new connection listener")
       retryListener = ClientConnectionListener(this)
     }
 
@@ -60,7 +60,7 @@ abstract class Client(private val serverAddress: InetSocketAddress, config: Clie
   }
 
   internal fun connectionEstablished(future: ChannelFuture) {
-    logger.info("connectionEstablished Client connected to {} ", serverAddress.hostString)
+    logger.info("Client connected to {} ", serverAddress.hostString)
     retryCount = 0
     retryTime = 0
     isDisconnectInitiated = false
@@ -73,7 +73,7 @@ abstract class Client(private val serverAddress: InetSocketAddress, config: Clie
 
   @Throws(IOException::class)
   fun disconnect() {
-    logger.info("disconnect disconnect explicitly called")
+    logger.info("disconnect explicitly called")
     isDisconnectInitiated = true
     if (channel == null || !isActive()) {
       logger.info("disconnect called when connection not active or channel null")
@@ -120,7 +120,7 @@ abstract class Client(private val serverAddress: InetSocketAddress, config: Clie
 
     if (retryCount >= MAX_RETRY_UNTIL_INCR) {
       logger.debug(
-        "calculateRetryTime {} >= {} setting {} as retry interval: total time retrying {} seconds",
+        "{} >= {} setting {} as retry interval: total time retrying {} seconds",
         retryCount,
         MAX_RETRY_UNTIL_INCR,
         MAX_RETRY_TIME,
@@ -129,7 +129,7 @@ abstract class Client(private val serverAddress: InetSocketAddress, config: Clie
       return MAX_RETRY_TIME
     } else {
       logger.debug(
-        "calculateRetryTime {} < {} setting {} seconds as retry interval: total time retrying {} seconds",
+        "{} < {} setting {} seconds as retry interval: total time retrying {} seconds",
         retryCount,
         MAX_RETRY_UNTIL_INCR,
         RETRY_TIME,

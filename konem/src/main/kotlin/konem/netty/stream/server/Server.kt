@@ -103,7 +103,7 @@ abstract class Server : ChannelReader, HandlerListener {
       val channelFuture = bootstrap.bind(socketAddress)
       channelFuture.await()
       if (channelFuture.isSuccess) {
-        logger.debug("startChannel now listening for connections on port {}", port)
+        logger.debug("now listening for connections on port {}", port)
         val channel = channelFuture.channel()
         val closeListener = ChannelFutureListener { future: ChannelFuture ->
           logger.info("Channel {} closed unexpectedly, closed with {}", port, future.cause())
@@ -121,7 +121,7 @@ abstract class Server : ChannelReader, HandlerListener {
         channelMap[port] = channel
         channelListenerMap[port] = listenerList
       } else {
-        logger.error("startChannel failed to bind to port {} ", port)
+        logger.error("failed to bind to port {} ", port)
       }
     }
   }
@@ -130,7 +130,7 @@ abstract class Server : ChannelReader, HandlerListener {
     val channel = channelMap[port]
 
     if (channel == null || !isActive(channel)) {
-      logger.info("closeChannel called on already closed channel {}", port)
+      logger.info("called on already closed channel {}", port)
       return
     }
 
@@ -138,13 +138,13 @@ abstract class Server : ChannelReader, HandlerListener {
 
     channel.close().addListener { future ->
       if (!future.isSuccess) {
-        logger.warn("closeChannel channel {} error {}", port, future.cause())
+        logger.warn("channel {} error {}", port, future.cause())
       }
       channelMap.remove(port)
       channelListenerMap.remove(port)
       portAddressMap.remove(port)
 
-      logger.info("closeChannel channel {} now closed", port)
+      logger.info("channel {} now closed", port)
     }
   }
 
@@ -156,7 +156,7 @@ abstract class Server : ChannelReader, HandlerListener {
   }
 
   fun shutdownServer() {
-    logger.info("shutdownServer explicitly called Shutting down server ")
+    logger.info("explicitly called Shutting down server ")
 
     for (port in channelMap.keys) {
       closeChannel(port)
@@ -164,7 +164,7 @@ abstract class Server : ChannelReader, HandlerListener {
 
     bossGroup.shutdownGracefully()
     workerGroup.shutdownGracefully()
-    logger.info("shutdownServer server fully shutdown")
+    logger.info("server fully shutdown")
   }
 
   private fun handleConnect(remoteConnection: InetSocketAddress) {

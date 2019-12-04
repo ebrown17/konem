@@ -17,16 +17,16 @@ abstract class Handler<I>(val handlerId: Long, val abstractTransceiver: Transcei
 
   fun sendMessage(message: I) {
     if (isActive()) {
-      logger.trace("sendMessage {} to {} written to wire", message.toString(), remoteAddress)
+      logger.trace("{} to {} written to wire", message.toString(), remoteAddress)
       context.writeAndFlush(message)
     } else {
-      logger.warn("sendMessage called when channel not active or writable")
+      logger.warn("called when channel not active or writable")
     }
   }
 
   @Throws(Exception::class)
   override fun channelActive(ctx: ChannelHandlerContext) {
-    logger.info("channelActive remote peer: {} connected", ctx.channel().remoteAddress())
+    logger.info("remote peer: {} connected", ctx.channel().remoteAddress())
     context = ctx
     remoteAddress = ctx.channel().remoteAddress() as InetSocketAddress
     abstractTransceiver.handlerActive(remoteAddress, this)
@@ -35,7 +35,7 @@ abstract class Handler<I>(val handlerId: Long, val abstractTransceiver: Transcei
 
   @Throws(Exception::class)
   override fun channelInactive(ctx: ChannelHandlerContext) {
-    logger.info("channelInactive remote peer: {} disconnected", ctx.channel().remoteAddress())
+    logger.info("remote peer: {} disconnected", ctx.channel().remoteAddress())
     ctx.fireChannelInactive()
     abstractTransceiver.handlerInActive(remoteAddress)
   }

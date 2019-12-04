@@ -16,7 +16,7 @@ abstract class HeartbeatProducerHandler<I>(private val transceiver: Transceiver<
   override fun userEventTriggered(ctx: ChannelHandlerContext, evt: Any) {
     if (evt is IdleStateEvent) {
       if (evt.state() == IdleState.WRITER_IDLE) {
-        logger.trace("userEventTriggered send heartBeat")
+        logger.trace("send heartBeat")
         transceiver.transmit(
           ctx.channel().remoteAddress() as InetSocketAddress,
           generateHeartBeat()

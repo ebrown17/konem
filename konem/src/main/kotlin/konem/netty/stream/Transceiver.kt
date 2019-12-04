@@ -17,7 +17,7 @@ open class Transceiver<I>(protected val channelPort: Int) {
   protected val activeLock = Any()
 
   fun handlerActive(addr: InetSocketAddress, handler: Handler<I>) {
-    logger.info("handler active remote: {}", addr)
+    logger.info("remote: {}", addr)
     synchronized(activeLock) {
       val activeHandler = activeHandlers[addr]
       if (activeHandler == null) {
@@ -28,7 +28,7 @@ open class Transceiver<I>(protected val channelPort: Int) {
   }
 
   fun handlerInActive(addr: InetSocketAddress) {
-    logger.info("registerHandlerInActive handler inactive, remote: {}", addr)
+    logger.info("handler inactive for remote: {}", addr)
     synchronized(activeLock) {
       activeHandlers.remove(addr)
       handlerListeners.forEach { listener -> listener.registerInActiveHandler(channelPort, addr) }
@@ -47,7 +47,7 @@ open class Transceiver<I>(protected val channelPort: Int) {
 
   fun transmit(addr: InetSocketAddress, message: I) {
     synchronized(activeLock) {
-      logger.debug("sendMessage to addr: {} with {}", addr, message)
+      logger.debug("to addr: {} with {}", addr, message)
       val handler = activeHandlers[addr]
       handler?.sendMessage(message)
     }
