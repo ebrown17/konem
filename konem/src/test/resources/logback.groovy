@@ -15,7 +15,7 @@ def logFileDate = timestamp('yyyy-MM-dd_HHmmss')
 def defaultLogPattern = "%d{HH:mm:ss.SSS} %-5level [%thread] %logger{36}.%M - %msg%n"
 
 def name = "konem"
-def mode = "ide"
+def mode = "test"
 context.name = name
 
 if (mode == "ide") {
@@ -57,8 +57,8 @@ if (mode == 'production') {
 } else if (mode == 'test') {
     println "Test logging level set"
     println "Logging in mode: ${mode}"
-    root(DEBUG, ["ASYNC"])
+    root(warn, ["ASYNC"])
 } else {
     println "Logging in mode: ${mode}"
-    root(warn, ["STDOUT"])
+    root(info, ["STDOUT"])
 }

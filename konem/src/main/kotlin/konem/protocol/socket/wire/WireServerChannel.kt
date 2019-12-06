@@ -5,12 +5,14 @@ import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender
 import io.netty.handler.timeout.IdleStateHandler
 import konem.netty.stream.ExceptionHandler
+import konem.netty.stream.SslContextManager
 import konem.netty.stream.server.ServerChannel
 
 class WireServerChannel(private val transceiver: WireTransceiver) : ServerChannel() {
 
   override fun initChannel(channel: SocketChannel) {
     val pipeline = channel.pipeline()
+    pipeline.addLast("serverSslHandler", SslContextManager.getServerContext().newHandler(channel.alloc()));
     pipeline.addLast("frameDecoder", ProtobufVarint32FrameDecoder())
     pipeline.addLast("protobufDecoder", WireDecoder())
     pipeline.addLast("frameEncoder", ProtobufVarint32LengthFieldPrepender())

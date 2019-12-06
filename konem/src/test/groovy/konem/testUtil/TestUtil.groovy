@@ -117,10 +117,11 @@ class TestUtil {
         while (true) {
             for (Receiver reader in readerList) {
                 def count = messageCountMap.get(reader)
+                def curCount = reader.messageCount
                 //  println("got: $count  ")
                 //  println("$received : $expectedNum")
-                if (count != reader.messageCount) {
-                    messageCountMap.put(reader, reader.messageCount)
+                if (count != curCount) {
+                    messageCountMap.put(reader, curCount)
                     noRecentMessage = false
                     changedTime = System.currentTimeMillis()
                     // println"Changed"
@@ -128,7 +129,7 @@ class TestUtil {
                 if (count > 0) {
                     received += count
                 }
-
+                Thread.yield()
                 //println("$received : $expectedNum")
             }
             //println("${received.class} : ${expectedNum.class}")

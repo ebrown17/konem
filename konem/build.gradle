@@ -61,9 +61,10 @@ detekt {
 }
 
 test {
-    jvmArgs = ["-Dio.netty.leakDetection.level=PARANOID"]
+    jvmArgs = ["-Dio.netty.leakDetection.level=PARANOID","-Dkonem.secure.keyStoreLocation=config/keystore/konem.jks","-Dkonem.secure.keyStoreType=JKS","-Dkonem.secure.keyStorePassword=test123"]
     systemProperties 'SKIP.LONG': '1'
 }
+
 
 wire {
 

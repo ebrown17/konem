@@ -638,7 +638,7 @@ class WebSocketCommunicationSpec extends Specification {
          [port: 7081, paths: ["/test2", "/test3"], clients: 50]]           | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 50],
          [port: 7081, paths: ["/test2", "/test3"], clients: 50],
-         [port: 7082, paths: ["/test5", "/test4", "/test6"], clients: 75]] | 1000      | 5000
+         [port: 7082, paths: ["/test5", "/test4", "/test6"], clients: 50]] | 1000      | 7000
 
     }
 

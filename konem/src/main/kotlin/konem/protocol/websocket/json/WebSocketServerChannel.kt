@@ -6,6 +6,7 @@ import io.netty.handler.codec.http.HttpObjectAggregator
 import io.netty.handler.codec.http.HttpServerCodec
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler
 import io.netty.handler.timeout.IdleStateHandler
+import konem.netty.stream.SslContextManager
 
 class WebSocketServerChannel(private val transceiver: WebSocketTransceiver, vararg webSocketPaths: String) :
   ServerChannel() {
@@ -15,6 +16,8 @@ class WebSocketServerChannel(private val transceiver: WebSocketTransceiver, vara
   @Throws(Exception::class)
   override fun initChannel(channel: SocketChannel) {
     val pipeline = channel.pipeline()
+    pipeline.addLast("serverSslHandler", SslContextManager.getServerContext().newHandler(channel.alloc()));
+
     pipeline.addLast("httpServerCodec", HttpServerCodec())
     pipeline.addLast("httpAggregator", HttpObjectAggregator(maxSize))
     pipeline.addLast("compressionHandler", WebSocketServerCompressionHandler())

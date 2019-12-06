@@ -7,12 +7,14 @@ import io.netty.handler.codec.string.StringEncoder
 import io.netty.handler.timeout.IdleStateHandler
 import io.netty.util.CharsetUtil
 import konem.netty.stream.ExceptionHandler
+import konem.netty.stream.SslContextManager
 import konem.netty.stream.server.ServerChannel
 
 class JsonServerChannel(private val transceiver: JsonTransceiver) : ServerChannel() {
 
   override fun initChannel(channel: SocketChannel) {
     val pipeline = channel.pipeline()
+    pipeline.addLast("serverSslHandler", SslContextManager.getServerContext().newHandler(channel.alloc()));
     pipeline.addLast("jsonDecoder",JsonObjectDecoder())
     pipeline.addLast("stringDecoder",StringDecoder(CharsetUtil.UTF_8))
     pipeline.addLast("stringEncoder", StringEncoder(CharsetUtil.UTF_8))

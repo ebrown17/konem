@@ -486,19 +486,19 @@ class JsonCommunicationSpec extends Specification {
         []                 | [[port: 6060, clients: 5],
                               [port: 6081, clients: 5]]  | 5        | 500
         [6060, 6081]       | [[port: 6060, clients: 15],
-                              [port: 6081, clients: 5]]  | 11       | 500
+                              [port: 6081, clients: 5]]  | 11       | 1000
         [6060]             | [[port: 6060, clients: 17],
                               [port: 6081, clients: 9],
-                              [port: 6082, clients: 25]] | 11       | 500
+                              [port: 6082, clients: 25]] | 11       | 1000
         [6060, 6081]       | [[port: 6060, clients: 17],
                               [port: 6081, clients: 9],
-                              [port: 6082, clients: 25]] | 11       | 500
+                              [port: 6082, clients: 25]] | 11       | 1000
         [6060, 6081, 6082] | [[port: 6060, clients: 17],
                               [port: 6081, clients: 9],
-                              [port: 6082, clients: 25]] | 11       | 500
+                              [port: 6082, clients: 25]] | 11       | 1000
         []                 | [[port: 6060, clients: 17],
                               [port: 6081, clients: 9],
-                              [port: 6082, clients: 25]] | 11       | 500
+                              [port: 6082, clients: 25]] | 11       | 1000
     }
 
     def "Server's broadcastOnAllChannels sends to all clients on a port"() {
@@ -557,19 +557,19 @@ class JsonCommunicationSpec extends Specification {
         configurations              | messages | receiveTime
         [[port: 6060, clients: 1]]  | 5        | 500
         [[port: 6060, clients: 1]]  | 25       | 500
-        [[port: 6060, clients: 33]] | 7        | 500
+        [[port: 6060, clients: 33]] | 7        | 1000
         [[port: 6060, clients: 33],
-         [port: 6081, clients: 12]] | 25       | 500
+         [port: 6081, clients: 12]] | 25       | 1000
         [[port: 6060, clients: 33],
          [port: 6081, clients: 12],
-         [port: 6082, clients: 29]] | 19       | 500
+         [port: 6082, clients: 29]] | 19       | 1000
         [[port: 6060, clients: 33],
          [port: 6081, clients: 12],
          [port: 6082, clients: 29]] | 75       | 2500
         [[port: 6060, clients: 33],
          [port: 6081, clients: 12],
          [port: 6082, clients: 29],
-         [port: 6083, clients: 7]]  | 75       | 2500
+         [port: 6083, clients: 7]]  | 75       | 4000
 
     }
 
