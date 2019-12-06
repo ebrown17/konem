@@ -45,6 +45,11 @@ open class Transceiver<I>(protected val channelPort: Int) {
     }
   }
 
+  /**
+   * Sends a message to specified address if connected to this transceiver
+   * @param addr
+   * @param message
+   */
   fun transmit(addr: InetSocketAddress, message: I) {
     synchronized(activeLock) {
       logger.debug("to addr: {} with {}", addr, message)

@@ -44,8 +44,9 @@ fun main(){
     Thread.sleep(500)
 
     if(count < 10) {
-      client.sendMessage(KonemMessage(konemMessage = Message.Data("Send message ${count++}")
-        ))
+      client.sendMessage(
+        KonemMessage(konemMessage = Message.Data("Send message ${count++}"))
+      )
     }
   })
 

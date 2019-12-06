@@ -43,6 +43,6 @@ class JsonClient(private val serverAddress: InetSocketAddress, config: ClientBoo
   }
 
   override fun toString(): String {
-    return "WireClient{Transceiver=$transceiver}"
+    return "JsonClient{Transceiver=$transceiver}"
   }
 }

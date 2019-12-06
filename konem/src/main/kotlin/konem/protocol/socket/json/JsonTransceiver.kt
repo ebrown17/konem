@@ -1,6 +1,5 @@
 package konem.protocol.socket.json
 
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame
 import konem.data.json.KonemMessage
 import konem.data.json.KonemMessageSerializer
 import konem.netty.stream.Transceiver
@@ -24,12 +23,7 @@ class JsonTransceiver(channelPort: Int) : Transceiver<String>(channelPort) {
    * @param message
    */
   fun transmit(addr: InetSocketAddress, message: KonemMessage) {
-    synchronized(activeLock) {
-      logger.debug("to addr: {} with {}", addr, message)
-      val handler = activeHandlers[addr]
-      val kMessage = serializer.toJson(message)
-      handler?.sendMessage(kMessage)
-    }
+      transmit(addr,serializer.toJson(message))
   }
 
   /**
