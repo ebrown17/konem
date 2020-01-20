@@ -60,5 +60,5 @@ if (mode == 'production') {
     root(warn, ["ASYNC"])
 } else {
     println "Logging in mode: ${mode}"
-    root(info, ["STDOUT"])
+    root(warn, ["STDOUT"])
 }

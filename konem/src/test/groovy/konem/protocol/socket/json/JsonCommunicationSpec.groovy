@@ -554,16 +554,16 @@ class JsonCommunicationSpec extends Specification {
         println "-----------------------------"
         where:
         configurations              | messages | receiveTime
-        [[port: 6060, clients: 1]]  | 1        | 500
-        [[port: 6060, clients: 10]] | 5        | 500
+        [[port: 6060, clients: 1]]  | 1        | 2000
+        [[port: 6060, clients: 10]] | 5        | 2000
         [[port: 6060, clients: 1],
-         [port: 6081, clients: 10]] | 5        | 500
+         [port: 6081, clients: 10]] | 5        | 2000
         [[port: 6060, clients: 1],
-         [port: 6081, clients: 10]] | 19       | 500
+         [port: 6081, clients: 10]] | 19       | 2000
         [[port: 6060, clients: 1],
          [port: 6081, clients: 10],
          [port: 6082, clients: 7],
-         [port: 6083, clients: 15]] | 19       | 500
+         [port: 6083, clients: 15]] | 19       | 2000
         [[port: 6060, clients: 1],
          [port: 6081, clients: 10],
          [port: 6082, clients: 7],
