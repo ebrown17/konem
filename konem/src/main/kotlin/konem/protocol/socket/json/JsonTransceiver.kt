@@ -1,10 +1,10 @@
 package konem.protocol.socket.json
 
+import java.net.SocketAddress
 import konem.data.json.KonemMessage
 import konem.data.json.KonemMessageSerializer
 import konem.netty.stream.Transceiver
 import org.slf4j.LoggerFactory
-import java.net.SocketAddress
 
 class JsonTransceiver(channelPort: Int) : Transceiver<String>(channelPort) {
   private val logger = LoggerFactory.getLogger(JsonTransceiver::class.java)
@@ -23,7 +23,7 @@ class JsonTransceiver(channelPort: Int) : Transceiver<String>(channelPort) {
    * @param message
    */
   fun transmit(addr: SocketAddress, message: KonemMessage) {
-      transmit(addr,serializer.toJson(message))
+      transmit(addr, serializer.toJson(message))
   }
 
   /**

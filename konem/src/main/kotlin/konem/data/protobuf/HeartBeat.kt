@@ -38,8 +38,8 @@ class HeartBeat(
   override fun equals(other: Any?): Boolean {
     if (other === this) return true
     if (other !is HeartBeat) return false
-    return unknownFields == other.unknownFields
-        && time == other.time
+    return unknownFields == other.unknownFields &&
+        time == other.time
   }
 
   override fun hashCode(): Int {
@@ -64,10 +64,10 @@ class HeartBeat(
   companion object {
     @JvmField
     val ADAPTER: ProtoAdapter<HeartBeat> = object : ProtoAdapter<HeartBeat>(
-      FieldEncoding.LENGTH_DELIMITED, 
+      FieldEncoding.LENGTH_DELIMITED,
       HeartBeat::class
     ) {
-      override fun encodedSize(value: HeartBeat): Int = 
+      override fun encodedSize(value: HeartBeat): Int =
         ProtoAdapter.STRING.encodedSizeWithTag(1, value.time) +
         value.unknownFields.size
 

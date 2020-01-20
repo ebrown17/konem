@@ -1,7 +1,7 @@
 package konem.netty.stream.client
 
-import konem.netty.stream.Transceiver
 import io.netty.bootstrap.Bootstrap
+import konem.netty.stream.Transceiver
 import kotlinx.coroutines.CoroutineScope
 
 data class ClientBootstrapConfig constructor(

@@ -2,7 +2,6 @@ package konem.netty.stream.client
 
 import io.netty.channel.ChannelFuture
 import io.netty.channel.ChannelFutureListener
-
 import java.util.concurrent.TimeUnit
 
 class ClientConnectionListener internal constructor(private val client: Client) :

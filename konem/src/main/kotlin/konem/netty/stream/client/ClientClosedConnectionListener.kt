@@ -2,8 +2,8 @@ package konem.netty.stream.client
 
 import io.netty.channel.ChannelFuture
 import io.netty.channel.ChannelFutureListener
-import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
+import org.slf4j.LoggerFactory
 
 class ClientClosedConnectionListener internal constructor(private val client: Client) :
   ChannelFutureListener {

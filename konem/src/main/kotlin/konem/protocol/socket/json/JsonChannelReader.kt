@@ -1,9 +1,8 @@
 package konem.protocol.socket.json
 
+import java.net.SocketAddress
 import konem.netty.stream.ChannelReader
 import konem.netty.stream.ServerChannelReader
-import java.net.InetSocketAddress
-import java.net.SocketAddress
 
 interface JsonChannelReader {
   fun handleChannelRead(addr: SocketAddress, port: Int, message: Any)

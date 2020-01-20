@@ -1,10 +1,10 @@
 package konem.protocol.socket.wire
 
+import java.net.InetSocketAddress
+import java.util.ArrayList
 import konem.netty.stream.client.ClientBootstrapConfig
 import konem.netty.stream.client.ClientFactory
 import org.slf4j.LoggerFactory
-import java.net.InetSocketAddress
-import java.util.ArrayList
 
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
 class WireClientFactory : ClientFactory() {

@@ -1,15 +1,15 @@
 package konem.protocol.websocket.json
 
 import io.netty.bootstrap.ServerBootstrap
+import java.net.SocketAddress
+import java.util.ArrayList
+import java.util.concurrent.ConcurrentHashMap
 import konem.data.json.KonemMessage
 import konem.netty.stream.Receiver
 import konem.netty.stream.server.Server
 import konem.netty.stream.server.ServerTransmitter
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
-import java.net.SocketAddress
-import java.util.ArrayList
-import java.util.concurrent.ConcurrentHashMap
 
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
 class WebSocketServer : Server(), ServerTransmitter<KonemMessage>,

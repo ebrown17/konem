@@ -1,14 +1,14 @@
 package konem.protocol.socket.wire
 
 import io.netty.bootstrap.ServerBootstrap
+import java.net.SocketAddress
+import java.util.concurrent.ConcurrentHashMap
 import konem.data.protobuf.KonemMessage
 import konem.netty.stream.Receiver
 import konem.netty.stream.server.Server
 import konem.netty.stream.server.ServerTransmitter
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
-import java.net.SocketAddress
-import java.util.concurrent.ConcurrentHashMap
 
 class WireServer : Server(), ServerTransmitter<KonemMessage>, WireServerChannelReader {
 

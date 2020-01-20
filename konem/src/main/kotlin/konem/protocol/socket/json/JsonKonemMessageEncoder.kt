@@ -21,5 +21,4 @@ class JsonKonemMessageEncoder : MessageToByteEncoder<String>() {
       message.release()
     }
   }
-
 }

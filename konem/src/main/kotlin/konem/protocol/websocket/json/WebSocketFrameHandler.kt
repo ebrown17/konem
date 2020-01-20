@@ -1,12 +1,12 @@
 package konem.protocol.websocket.json
 
-import konem.netty.stream.Handler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame
 import io.netty.handler.codec.http.websocketx.PongWebSocketFrame
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame
 import io.netty.handler.codec.http.websocketx.WebSocketFrame
 import io.netty.util.CharsetUtil
+import konem.netty.stream.Handler
 import org.slf4j.LoggerFactory
 
 class WebSocketFrameHandler(

@@ -1,5 +1,7 @@
 package konem.protocol.websocket.json
 
+import java.net.SocketAddress
+import java.net.URI
 import konem.data.json.KonemMessage
 import konem.netty.stream.Receiver
 import konem.netty.stream.client.Client
@@ -7,8 +9,6 @@ import konem.netty.stream.client.ClientBootstrapConfig
 import konem.netty.stream.client.ClientTransmitter
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
-import java.net.SocketAddress
-import java.net.URI
 
 class WebSocketClient(
   private val serverAddress: SocketAddress,

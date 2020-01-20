@@ -38,8 +38,8 @@ class Data(
   override fun equals(other: Any?): Boolean {
     if (other === this) return true
     if (other !is Data) return false
-    return unknownFields == other.unknownFields
-        && data == other.data
+    return unknownFields == other.unknownFields &&
+        data == other.data
   }
 
   override fun hashCode(): Int {
@@ -64,10 +64,10 @@ class Data(
   companion object {
     @JvmField
     val ADAPTER: ProtoAdapter<Data> = object : ProtoAdapter<Data>(
-      FieldEncoding.LENGTH_DELIMITED, 
+      FieldEncoding.LENGTH_DELIMITED,
       Data::class
     ) {
-      override fun encodedSize(value: Data): Int = 
+      override fun encodedSize(value: Data): Int =
         ProtoAdapter.STRING.encodedSizeWithTag(1, value.data) +
         value.unknownFields.size
 

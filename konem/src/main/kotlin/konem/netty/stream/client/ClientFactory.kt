@@ -1,6 +1,5 @@
 package konem.netty.stream.client
 
-import konem.netty.stream.Transceiver
 import io.netty.bootstrap.Bootstrap
 import io.netty.buffer.ByteBufAllocator
 import io.netty.buffer.PooledByteBufAllocator
@@ -10,9 +9,10 @@ import io.netty.channel.EventLoopGroup
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.util.concurrent.DefaultThreadFactory
+import java.net.InetSocketAddress
+import konem.netty.stream.Transceiver
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
-import java.net.InetSocketAddress
 
 abstract class ClientFactory {
 

@@ -4,19 +4,18 @@ import io.netty.bootstrap.ServerBootstrap
 import io.netty.buffer.ByteBufAllocator
 import io.netty.buffer.PooledByteBufAllocator
 import io.netty.channel.*
-import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.util.concurrent.DefaultThreadFactory
-import konem.netty.stream.*
-import kotlinx.coroutines.*
-import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 import java.net.SocketAddress
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import konem.netty.stream.*
 import kotlin.collections.ArrayList
+import kotlinx.coroutines.*
+import org.slf4j.LoggerFactory
 
 abstract class Server : ChannelReader, HandlerListener {
 
@@ -251,7 +250,7 @@ abstract class Server : ChannelReader, HandlerListener {
     return transceiverMap[port] != null
   }
 
-   override  fun registerActiveHandler(channelPort: Int, remoteConnection: SocketAddress) {
+  override fun registerActiveHandler(channelPort: Int, remoteConnection: SocketAddress) {
     var channelConnections = channelConnectionMap[channelPort]
     if (channelConnections == null) {
       channelConnections = ArrayList()

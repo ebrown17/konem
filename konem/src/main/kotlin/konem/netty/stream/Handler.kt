@@ -2,11 +2,9 @@ package konem.netty.stream
 
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
+import java.net.SocketAddress
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-
-import java.net.InetSocketAddress
-import java.net.SocketAddress
 
 abstract class Handler<I>(val handlerId: Long, val abstractTransceiver: Transceiver<I>) :
   SimpleChannelInboundHandler<I>() {

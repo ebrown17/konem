@@ -1,10 +1,9 @@
 package konem.protocol.websocket.json
 
+import java.net.SocketAddress
 import konem.netty.stream.ChannelReader
 import konem.netty.stream.Receiver
 import konem.netty.stream.ServerChannelReader
-import java.net.InetSocketAddress
-import java.net.SocketAddress
 
 interface WebSocketChannelReader {
   fun handleChannelRead(addr: SocketAddress, channelPort: Int, webSocketPath: String, message: Any)

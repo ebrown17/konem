@@ -38,8 +38,8 @@ class Unknown(
   override fun equals(other: Any?): Boolean {
     if (other === this) return true
     if (other !is Unknown) return false
-    return unknownFields == other.unknownFields
-        && unknown == other.unknown
+    return unknownFields == other.unknownFields &&
+        unknown == other.unknown
   }
 
   override fun hashCode(): Int {
@@ -58,16 +58,16 @@ class Unknown(
     return result.joinToString(prefix = "Unknown{", separator = ", ", postfix = "}")
   }
 
-  fun copy(unknown: String = this.unknown, unknownFields: ByteString = this.unknownFields): Unknown
-      = Unknown(unknown, unknownFields)
+  fun copy(unknown: String = this.unknown, unknownFields: ByteString = this.unknownFields): Unknown =
+      Unknown(unknown, unknownFields)
 
   companion object {
     @JvmField
     val ADAPTER: ProtoAdapter<Unknown> = object : ProtoAdapter<Unknown>(
-      FieldEncoding.LENGTH_DELIMITED, 
+      FieldEncoding.LENGTH_DELIMITED,
       Unknown::class
     ) {
-      override fun encodedSize(value: Unknown): Int = 
+      override fun encodedSize(value: Unknown): Int =
         ProtoAdapter.STRING.encodedSizeWithTag(1, value.unknown) +
         value.unknownFields.size
 

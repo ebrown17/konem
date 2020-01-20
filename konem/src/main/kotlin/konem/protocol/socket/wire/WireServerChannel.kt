@@ -12,7 +12,7 @@ class WireServerChannel(private val transceiver: WireTransceiver) : ServerChanne
 
   override fun initChannel(channel: SocketChannel) {
     val pipeline = channel.pipeline()
-    pipeline.addLast("serverSslHandler", SslContextManager.getServerContext().newHandler(channel.alloc()));
+    pipeline.addLast("serverSslHandler", SslContextManager.getServerContext().newHandler(channel.alloc()))
     pipeline.addLast("frameDecoder", ProtobufVarint32FrameDecoder())
     pipeline.addLast("protobufDecoder", WireDecoder())
     pipeline.addLast("frameEncoder", ProtobufVarint32LengthFieldPrepender())

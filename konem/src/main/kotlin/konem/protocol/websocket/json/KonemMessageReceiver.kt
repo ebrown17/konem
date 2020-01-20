@@ -1,12 +1,11 @@
 package konem.protocol.websocket.json
 
+import java.net.SocketAddress
 import konem.data.json.KonemMessage
 import konem.data.json.KonemMessageSerializer
 import konem.netty.stream.ReceiverHandler
 import kotlinx.serialization.json.JsonDecodingException
 import org.slf4j.LoggerFactory
-import java.net.InetSocketAddress
-import java.net.SocketAddress
 
 open class KonemMessageReceiver(private val receive: (SocketAddress, KonemMessage) -> Unit) :
   ReceiverHandler<String>() {

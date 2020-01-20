@@ -1,6 +1,5 @@
 package konem.netty.stream
 
-import java.net.InetSocketAddress
 import java.net.SocketAddress
 
 interface HandlerListener {

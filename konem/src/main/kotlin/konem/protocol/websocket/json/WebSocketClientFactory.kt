@@ -1,12 +1,12 @@
 package konem.protocol.websocket.json
 
-import konem.netty.stream.client.ClientBootstrapConfig
-import konem.netty.stream.client.ClientFactory
-import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 import java.net.URI
 import java.net.URISyntaxException
 import java.util.ArrayList
+import konem.netty.stream.client.ClientBootstrapConfig
+import konem.netty.stream.client.ClientFactory
+import org.slf4j.LoggerFactory
 
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
 class WebSocketClientFactory : ClientFactory() {

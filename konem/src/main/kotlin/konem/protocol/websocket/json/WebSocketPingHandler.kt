@@ -1,8 +1,8 @@
 package konem.protocol.websocket.json
 
-import konem.netty.stream.HeartbeatProducerHandler
 import io.netty.handler.codec.http.websocketx.PingWebSocketFrame
 import io.netty.handler.codec.http.websocketx.WebSocketFrame
+import konem.netty.stream.HeartbeatProducerHandler
 
 class WebSocketPingHandler(transceiver: WebSocketTransceiver) :
   HeartbeatProducerHandler<WebSocketFrame>(transceiver) {

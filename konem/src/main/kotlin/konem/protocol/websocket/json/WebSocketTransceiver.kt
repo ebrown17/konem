@@ -1,13 +1,12 @@
 package konem.protocol.websocket.json
 
-import konem.netty.stream.Transceiver
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame
 import io.netty.handler.codec.http.websocketx.WebSocketFrame
+import java.net.SocketAddress
 import konem.data.json.KonemMessage
 import konem.data.json.KonemMessageSerializer
+import konem.netty.stream.Transceiver
 import org.slf4j.LoggerFactory
-import java.net.InetSocketAddress
-import java.net.SocketAddress
 
 class WebSocketTransceiver(channelPort: Int) : Transceiver<WebSocketFrame>(channelPort) {
   private val logger = LoggerFactory.getLogger(WebSocketTransceiver::class.java)

@@ -1,9 +1,9 @@
 package konem.protocol.socket.wire
 
+import java.net.SocketAddress
 import konem.data.protobuf.KonemMessage
 import konem.netty.stream.Transceiver
 import org.slf4j.LoggerFactory
-import java.net.SocketAddress
 
 class WireTransceiver(channelPort: Int) : Transceiver<KonemMessage>(channelPort) {
   private val logger = LoggerFactory.getLogger(WireTransceiver::class.java)

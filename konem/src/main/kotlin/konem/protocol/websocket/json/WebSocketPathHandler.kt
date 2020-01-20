@@ -9,11 +9,11 @@ import io.netty.handler.codec.http.HttpMethod.GET
 import io.netty.handler.codec.http.HttpRequest
 import io.netty.handler.codec.http.HttpResponse
 import io.netty.handler.codec.http.HttpResponseStatus.FORBIDDEN
-import io.netty.handler.codec.http.HttpVersion.HTTP_1_1
 import io.netty.handler.codec.http.HttpUtil.isKeepAlive
+import io.netty.handler.codec.http.HttpVersion.HTTP_1_1
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler
-import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicLong
+import org.slf4j.LoggerFactory
 
 class WebSocketPathHandler(
   val transceiver: WebSocketTransceiver,

@@ -62,12 +62,12 @@ class Status(
   override fun equals(other: Any?): Boolean {
     if (other === this) return true
     if (other !is Status) return false
-    return unknownFields == other.unknownFields
-        && shortName == other.shortName
-        && errors == other.errors
-        && received == other.received
-        && sent == other.sent
-        && description == other.description
+    return unknownFields == other.unknownFields &&
+        shortName == other.shortName &&
+        errors == other.errors &&
+        received == other.received &&
+        sent == other.sent &&
+        description == other.description
   }
 
   override fun hashCode(): Int {
@@ -106,10 +106,10 @@ class Status(
   companion object {
     @JvmField
     val ADAPTER: ProtoAdapter<Status> = object : ProtoAdapter<Status>(
-      FieldEncoding.LENGTH_DELIMITED, 
+      FieldEncoding.LENGTH_DELIMITED,
       Status::class
     ) {
-      override fun encodedSize(value: Status): Int = 
+      override fun encodedSize(value: Status): Int =
         ProtoAdapter.STRING.encodedSizeWithTag(1, value.shortName) +
         ProtoAdapter.INT32.encodedSizeWithTag(2, value.errors) +
         ProtoAdapter.INT32.encodedSizeWithTag(3, value.received) +

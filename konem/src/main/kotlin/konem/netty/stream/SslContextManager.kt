@@ -1,18 +1,16 @@
 package konem.netty.stream
 
-
+import io.netty.handler.ssl.SslContext
+import io.netty.handler.ssl.SslContextBuilder
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory
+import io.netty.handler.ssl.util.SelfSignedCertificate
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.security.KeyStore
-import io.netty.handler.ssl.SslContextBuilder
-import io.netty.handler.ssl.SslContext
-import io.netty.handler.ssl.util.InsecureTrustManagerFactory
-import io.netty.handler.ssl.util.SelfSignedCertificate
-import org.slf4j.LoggerFactory
 import javax.net.ssl.KeyManagerFactory
 import javax.net.ssl.TrustManagerFactory
-
+import org.slf4j.LoggerFactory
 
 object SslContextManager {
 
@@ -32,12 +30,11 @@ object SslContextManager {
   private lateinit var serverContext: SslContext
   private lateinit var clientContext: SslContext
 
-
-   fun getServerContext(): SslContext {
-     synchronized(this) {
-       ensureInitialized()
-       return serverContext
-     }
+  fun getServerContext(): SslContext {
+    synchronized(this) {
+      ensureInitialized()
+      return serverContext
+    }
   }
 
   fun getClientContext(): SslContext {
@@ -59,7 +56,7 @@ object SslContextManager {
           logger.info("loading $keyStoreLocation")
           keyStore.load(cert, keyStorePassword.toCharArray())
           val kmf = KeyManagerFactory.getInstance(algorithm)
-          kmf.init(keyStore, keyStorePassword.toCharArray());
+          kmf.init(keyStore, keyStorePassword.toCharArray())
           trustFactory.init(keyStore)
           serverContext = SslContextBuilder.forServer(kmf).build()
           clientContext = SslContextBuilder.forClient().trustManager(trustFactory).build()
@@ -70,7 +67,7 @@ object SslContextManager {
       logger.info("Loading self signed cert")
       val ssc = SelfSignedCertificate()
       serverContext = SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey()).build()
-      clientContext = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
+      clientContext = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build()
     }
   }
 
@@ -81,9 +78,4 @@ object SslContextManager {
       null
     }
   }
-}
-
-fun main() {
-  println(SslContextManager.getServerContext())
-
 }

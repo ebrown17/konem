@@ -1,11 +1,10 @@
 package konem.protocol.socket.json
 
-
+import java.net.InetSocketAddress
+import java.util.ArrayList
 import konem.netty.stream.client.ClientBootstrapConfig
 import konem.netty.stream.client.ClientFactory
 import org.slf4j.LoggerFactory
-import java.net.InetSocketAddress
-import java.util.ArrayList
 
 class JsonClientFactory : ClientFactory() {
   private val logger = LoggerFactory.getLogger(JsonClientFactory::class.java)

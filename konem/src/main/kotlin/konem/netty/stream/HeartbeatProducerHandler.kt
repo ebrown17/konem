@@ -4,8 +4,8 @@ import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.timeout.IdleState
 import io.netty.handler.timeout.IdleStateEvent
-import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
+import org.slf4j.LoggerFactory
 
 abstract class HeartbeatProducerHandler<I>(private val transceiver: Transceiver<I>) :
   ChannelDuplexHandler() {

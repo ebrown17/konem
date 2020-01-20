@@ -1,9 +1,9 @@
 package konem.netty.stream
 
-import org.slf4j.LoggerFactory
 import java.net.SocketAddress
 import java.util.ArrayList
 import java.util.concurrent.ConcurrentHashMap
+import org.slf4j.LoggerFactory
 
 open class Transceiver<I>(protected val channelPort: Int) {
 

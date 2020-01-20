@@ -4,7 +4,6 @@ import konem.data.json.KonemMessage
 import konem.data.json.KonemMessageSerializer
 import konem.data.json.Message
 import konem.netty.stream.HeartbeatProducerHandler
-import java.util.*
 
 class JsonHeartbeatProducer(transceiver: JsonTransceiver) :
   HeartbeatProducerHandler<String>(transceiver) {

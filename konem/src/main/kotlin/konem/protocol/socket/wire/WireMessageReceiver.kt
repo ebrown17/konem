@@ -1,10 +1,9 @@
 package konem.protocol.socket.wire
 
+import java.net.SocketAddress
 import konem.data.protobuf.KonemMessage
 import konem.netty.stream.ReceiverHandler
 import org.slf4j.LoggerFactory
-import java.net.InetSocketAddress
-import java.net.SocketAddress
 
 open class WireMessageReceiver(private val receive: (SocketAddress, KonemMessage) -> Unit) :
   ReceiverHandler<Any>() {

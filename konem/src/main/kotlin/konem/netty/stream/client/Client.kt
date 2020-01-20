@@ -3,16 +3,15 @@ package konem.netty.stream.client
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.Channel
 import io.netty.channel.ChannelFuture
+import java.io.IOException
+import java.net.SocketAddress
+import java.util.ArrayList
+import java.util.concurrent.TimeUnit
 import konem.netty.stream.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
-import java.io.IOException
-import java.net.InetSocketAddress
-import java.net.SocketAddress
-import java.util.ArrayList
-import java.util.concurrent.TimeUnit
 
 abstract class Client(private val serverAddress: SocketAddress, config: ClientBootstrapConfig) :
   ChannelReader {

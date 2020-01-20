@@ -1,5 +1,6 @@
 package konem.protocol.socket.wire
 
+import java.net.SocketAddress
 import konem.data.protobuf.KonemMessage
 import konem.netty.stream.Receiver
 import konem.netty.stream.client.Client
@@ -7,7 +8,6 @@ import konem.netty.stream.client.ClientBootstrapConfig
 import konem.netty.stream.client.ClientTransmitter
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
-import java.net.SocketAddress
 
 class WireClient(private val serverAddress: SocketAddress, config: ClientBootstrapConfig) :
   Client(serverAddress, config), ClientTransmitter<KonemMessage>, WireClientChannelReader {

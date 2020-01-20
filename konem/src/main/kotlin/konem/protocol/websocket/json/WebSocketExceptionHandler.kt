@@ -1,6 +1,5 @@
 package konem.protocol.websocket.json
 
-import konem.netty.stream.ExceptionHandler
 import io.netty.channel.ChannelFutureListener
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.http.DefaultFullHttpResponse
@@ -10,8 +9,9 @@ import io.netty.handler.codec.http.HttpResponse
 import io.netty.handler.codec.http.HttpResponseStatus.FORBIDDEN
 import io.netty.handler.codec.http.HttpUtil.isKeepAlive
 import io.netty.handler.codec.http.HttpVersion.HTTP_1_1
-import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
+import konem.netty.stream.ExceptionHandler
+import org.slf4j.LoggerFactory
 
 class WebSocketExceptionHandler : ExceptionHandler() {
   private val logger = LoggerFactory.getLogger(WebSocketExceptionHandler::class.java)

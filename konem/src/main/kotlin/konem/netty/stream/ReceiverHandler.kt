@@ -1,8 +1,8 @@
 package konem.netty.stream
 
-import org.slf4j.LoggerFactory
 import java.lang.ClassCastException
 import java.net.SocketAddress
+import org.slf4j.LoggerFactory
 
 @Suppress("UNCHECKED_CAST")
 abstract class ReceiverHandler<I> : Receiver {

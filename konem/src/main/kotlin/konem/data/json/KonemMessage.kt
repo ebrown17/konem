@@ -1,16 +1,16 @@
 package konem.data.json
 
+import java.util.*
+import konem.data.json.Message.Data
+import konem.data.json.Message.Heartbeat
+import konem.data.json.Message.Status
+import konem.data.json.Message.Unknown
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Polymorphic
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
-import java.util.*
-import konem.data.json.Message.Heartbeat
-import konem.data.json.Message.Unknown
-import konem.data.json.Message.Status
-import konem.data.json.Message.Data
 
 @Serializable
 sealed class Message {
