@@ -7,7 +7,7 @@ import konem.netty.stream.server.Server
 import konem.netty.stream.server.ServerTransmitter
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
-import java.net.InetSocketAddress
+import java.net.SocketAddress
 import java.util.ArrayList
 import java.util.concurrent.ConcurrentHashMap
 
@@ -62,13 +62,13 @@ class WebSocketServer : Server(), ServerTransmitter<KonemMessage>,
     return createServerBootstrap(channel)
   }
 
-  override fun handleChannelRead(addr: InetSocketAddress, channelPort: Int, webSocketPath: String, message: Any) {
+  override fun handleChannelRead(addr: SocketAddress, channelPort: Int, webSocketPath: String, message: Any) {
     serverScope.launch {
       readMessage(addr, channelPort, webSocketPath, message)
     }
   }
 
-  override suspend fun readMessage(addr: InetSocketAddress, channelPort: Int, webSocketPath: String, message: Any) {
+  override suspend fun readMessage(addr: SocketAddress, channelPort: Int, webSocketPath: String, message: Any) {
     logger.trace("readMessage got message: {}, addr: {} readListenerMap: {} ", message, addr, readListenerMap)
     val readListeners = readListenerMap[channelPort]
     if (readListeners != null) {
@@ -174,7 +174,7 @@ class WebSocketServer : Server(), ServerTransmitter<KonemMessage>,
     }
   }
 
-  override fun sendMessage(addr: InetSocketAddress, message: KonemMessage) {
+  override fun sendMessage(addr: SocketAddress, message: KonemMessage) {
     val channelPort = getRemoteHostToChannelMap()[addr]
     if (channelPort != null) {
       val transceiver = getTransceiverMap()[channelPort] as WebSocketTransceiver

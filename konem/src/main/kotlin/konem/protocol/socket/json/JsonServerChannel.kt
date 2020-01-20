@@ -15,8 +15,8 @@ class JsonServerChannel(private val transceiver: JsonTransceiver) : ServerChanne
   override fun initChannel(channel: SocketChannel) {
     val pipeline = channel.pipeline()
     pipeline.addLast("serverSslHandler", SslContextManager.getServerContext().newHandler(channel.alloc()));
-    pipeline.addLast("jsonDecoder",JsonObjectDecoder())
-    pipeline.addLast("stringDecoder",StringDecoder(CharsetUtil.UTF_8))
+    pipeline.addLast("jsonDecoder", JsonObjectDecoder())
+    pipeline.addLast("stringDecoder", StringDecoder(CharsetUtil.UTF_8))
     pipeline.addLast("stringEncoder", StringEncoder(CharsetUtil.UTF_8))
     pipeline.addLast("jsonHandler", JsonMessageHandler(channelIds.incrementAndGet(), transceiver))
     pipeline.addLast("idleStateHandler", IdleStateHandler(0, WRITE_IDLE_TIME, 0))

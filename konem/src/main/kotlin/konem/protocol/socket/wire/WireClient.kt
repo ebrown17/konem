@@ -7,9 +7,9 @@ import konem.netty.stream.client.ClientBootstrapConfig
 import konem.netty.stream.client.ClientTransmitter
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
-import java.net.InetSocketAddress
+import java.net.SocketAddress
 
-class WireClient(private val serverAddress: InetSocketAddress, config: ClientBootstrapConfig) :
+class WireClient(private val serverAddress: SocketAddress, config: ClientBootstrapConfig) :
   Client(serverAddress, config), ClientTransmitter<KonemMessage>, WireClientChannelReader {
 
   private val logger = LoggerFactory.getLogger(WireClient::class.java)
@@ -29,13 +29,13 @@ class WireClient(private val serverAddress: InetSocketAddress, config: ClientBoo
     receiveListeners.add(receiver)
   }
 
-  override fun handleChannelRead(addr: InetSocketAddress, port: Int, message: Any) {
+  override fun handleChannelRead(addr: SocketAddress, port: Int, message: Any) {
     clientScope.launch {
       readMessage(addr, port, message)
     }
   }
 
-  override suspend fun readMessage(addr: InetSocketAddress, port: Int, message: Any) {
+  override suspend fun readMessage(addr: SocketAddress, port: Int, message: Any) {
     logger.trace("readMessage got message: {}", message)
       for (listener in receiveListeners) {
         listener.handle(addr, message)

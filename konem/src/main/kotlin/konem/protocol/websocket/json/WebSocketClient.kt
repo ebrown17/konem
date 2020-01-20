@@ -7,11 +7,11 @@ import konem.netty.stream.client.ClientBootstrapConfig
 import konem.netty.stream.client.ClientTransmitter
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
-import java.net.InetSocketAddress
+import java.net.SocketAddress
 import java.net.URI
 
 class WebSocketClient(
-  private val serverAddress: InetSocketAddress,
+  private val serverAddress: SocketAddress,
   config: ClientBootstrapConfig,
   private val fullWSPath: URI
 ) : Client(serverAddress, config),
@@ -30,13 +30,13 @@ class WebSocketClient(
     transceiver.transmit(serverAddress, message)
   }
 
-  override fun handleChannelRead(addr: InetSocketAddress, channelPort: Int, webSocketPath: String, message: Any) {
+  override fun handleChannelRead(addr: SocketAddress, channelPort: Int, webSocketPath: String, message: Any) {
     clientScope.launch {
       readMessage(addr, channelPort, webSocketPath, message)
     }
   }
 
-  override suspend fun readMessage(addr: InetSocketAddress, channelPort: Int, webSocketPath: String, message: Any) {
+  override suspend fun readMessage(addr: SocketAddress, channelPort: Int, webSocketPath: String, message: Any) {
     logger.trace("readMessage got message: {}", message)
     for (listener in readListeners) {
       listener.handle(addr, message)

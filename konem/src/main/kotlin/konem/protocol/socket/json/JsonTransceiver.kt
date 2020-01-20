@@ -4,13 +4,13 @@ import konem.data.json.KonemMessage
 import konem.data.json.KonemMessageSerializer
 import konem.netty.stream.Transceiver
 import org.slf4j.LoggerFactory
-import java.net.InetSocketAddress
+import java.net.SocketAddress
 
 class JsonTransceiver(channelPort: Int) : Transceiver<String>(channelPort) {
   private val logger = LoggerFactory.getLogger(JsonTransceiver::class.java)
   private val serializer = KonemMessageSerializer()
 
-  fun handleMessage(addr: InetSocketAddress, message: String) {
+  fun handleMessage(addr: SocketAddress, message: String) {
     logger.trace("from {} with {}", addr, message)
     val reader = channelReaders[addr] as JsonChannelReader
     logger.trace("channelReaders: {} reader got: {}", channelReaders.size, reader)
@@ -22,7 +22,7 @@ class JsonTransceiver(channelPort: Int) : Transceiver<String>(channelPort) {
    * @param addr
    * @param message
    */
-  fun transmit(addr: InetSocketAddress, message: KonemMessage) {
+  fun transmit(addr: SocketAddress, message: KonemMessage) {
       transmit(addr,serializer.toJson(message))
   }
 

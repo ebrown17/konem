@@ -6,6 +6,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import java.net.InetSocketAddress
+import java.net.SocketAddress
 
 abstract class Handler<I>(val handlerId: Long, val abstractTransceiver: Transceiver<I>) :
   SimpleChannelInboundHandler<I>() {
@@ -13,7 +14,7 @@ abstract class Handler<I>(val handlerId: Long, val abstractTransceiver: Transcei
   private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
   private lateinit var context: ChannelHandlerContext
-  protected lateinit var remoteAddress: InetSocketAddress
+  protected lateinit var remoteAddress: SocketAddress
 
   fun sendMessage(message: I) {
     if (isActive()) {
@@ -28,7 +29,7 @@ abstract class Handler<I>(val handlerId: Long, val abstractTransceiver: Transcei
   override fun channelActive(ctx: ChannelHandlerContext) {
     logger.info("remote peer: {} connected", ctx.channel().remoteAddress())
     context = ctx
-    remoteAddress = ctx.channel().remoteAddress() as InetSocketAddress
+    remoteAddress = ctx.channel().remoteAddress()
     abstractTransceiver.handlerActive(remoteAddress, this)
     ctx.fireChannelActive()
   }

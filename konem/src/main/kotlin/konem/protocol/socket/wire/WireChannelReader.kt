@@ -2,12 +2,12 @@ package konem.protocol.socket.wire
 
 import konem.netty.stream.ChannelReader
 import konem.netty.stream.ServerChannelReader
-import java.net.InetSocketAddress
+import java.net.SocketAddress
 
 interface WireChannelReader {
-  fun handleChannelRead(addr: InetSocketAddress, port: Int, message: Any)
+  fun handleChannelRead(addr: SocketAddress, port: Int, message: Any)
 
-  suspend fun readMessage(addr: InetSocketAddress, port: Int, message: Any)
+  suspend fun readMessage(addr: SocketAddress, port: Int, message: Any)
 }
 
 interface WireClientChannelReader : ChannelReader, WireChannelReader

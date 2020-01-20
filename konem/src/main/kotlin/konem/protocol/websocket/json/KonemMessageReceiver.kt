@@ -6,15 +6,16 @@ import konem.netty.stream.ReceiverHandler
 import kotlinx.serialization.json.JsonDecodingException
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
+import java.net.SocketAddress
 
-open class KonemMessageReceiver(private val receive: (InetSocketAddress, KonemMessage) -> Unit) :
+open class KonemMessageReceiver(private val receive: (SocketAddress, KonemMessage) -> Unit) :
   ReceiverHandler<String>() {
   private val logger = LoggerFactory.getLogger(KonemMessageReceiver::class.java)
   private val serializer = KonemMessageSerializer()
 
   // TODO look at using channels to pass value from receiver
 
-  override fun read(addr: InetSocketAddress, message: String) {
+  override fun read(addr: SocketAddress, message: String) {
     synchronized(this) {
       try {
         val kMessage = serializer.toKonemMessage(message)

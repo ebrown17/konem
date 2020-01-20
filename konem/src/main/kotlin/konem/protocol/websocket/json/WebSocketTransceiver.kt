@@ -7,12 +7,13 @@ import konem.data.json.KonemMessage
 import konem.data.json.KonemMessageSerializer
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
+import java.net.SocketAddress
 
 class WebSocketTransceiver(channelPort: Int) : Transceiver<WebSocketFrame>(channelPort) {
   private val logger = LoggerFactory.getLogger(WebSocketTransceiver::class.java)
   private val serializer = KonemMessageSerializer()
 
-  fun handleMessage(addr: InetSocketAddress, webSocketPath: String, message: String) {
+  fun handleMessage(addr: SocketAddress, webSocketPath: String, message: String) {
     logger.trace("from {} with {}", addr, message)
     val reader = channelReaders[addr] as WebSocketChannelReader
     logger.trace("channelReaders: {} reader got: {}", channelReaders.size, reader)
@@ -24,7 +25,7 @@ class WebSocketTransceiver(channelPort: Int) : Transceiver<WebSocketFrame>(chann
    * @param addr
    * @param message
    */
-  fun transmit(addr: InetSocketAddress, message: KonemMessage) {
+  fun transmit(addr: SocketAddress, message: KonemMessage) {
     synchronized(activeLock) {
       logger.debug("to addr: {} with {}", addr, message)
       val handler = activeHandlers[addr]

@@ -3,12 +3,12 @@ package konem.protocol.socket.wire
 import konem.data.protobuf.KonemMessage
 import konem.netty.stream.Transceiver
 import org.slf4j.LoggerFactory
-import java.net.InetSocketAddress
+import java.net.SocketAddress
 
 class WireTransceiver(channelPort: Int) : Transceiver<KonemMessage>(channelPort) {
   private val logger = LoggerFactory.getLogger(WireTransceiver::class.java)
 
-  fun handleMessage(addr: InetSocketAddress, message: KonemMessage) {
+  fun handleMessage(addr: SocketAddress, message: KonemMessage) {
     logger.trace("from {} with {}", addr, message)
     val reader = channelReaders[addr] as WireChannelReader
     logger.trace("channelReaders: {} reader got: {}", channelReaders.size, reader)

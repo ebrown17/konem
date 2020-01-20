@@ -1,28 +1,28 @@
 package konem.netty.stream
 
-import java.net.InetSocketAddress
+import java.net.SocketAddress
 
 interface StatusListener
 
 interface ConnectListener : StatusListener {
-  fun onConnection(address: InetSocketAddress)
+  fun onConnection(address: SocketAddress)
 }
 
 interface DisconnectListener : StatusListener {
-  fun onDisconnection(address: InetSocketAddress)
+  fun onDisconnection(address: SocketAddress)
 }
 
-class ConnectionListener(private val connected: (InetSocketAddress) -> Unit) : ConnectListener {
-  override fun onConnection(address: InetSocketAddress) {
+class ConnectionListener(private val connected: (SocketAddress) -> Unit) : ConnectListener {
+  override fun onConnection(address: SocketAddress) {
     synchronized(this) {
       connected(address)
     }
   }
 }
 
-class DisconnectionListener(private val disconnected: (InetSocketAddress) -> Unit) :
+class DisconnectionListener(private val disconnected: (SocketAddress) -> Unit) :
   DisconnectListener {
-  override fun onDisconnection(address: InetSocketAddress) {
+  override fun onDisconnection(address: SocketAddress) {
     synchronized(this) {
       disconnected(address)
     }
@@ -30,17 +30,17 @@ class DisconnectionListener(private val disconnected: (InetSocketAddress) -> Uni
 }
 
 class ConnectionStatusListener(
-  private val connected: (InetSocketAddress) -> Unit,
-  private val disconnected: (InetSocketAddress) -> Unit
+  private val connected: (SocketAddress) -> Unit,
+  private val disconnected: (SocketAddress) -> Unit
 ) : ConnectListener, DisconnectListener {
 
-  override fun onConnection(address: InetSocketAddress) {
+  override fun onConnection(address: SocketAddress) {
     synchronized(this) {
       connected(address)
     }
   }
 
-  override fun onDisconnection(address: InetSocketAddress) {
+  override fun onDisconnection(address: SocketAddress) {
     synchronized(this) {
       disconnected(address)
     }

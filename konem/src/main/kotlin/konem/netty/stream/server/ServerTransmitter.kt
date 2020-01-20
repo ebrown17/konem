@@ -1,6 +1,6 @@
 package konem.netty.stream.server
 
-import java.net.InetSocketAddress
+import java.net.SocketAddress
 
 interface ServerTransmitter<I> {
 
@@ -27,5 +27,5 @@ interface ServerTransmitter<I> {
    * @param addr
    * @param message
    */
-  fun sendMessage(addr: InetSocketAddress, message: I)
+  fun sendMessage(addr: SocketAddress, message: I)
 }

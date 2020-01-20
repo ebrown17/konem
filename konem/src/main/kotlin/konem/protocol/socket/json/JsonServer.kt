@@ -7,7 +7,7 @@ import konem.netty.stream.server.Server
 import konem.netty.stream.server.ServerTransmitter
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
-import java.net.InetSocketAddress
+import java.net.SocketAddress
 import java.util.concurrent.ConcurrentHashMap
 
 class JsonServer : Server(), ServerTransmitter<KonemMessage>, JsonServerChannelReader {
@@ -71,7 +71,7 @@ class JsonServer : Server(), ServerTransmitter<KonemMessage>, JsonServerChannelR
     }
   }
 
-  override fun sendMessage(addr: InetSocketAddress, message: KonemMessage) {
+  override fun sendMessage(addr: SocketAddress, message: KonemMessage) {
     val channelPort = getRemoteHostToChannelMap()[addr]
     if (channelPort != null) {
       val transceiver = getTransceiverMap()[channelPort] as JsonTransceiver
@@ -79,13 +79,13 @@ class JsonServer : Server(), ServerTransmitter<KonemMessage>, JsonServerChannelR
     }
   }
 
-  override fun handleChannelRead(addr: InetSocketAddress, port: Int, message: Any) {
+  override fun handleChannelRead(addr: SocketAddress, port: Int, message: Any) {
     serverScope.launch {
       readMessage(addr, port, message)
     }
   }
 
-  override suspend fun readMessage(addr: InetSocketAddress, port: Int, message: Any) {
+  override suspend fun readMessage(addr: SocketAddress, port: Int, message: Any) {
     logger.trace("readMessage got message: {}", message)
     val readerListenerList = receiveListeners[port]
     if (readerListenerList != null) {

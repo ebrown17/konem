@@ -1,7 +1,7 @@
 package konem.netty.stream
 
-import java.net.InetSocketAddress
+import java.net.SocketAddress
 
 interface Receiver {
-  fun handle(addr: InetSocketAddress, msg: Any)
+  fun handle(addr: SocketAddress, msg: Any)
 }

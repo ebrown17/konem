@@ -1,7 +1,7 @@
 package konem.netty.stream
 
 import org.slf4j.LoggerFactory
-import java.net.InetSocketAddress
+import java.net.SocketAddress
 import java.util.ArrayList
 import java.util.concurrent.ConcurrentHashMap
 
@@ -9,14 +9,14 @@ open class Transceiver<I>(protected val channelPort: Int) {
 
   private val logger = LoggerFactory.getLogger(javaClass)
 
-  protected val activeHandlers: ConcurrentHashMap<InetSocketAddress, Handler<I>> =
+  protected val activeHandlers: ConcurrentHashMap<SocketAddress, Handler<I>> =
     ConcurrentHashMap()
-  protected val channelReaders: ConcurrentHashMap<InetSocketAddress, ChannelReader> =
+  protected val channelReaders: ConcurrentHashMap<SocketAddress, ChannelReader> =
     ConcurrentHashMap()
   protected val handlerListeners: MutableList<HandlerListener> = ArrayList()
   protected val activeLock = Any()
 
-  fun handlerActive(addr: InetSocketAddress, handler: Handler<I>) {
+  fun handlerActive(addr: SocketAddress, handler: Handler<I>) {
     logger.info("remote: {}", addr)
     synchronized(activeLock) {
       val activeHandler = activeHandlers[addr]
@@ -27,7 +27,7 @@ open class Transceiver<I>(protected val channelPort: Int) {
     }
   }
 
-  fun handlerInActive(addr: InetSocketAddress) {
+  fun handlerInActive(addr: SocketAddress) {
     logger.info("handler inactive for remote: {}", addr)
     synchronized(activeLock) {
       activeHandlers.remove(addr)
@@ -35,7 +35,7 @@ open class Transceiver<I>(protected val channelPort: Int) {
     }
   }
 
-  fun registerChannelReader(addr: InetSocketAddress, reader: ChannelReader) {
+  fun registerChannelReader(addr: SocketAddress, reader: ChannelReader) {
     channelReaders.putIfAbsent(addr, reader)
   }
 
@@ -50,7 +50,7 @@ open class Transceiver<I>(protected val channelPort: Int) {
    * @param addr
    * @param message
    */
-  fun transmit(addr: InetSocketAddress, message: I) {
+  fun transmit(addr: SocketAddress, message: I) {
     synchronized(activeLock) {
       logger.debug("to addr: {} with {}", addr, message)
       val handler = activeHandlers[addr]

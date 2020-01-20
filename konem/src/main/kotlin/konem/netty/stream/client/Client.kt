@@ -10,10 +10,11 @@ import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.net.InetSocketAddress
+import java.net.SocketAddress
 import java.util.ArrayList
 import java.util.concurrent.TimeUnit
 
-abstract class Client(private val serverAddress: InetSocketAddress, config: ClientBootstrapConfig) :
+abstract class Client(private val serverAddress: SocketAddress, config: ClientBootstrapConfig) :
   ChannelReader {
 
   private val logger = LoggerFactory.getLogger(javaClass)
@@ -60,7 +61,7 @@ abstract class Client(private val serverAddress: InetSocketAddress, config: Clie
   }
 
   internal fun connectionEstablished(future: ChannelFuture) {
-    logger.info("Client connected to {} ", serverAddress.hostString)
+    logger.info("Client connected to {} ", serverAddress.toString())
     retryCount = 0
     retryTime = 0
     isDisconnectInitiated = false
