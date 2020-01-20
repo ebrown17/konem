@@ -111,16 +111,16 @@ class WebSocketCommunicationSpec extends Specification {
 
         where:
         configurations                                                    | messages | sleepTime | receiveTime
-        [[port: 7060, paths: ["/test0"], clients: 1]]                     | 5_000    | 1000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 1]]                     | 10    | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 1],
-         [port: 7081, paths: ["/test2"], clients: 1]]                     | 1_000    | 1000      | 5000
+         [port: 7081, paths: ["/test2"], clients: 1]]                     | 15    | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 5],
          [port: 7081, paths: ["/test2"], clients: 5],
-         [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5]] | 1_000    | 1000      | 5000
+         [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5]] | 10    | 1000      | 5000
         [[port: 7060, paths: ["/test0", "/test1"], clients: 5],
          [port: 7081, paths: ["/test2", "/test3"], clients: 5],
          [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5],
-         [port: 7083, paths: ["/test7", "/test8", "/test9"], clients: 5]] | 1_000    | 1000      | 5000
+         [port: 7083, paths: ["/test7", "/test8", "/test9"], clients: 5]] | 15    | 1000      | 5000
     }
 
 
@@ -132,7 +132,6 @@ class WebSocketCommunicationSpec extends Specification {
             serverReceiver.messageCount++
             server.sendMessage(addr, msg)
         })
-        receiverList << serverReceiver
         server.registerChannelReadListener(serverReceiver)
         server.startServer()
         TestUtil.waitForServerActive(server)
@@ -156,7 +155,6 @@ class WebSocketCommunicationSpec extends Specification {
             }
         }
         TestUtil.ensureClientsActive(clientList)
-
         when:
         def msg = new KonemMessage(new Message.Data("send"))
         clientList.each { WebSocketClient client ->
@@ -164,7 +162,7 @@ class WebSocketCommunicationSpec extends Specification {
                 client.sendMessage(msg)
             }
         }
-        TestUtil.waitForAllMessages(receiverList, totalMessages * 2, receiveTime)
+        TestUtil.waitForAllMessages(receiverList, totalMessages , receiveTime)
 
         then:
         def clientMessagesRecieved = 0
@@ -180,16 +178,16 @@ class WebSocketCommunicationSpec extends Specification {
         println "-----------------------------"
         where:
         configurations                                                    | messages | sleepTime | receiveTime
-        [[port: 7060, paths: ["/test0"], clients: 1]]                     | 5_000    | 1000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 1]]                     | 10    | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 1],
-         [port: 7081, paths: ["/test2"], clients: 1]]                     | 5_000    | 1000      | 5000
+         [port: 7081, paths: ["/test2"], clients: 1]]                     | 15    | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 5],
          [port: 7081, paths: ["/test2"], clients: 5],
-         [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5]] | 1_000    | 1000      | 5000
-        [[port: 7060, paths: ["/test0", "/test1"], clients: 5],
-         [port: 7081, paths: ["/test2", "/test3"], clients: 5],
-         [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5],
-         [port: 7083, paths: ["/test7", "/test8", "/test9"], clients: 5]] | 1_000    | 1000      | 5000
+         [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 2]] | 10    | 1000      | 5000
+        [[port: 7060, paths: ["/test0", "/test1"], clients: 2],
+         [port: 7081, paths: ["/test2", "/test3"], clients: 2],
+         [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 2],
+         [port: 7083, paths: ["/test7", "/test8", "/test9"], clients:2]] | 15    | 1000      | 5000
     }
 
 
@@ -278,16 +276,16 @@ class WebSocketCommunicationSpec extends Specification {
         println "-----------------------------"
         where:
         configurations                                                    | messages | sleepTime | receiveTime
-        [[port: 7060, paths: ["/test0"], clients: 1]]                     | 1_000    | 1000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 1]]                     | 10    | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 1],
-         [port: 7081, paths: ["/test2"], clients: 1]]                     | 5_000    | 1000      | 5000
+         [port: 7081, paths: ["/test2"], clients: 1]]                     | 15    | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 5],
          [port: 7081, paths: ["/test2"], clients: 5],
-         [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5]] | 1_000    | 1000      | 5000
+         [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5]] | 10    | 1000      | 5000
         [[port: 7060, paths: ["/test0", "/test1"], clients: 5],
          [port: 7081, paths: ["/test2", "/test3"], clients: 5],
          [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5],
-         [port: 7083, paths: ["/test7", "/test8", "/test9"], clients: 5]] | 1_000    | 1000      | 5000
+         [port: 7083, paths: ["/test7", "/test8", "/test9"], clients: 5]] | 15    | 1000      | 5000
     }
 
     def "Server's broadcastOnChannel sends to all clients on a port"() {
@@ -344,16 +342,16 @@ class WebSocketCommunicationSpec extends Specification {
         println "-----------------------------"
         where:
         configurations                                                    | messages | sleepTime | receiveTime
-        [[port: 7060, paths: ["/test0"], clients: 1]]                     | 1_000    | 1000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 1]]                     | 10    | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 1],
-         [port: 7081, paths: ["/test2"], clients: 1]]                     | 5_000    | 1000      | 5000
+         [port: 7081, paths: ["/test2"], clients: 1]]                     | 15    | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 5],
          [port: 7081, paths: ["/test2"], clients: 5],
-         [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5]] | 1_000    | 1000      | 5000
+         [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5]] | 10    | 1000      | 5000
         [[port: 7060, paths: ["/test0", "/test1"], clients: 5],
          [port: 7081, paths: ["/test2", "/test3"], clients: 5],
          [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5],
-         [port: 7083, paths: ["/test7", "/test8", "/test9"], clients: 5]] | 1_000    | 1000      | 5000
+         [port: 7083, paths: ["/test7", "/test8", "/test9"], clients: 5]] | 15   | 1000      | 5000
     }
 
     def "Server's broadcastOnAllChannels sends to all clients on a port"() {
@@ -412,16 +410,16 @@ class WebSocketCommunicationSpec extends Specification {
         println "-----------------------------"
         where:
         configurations                                                    | messages | sleepTime | receiveTime
-        [[port: 7060, paths: ["/test0"], clients: 1]]                     | 1_000    | 1000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 1]]                     | 10    | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 1],
-         [port: 7081, paths: ["/test2"], clients: 1]]                     | 606      | 1000      | 5000
+         [port: 7081, paths: ["/test2"], clients: 1]]                     | 17      | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 5],
          [port: 7081, paths: ["/test2"], clients: 5],
-         [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5]] | 501      | 1000      | 5000
+         [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5]] | 11      | 1000      | 5000
         [[port: 7060, paths: ["/test0", "/test1"], clients: 5],
          [port: 7081, paths: ["/test2", "/test3"], clients: 5],
          [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5],
-         [port: 7083, paths: ["/test7", "/test8", "/test9"], clients: 5]] | 505      | 1000      | 5000
+         [port: 7083, paths: ["/test7", "/test8", "/test9"], clients: 5]] | 18      | 1000      | 5000
     }
 
 
@@ -489,14 +487,14 @@ class WebSocketCommunicationSpec extends Specification {
         configurations                                                    | messages | sleepTime | receiveTime
         [[port: 7060, paths: ["/test0"], clients: 1]]                     | 10       | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 1],
-         [port: 7081, paths: ["/test2"], clients: 1]]                     | 50       | 1000      | 5000
+         [port: 7081, paths: ["/test2"], clients: 1]]                     | 11       | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 5],
          [port: 7081, paths: ["/test2"], clients: 5],
-         [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5]] | 100      | 1000      | 5000
+         [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5]] | 14      | 1000      | 5000
         [[port: 7060, paths: ["/test0", "/test1"], clients: 5],
          [port: 7081, paths: ["/test2", "/test3"], clients: 5],
          [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5],
-         [port: 7083, paths: ["/test7", "/test8", "/test9"], clients: 5]] | 100      | 1000      | 5000
+         [port: 7083, paths: ["/test7", "/test8", "/test9"], clients: 5]] | 17      | 1000      | 5000
     }
 
 
@@ -573,11 +571,11 @@ class WebSocketCommunicationSpec extends Specification {
         ["/test0", "/test1",
          "/test2", "/test3",
          "/test4"]           | [[port: 7060, paths: ["/test0", "/test1"], clients: 5],
-                                [port: 7081, paths: ["/test2", "/test3"], clients: 5]]  | 32       | 1000      | 5000
+                                [port: 7081, paths: ["/test2", "/test3"], clients: 5]]  | 11       | 1000      | 5000
         ["/test0", "/test1",
          "/test2", "/test3",
-         "/test4"]           | [[port: 7060, paths: ["/test0", "/test1"], clients: 11],
-                                [port: 7081, paths: ["/test2", "/test3"], clients: 27]] | 17       | 1000      | 5000
+         "/test4"]           | [[port: 7060, paths: ["/test0", "/test1"], clients: 6],
+                                [port: 7081, paths: ["/test2", "/test3"], clients: 9]] | 7       | 1000      | 5000
     }
 
 
@@ -633,12 +631,12 @@ class WebSocketCommunicationSpec extends Specification {
         where:
         configurations                                                     | sleepTime | receiveTime
         [[port: 7060, paths: ["/test0"], clients: 1]]                      | 1000      | 5000
-        [[port: 7060, paths: ["/test0"], clients: 50]]                     | 1000      | 5000
-        [[port: 7060, paths: ["/test0"], clients: 50],
-         [port: 7081, paths: ["/test2", "/test3"], clients: 50]]           | 1000      | 5000
-        [[port: 7060, paths: ["/test0"], clients: 50],
-         [port: 7081, paths: ["/test2", "/test3"], clients: 50],
-         [port: 7082, paths: ["/test5", "/test4", "/test6"], clients: 50]] | 1000      | 7000
+        [[port: 7060, paths: ["/test0"], clients: 5]]                     | 1000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 5],
+         [port: 7081, paths: ["/test2", "/test3"], clients: 5]]           | 1000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 5],
+         [port: 7081, paths: ["/test2", "/test3"], clients: 5],
+         [port: 7082, paths: ["/test5", "/test4", "/test6"], clients: 5]] | 1000      | 7000
 
     }
 
@@ -705,12 +703,12 @@ class WebSocketCommunicationSpec extends Specification {
         where:
         configurations                                                     | sleepTime | receiveTime
         [[port: 7060, paths: ["/test0"], clients: 1]]                      | 1000      | 5000
-        [[port: 7060, paths: ["/test0"], clients: 50]]                     | 1000      | 5000
-        [[port: 7060, paths: ["/test0"], clients: 50],
-         [port: 7081, paths: ["/test2", "/test3"], clients: 50]]           | 1000      | 5000
-        [[port: 7060, paths: ["/test0"], clients: 50],
-         [port: 7081, paths: ["/test2", "/test3"], clients: 50],
-         [port: 7082, paths: ["/test5", "/test4", "/test6"], clients: 75]] | 1000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 5]]                     | 1000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 5],
+         [port: 7081, paths: ["/test2", "/test3"], clients: 5]]           | 1000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 5],
+         [port: 7081, paths: ["/test2", "/test3"], clients: 5],
+         [port: 7082, paths: ["/test5", "/test4", "/test6"], clients: 6]] | 1000      | 5000
     }
 
     def "ConnectionStatusListener's connect and disconnect listeners are called"() {
@@ -772,12 +770,12 @@ class WebSocketCommunicationSpec extends Specification {
         where:
         configurations                                                     | sleepTime | receiveTime
         [[port: 7060, paths: ["/test0"], clients: 1]]                      | 2000      | 5000
-        [[port: 7060, paths: ["/test0"], clients: 50]]                     | 2000      | 5000
-        [[port: 7060, paths: ["/test0"], clients: 50],
-         [port: 7081, paths: ["/test2", "/test3"], clients: 50]]           | 2000      | 5000
-        [[port: 7060, paths: ["/test0"], clients: 50],
-         [port: 7081, paths: ["/test2", "/test3"], clients: 50],
-         [port: 7082, paths: ["/test5", "/test4", "/test6"], clients: 75]] | 2000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 5]]                     | 2000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 5],
+         [port: 7081, paths: ["/test2", "/test3"], clients: 5]]           | 2000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 5],
+         [port: 7081, paths: ["/test2", "/test3"], clients: 5],
+         [port: 7082, paths: ["/test5", "/test4", "/test6"], clients: 6]] | 2000      | 5000
     }
 
     def "Server receiver gets all messages when registered on port"() {
@@ -846,18 +844,18 @@ class WebSocketCommunicationSpec extends Specification {
 
         where:
         configurations                                                                     | messages | sleepTime | receiveTime
-        [[port: 7060, paths: ["/test0"], clients: 1, readers: [7060]]]                     | 1_000    | 1000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 1, readers: [7060]]]                     | 10    | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 1, readers: [7060]],
-         [port: 7081, paths: ["/test2"], clients: 1, readers: [7081]]]                     | 5_001    | 1000      | 5000
+         [port: 7081, paths: ["/test2"], clients: 1, readers: [7081]]]                     | 13    | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 5, readers: [7060]],
-         [port: 7081, paths: ["/test2"], clients: 1, readers: []]]                         | 1_001    | 1000      | 5000
+         [port: 7081, paths: ["/test2"], clients: 1, readers: []]]                         | 10    | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 5, readers: []],
          [port: 7081, paths: ["/test2"], clients: 5, readers: []],
-         [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5, readers: [7082]]] | 1_000    | 1000      | 5000
+         [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5, readers: [7082]]] | 10    | 1000      | 5000
         [[port: 7060, paths: ["/test0", "/test1"], clients: 5, readers: [7060]],
          [port: 7081, paths: ["/test2", "/test3"], clients: 5, readers: [7081]],
          [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5, readers: [7060]],
-         [port: 7083, paths: ["/test7", "/test8", "/test9"], clients: 5, readers: []]]     | 1_000    | 1000      | 5000
+         [port: 7083, paths: ["/test7", "/test8", "/test9"], clients: 5, readers: []]]     | 10    | 1000      | 5000
     }
 
 
@@ -933,15 +931,15 @@ class WebSocketCommunicationSpec extends Specification {
 
         where:
         configurations                                                                                                                    | messages | sleepTime | receiveTime
-        [[port: 7060, paths: ["/test0"], clients: 1, readers: [[port: 7060, paths: ["/test0"]]]]]                                         | 11       | 1000      | 5000
-        [[port: 7060, paths: ["/test0", "/test1"], clients: 1, readers: [[port: 7060, paths: ["/test0"]]]]]                               | 101      | 1000      | 5000
-        [[port: 7060, paths: ["/test0", "/test1"], clients: 1, readers: [[port: 7060, paths: ["/test0", "/test1"]]]]]                     | 299      | 1000      | 5000
-        [[port: 7060, paths: ["/test0"], clients: 5, readers: [[port: 7060, paths: ["/test0"]]]]]                                         | 1_000    | 1000      | 5000
-        [[port: 7060, paths: ["/test0", "/test1"], clients: 5, readers: [[port: 7060, paths: ["/test0"]]]]]                               | 1_000    | 1000      | 5000
-        [[port: 7060, paths: ["/test0", "/test1"], clients: 5, readers: [[port: 7060, paths: ["/test0", "/test1"]]]]]                     | 1_000    | 1000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 1, readers: [[port: 7060, paths: ["/test0"]]]]]                                         | 5       | 1000      | 5000
+        [[port: 7060, paths: ["/test0", "/test1"], clients: 1, readers: [[port: 7060, paths: ["/test0"]]]]]                               | 6      | 1000      | 5000
+        [[port: 7060, paths: ["/test0", "/test1"], clients: 1, readers: [[port: 7060, paths: ["/test0", "/test1"]]]]]                     | 7      | 1000      | 5000
+        [[port: 7060, paths: ["/test0"], clients: 5, readers: [[port: 7060, paths: ["/test0"]]]]]                                         | 10    | 1000      | 5000
+        [[port: 7060, paths: ["/test0", "/test1"], clients: 5, readers: [[port: 7060, paths: ["/test0"]]]]]                               | 10    | 1000      | 5000
+        [[port: 7060, paths: ["/test0", "/test1"], clients: 5, readers: [[port: 7060, paths: ["/test0", "/test1"]]]]]                     | 10    | 1000      | 5000
 
         [[port: 7060, paths: ["/test0"], clients: 1, readers: [[port: 7060, paths: ["/test0"]]]],
-         [port: 7081, paths: ["/test2"], clients: 1, readers: [[port: 7081, paths: ["/test2"]]]]]                                         | 1_000    | 1000      | 5000
+         [port: 7081, paths: ["/test2"], clients: 1, readers: [[port: 7081, paths: ["/test2"]]]]]                                         | 10    | 1000      | 5000
         [[port: 7060, paths: ["/test0"], clients: 5, readers: [[port: 7060, paths: ["/test0"]]]],
          [port: 7081, paths: ["/test2"], clients: 3, readers: [[port: 7081, paths: ["/test2"]]]],
          [port: 7082, paths: ["/test4", "/test5", "/test6"], clients: 5, readers: [[port: 7082, paths: ["/test4", "/test5", "/test6"]]]],

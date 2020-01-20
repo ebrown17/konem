@@ -15,15 +15,11 @@ def logFileDate = timestamp('yyyy-MM-dd_HHmmss')
 def defaultLogPattern = "%d{HH:mm:ss.SSS} %-5level [%thread] %logger{36}.%M - %msg%n"
 
 def name = "konem"
-def mode = "test"
+def mode = "ide"
 context.name = name
 
-if (mode == "ide") {
 
-    appender("STDOUT", ConsoleAppender) {
-        encoder(PatternLayoutEncoder) { pattern = defaultLogPattern }
-    }
-} else {
+if (mode != "ide") {
     appender("ROLLING", RollingFileAppender) {
         file = "debuglog/${name}.log"
         rollingPolicy(TimeBasedRollingPolicy) {
@@ -40,6 +36,10 @@ if (mode == "ide") {
         discardingThreshold = 0
         appenderRef("ROLLING")
     }
+}
+
+appender("STDOUT", ConsoleAppender) {
+    encoder(PatternLayoutEncoder) { pattern = defaultLogPattern }
 }
 // Log will display all levels that are greater than set level
 // TRACE < DEBUG < INFO < WARN < ERROR < OFF

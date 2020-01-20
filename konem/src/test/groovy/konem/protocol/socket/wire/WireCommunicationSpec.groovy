@@ -71,20 +71,20 @@ class WireCommunicationSpec extends Specification {
 
         where:
         configurations              | messages | receiveTime
-        [[port: 6060, clients: 1]]  | 5        | 500
+        [[port: 6060, clients: 1]]  | 1        | 500
         [[port: 6060, clients: 10]] | 5        | 500
         [[port: 6060, clients: 1],
-         [port: 6081, clients: 1]]  | 5        | 500
-        [[port: 6060, clients: 3],
-         [port: 6081, clients: 14]] | 51       | 500
-        [[port: 6060, clients: 3],
-         [port: 6081, clients: 14],
-         [port: 6082, clients: 21],
-         [port: 6083, clients: 51]] | 21       | 500
-        [[port: 6060, clients: 3],
-         [port: 6081, clients: 14],
-         [port: 6082, clients: 21],
-         [port: 6083, clients: 51]] | 500      | 2000
+         [port: 6081, clients: 10]] | 5        | 500
+        [[port: 6060, clients: 1],
+         [port: 6081, clients: 10]] | 19       | 500
+        [[port: 6060, clients: 1],
+         [port: 6081, clients: 10],
+         [port: 6082, clients: 7],
+         [port: 6083, clients: 15]] | 19       | 500
+        [[port: 6060, clients: 1],
+         [port: 6081, clients: 10],
+         [port: 6082, clients: 7],
+         [port: 6083, clients: 15]] | 23       | 2000
     }
 
     def "Server readers can register after server starts and then see messages"() {
@@ -129,20 +129,20 @@ class WireCommunicationSpec extends Specification {
 
         where:
         configurations              | messages | receiveTime
-        [[port: 6060, clients: 1]]  | 5        | 500
+        [[port: 6060, clients: 1]]  | 1        | 500
         [[port: 6060, clients: 10]] | 5        | 500
         [[port: 6060, clients: 1],
-         [port: 6081, clients: 1]]  | 5        | 500
-        [[port: 6060, clients: 3],
-         [port: 6081, clients: 14]] | 51       | 500
-        [[port: 6060, clients: 3],
-         [port: 6081, clients: 14],
-         [port: 6082, clients: 21],
-         [port: 6083, clients: 51]] | 21       | 500
-        [[port: 6060, clients: 3],
-         [port: 6081, clients: 14],
-         [port: 6082, clients: 21],
-         [port: 6083, clients: 51]] | 500      | 2000
+         [port: 6081, clients: 10]] | 5        | 500
+        [[port: 6060, clients: 1],
+         [port: 6081, clients: 10]] | 19       | 500
+        [[port: 6060, clients: 1],
+         [port: 6081, clients: 10],
+         [port: 6082, clients: 7],
+         [port: 6083, clients: 15]] | 19       | 500
+        [[port: 6060, clients: 1],
+         [port: 6081, clients: 10],
+         [port: 6082, clients: 7],
+         [port: 6083, clients: 15]] | 23       | 2000
     }
 
     def "Clients can register reader before connect and then see messages"() {
@@ -211,20 +211,20 @@ class WireCommunicationSpec extends Specification {
         println "-----------------------------"
         where:
         configurations              | messages | receiveTime
-        [[port: 6060, clients: 1]]  | 5        | 500
-        [[port: 6060, clients: 25]] | 5        | 500
-        [[port: 6060, clients: 25]] | 500      | 4000
-        [[port: 6060, clients: 31],
-         [port: 6081, clients: 17]] | 5        | 1000
-        [[port: 6060, clients: 31],
-         [port: 6081, clients: 17]] | 500      | 4000
-        [[port: 6060, clients: 31],
-         [port: 6081, clients: 17],
-         [port: 6082, clients: 9]]  | 5        | 2000
-        [[port: 6060, clients: 31],
-         [port: 6081, clients: 17],
-         [port: 6082, clients: 9],
-         [port: 6083, clients: 56]] | 5        | 2000
+        [[port: 6060, clients: 1]]  | 1        | 500
+        [[port: 6060, clients: 10]] | 5        | 500
+        [[port: 6060, clients: 1],
+         [port: 6081, clients: 10]] | 5        | 500
+        [[port: 6060, clients: 1],
+         [port: 6081, clients: 10]] | 19       | 500
+        [[port: 6060, clients: 1],
+         [port: 6081, clients: 10],
+         [port: 6082, clients: 7],
+         [port: 6083, clients: 15]] | 19       | 500
+        [[port: 6060, clients: 1],
+         [port: 6081, clients: 10],
+         [port: 6082, clients: 7],
+         [port: 6083, clients: 15]] | 23       | 2000
     }
 
     def "Clients can register reader after connect and then see messages"() {
@@ -293,20 +293,20 @@ class WireCommunicationSpec extends Specification {
         println "-----------------------------"
         where:
         configurations              | messages | receiveTime
-        [[port: 6060, clients: 1]]  | 5        | 500
-        [[port: 6060, clients: 25]] | 5        | 500
-        [[port: 6060, clients: 25]] | 500      | 4000
-        [[port: 6060, clients: 31],
-         [port: 6081, clients: 17]] | 5        | 1000
-        [[port: 6060, clients: 31],
-         [port: 6081, clients: 17]] | 500      | 4000
-        [[port: 6060, clients: 31],
-         [port: 6081, clients: 17],
-         [port: 6082, clients: 9]]  | 5        | 2000
-        [[port: 6060, clients: 31],
-         [port: 6081, clients: 17],
-         [port: 6082, clients: 9],
-         [port: 6083, clients: 56]] | 5        | 2000
+        [[port: 6060, clients: 1]]  | 1        | 500
+        [[port: 6060, clients: 10]] | 5        | 500
+        [[port: 6060, clients: 1],
+         [port: 6081, clients: 10]] | 5        | 500
+        [[port: 6060, clients: 1],
+         [port: 6081, clients: 10]] | 19       | 500
+        [[port: 6060, clients: 1],
+         [port: 6081, clients: 10],
+         [port: 6082, clients: 7],
+         [port: 6083, clients: 15]] | 19       | 500
+        [[port: 6060, clients: 1],
+         [port: 6081, clients: 10],
+         [port: 6082, clients: 7],
+         [port: 6083, clients: 15]] | 23       | 2000
     }
 
     def "Client readers can see messages after a reconnect"() {
@@ -399,21 +399,20 @@ class WireCommunicationSpec extends Specification {
         println "-----------------------------"
         where:
         configurations              | messages | receiveTime
-        [[port: 6060, clients: 1]]  | 5        | 500
-        [[port: 6060, clients: 1]]  | 25       | 500
-        [[port: 6060, clients: 33]] | 7        | 500
-        [[port: 6060, clients: 33],
-         [port: 6081, clients: 12]] | 25       | 500
-        [[port: 6060, clients: 33],
-         [port: 6081, clients: 12],
-         [port: 6082, clients: 29]] | 19       | 500
-        [[port: 6060, clients: 33],
-         [port: 6081, clients: 12],
-         [port: 6082, clients: 29]] | 75       | 2500
-        [[port: 6060, clients: 33],
-         [port: 6081, clients: 12],
-         [port: 6082, clients: 29],
-         [port: 6083, clients: 7]]  | 75       | 2500
+        [[port: 6060, clients: 1]]  | 1        | 500
+        [[port: 6060, clients: 10]] | 5        | 500
+        [[port: 6060, clients: 1],
+         [port: 6081, clients: 10]] | 5        | 500
+        [[port: 6060, clients: 1],
+         [port: 6081, clients: 10]] | 19       | 500
+        [[port: 6060, clients: 1],
+         [port: 6081, clients: 10],
+         [port: 6082, clients: 7],
+         [port: 6083, clients: 15]] | 19       | 500
+        [[port: 6060, clients: 1],
+         [port: 6081, clients: 10],
+         [port: 6082, clients: 7],
+         [port: 6083, clients: 15]] | 23       | 2000
 
     }
 
@@ -486,19 +485,19 @@ class WireCommunicationSpec extends Specification {
         []                 | [[port: 6060, clients: 5],
                               [port: 6081, clients: 5]]  | 5        | 500
         [6060, 6081]       | [[port: 6060, clients: 15],
-                              [port: 6081, clients: 5]]  | 11       | 500
-        [6060]             | [[port: 6060, clients: 17],
+                              [port: 6081, clients: 5]]  | 11       | 1000
+        [6060]             | [[port: 6060, clients: 5],
                               [port: 6081, clients: 9],
-                              [port: 6082, clients: 25]] | 11       | 500
-        [6060, 6081]       | [[port: 6060, clients: 17],
+                              [port: 6082, clients: 11]] | 11       | 1000
+        [6060, 6081]       | [[port: 6060, clients: 5],
                               [port: 6081, clients: 9],
-                              [port: 6082, clients: 25]] | 11       | 500
-        [6060, 6081, 6082] | [[port: 6060, clients: 17],
+                              [port: 6082, clients: 11]] | 11       | 1000
+        [6060, 6081, 6082] | [[port: 6060, clients: 5],
                               [port: 6081, clients: 9],
-                              [port: 6082, clients: 25]] | 11       | 500
-        []                 | [[port: 6060, clients: 17],
+                              [port: 6082, clients: 11]] | 11       | 1000
+        []                 | [[port: 6060, clients: 5],
                               [port: 6081, clients: 9],
-                              [port: 6082, clients: 25]] | 11       | 500
+                              [port: 6082, clients: 11]] | 11       | 1000
     }
 
     def "Server's broadcastOnAllChannels sends to all clients on a port"() {
@@ -555,21 +554,20 @@ class WireCommunicationSpec extends Specification {
         println "-----------------------------"
         where:
         configurations              | messages | receiveTime
-        [[port: 6060, clients: 1]]  | 5        | 500
-        [[port: 6060, clients: 1]]  | 25       | 500
-        [[port: 6060, clients: 33]] | 7        | 500
-        [[port: 6060, clients: 33],
-         [port: 6081, clients: 12]] | 25       | 500
-        [[port: 6060, clients: 33],
-         [port: 6081, clients: 12],
-         [port: 6082, clients: 29]] | 19       | 500
-        [[port: 6060, clients: 33],
-         [port: 6081, clients: 12],
-         [port: 6082, clients: 29]] | 75       | 2500
-        [[port: 6060, clients: 33],
-         [port: 6081, clients: 12],
-         [port: 6082, clients: 29],
-         [port: 6083, clients: 7]]  | 75       | 2500
+        [[port: 6060, clients: 1]]  | 1        | 500
+        [[port: 6060, clients: 10]] | 5        | 500
+        [[port: 6060, clients: 1],
+         [port: 6081, clients: 10]] | 5        | 500
+        [[port: 6060, clients: 1],
+         [port: 6081, clients: 10]] | 19       | 500
+        [[port: 6060, clients: 1],
+         [port: 6081, clients: 10],
+         [port: 6082, clients: 7],
+         [port: 6083, clients: 15]] | 19       | 500
+        [[port: 6060, clients: 1],
+         [port: 6081, clients: 10],
+         [port: 6082, clients: 7],
+         [port: 6083, clients: 15]] | 23       | 2000
 
     }
 
@@ -634,14 +632,14 @@ class WireCommunicationSpec extends Specification {
 
         where:
         configurations              | messages | receiveTime
-        [[port: 6060, clients: 1]]  | 5        | 500
-        [[port: 6060, clients: 10]] | 5        | 500
-        [[port: 6060, clients: 10],
-         [port: 6081, clients: 10]] | 5        | 500
-        [[port: 6060, clients: 10],
-         [port: 6081, clients: 10],
-         [port: 6082, clients: 10],
-         [port: 6083, clients: 10]] | 25       | 4000
+        [[port: 6060, clients: 1]] | 5        | 500
+        [[port: 6060, clients: 5]] | 5        | 500
+        [[port: 6060, clients: 5],
+         [port: 6081, clients: 5]] | 5        | 500
+        [[port: 6060, clients: 5],
+         [port: 6081, clients: 5],
+         [port: 6082, clients: 5],
+         [port: 6083, clients: 5]] | 5        | 4000
     }
 
     def "Clients ConnectionListener is called after connect and able to send message"() {
@@ -695,13 +693,13 @@ class WireCommunicationSpec extends Specification {
         where:
         configurations              | receiveTime
         [[port: 6060, clients: 1]]  | 5000
-        [[port: 6060, clients: 50]] | 5000
-        [[port: 6060, clients: 20],
-         [port: 6081, clients: 20]] | 5000
-        [[port: 6060, clients: 50],
-         [port: 6081, clients: 50],
-         [port: 6082, clients: 50],
-         [port: 6083, clients: 50]] | 5000
+        [[port: 6060, clients: 5]]  | 5000
+        [[port: 6060, clients: 6],
+         [port: 6081, clients: 11]] | 5000
+        [[port: 6060, clients: 1],
+         [port: 6081, clients: 5],
+         [port: 6082, clients: 6],
+         [port: 6083, clients: 11]] | 5000
     }
 
     def "Server's ConnectionListener is called after a client connects and able to send message to client"() {
@@ -767,13 +765,13 @@ class WireCommunicationSpec extends Specification {
         where:
         configurations              | receiveTime
         [[port: 6060, clients: 1]]  | 5000
-        [[port: 6060, clients: 50]] | 5000
-        [[port: 6060, clients: 20],
-         [port: 6081, clients: 20]] | 5000
-        [[port: 6060, clients: 50],
-         [port: 6081, clients: 50],
-         [port: 6082, clients: 50],
-         [port: 6083, clients: 50]] | 5000
+        [[port: 6060, clients: 5]]  | 5000
+        [[port: 6060, clients: 6],
+         [port: 6081, clients: 11]] | 5000
+        [[port: 6060, clients: 1],
+         [port: 6081, clients: 5],
+         [port: 6082, clients: 6],
+         [port: 6083, clients: 11]] | 5000
     }
 
     def "ConnectionStatusListener's connect and disconnect listeners are called"() {
@@ -834,14 +832,14 @@ class WireCommunicationSpec extends Specification {
         println "-----------------------------"
         where:
         configurations              | receiveTime
-        [[port: 6060, clients: 1]]  | 2000
-        [[port: 6060, clients: 50]] | 2000
-        [[port: 6060, clients: 20],
-         [port: 6081, clients: 20]] | 2000
-        [[port: 6060, clients: 25],
-         [port: 6081, clients: 50],
-         [port: 6082, clients: 25],
-         [port: 6083, clients: 50]] | 2000
+        [[port: 6060, clients: 1]]  | 5000
+        [[port: 6060, clients: 5]]  | 5000
+        [[port: 6060, clients: 6],
+         [port: 6081, clients: 11]] | 5000
+        [[port: 6060, clients: 1],
+         [port: 6081, clients: 5],
+         [port: 6082, clients: 6],
+         [port: 6083, clients: 11]] | 5000
 
     }
 

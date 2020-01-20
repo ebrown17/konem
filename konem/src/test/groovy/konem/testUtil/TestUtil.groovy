@@ -79,9 +79,11 @@ class TestUtil {
         def endTime = System.currentTimeMillis()
         if (allActive) {
             println "Took ${(endTime - startTime) / 1000L} seconds for ${clientList.size()} clients to connect"
+            Thread.sleep(1000)
         } else {
             def inactiveCount = clientList.findAll { !it.isActive() }
             println "${inactiveCount.size()} of ${clientList.size()} clients did not connect in the configured connection timeout of ${max_connect_time} seconds"
+            Thread.sleep(1000)
         }
 
     }
@@ -112,7 +114,7 @@ class TestUtil {
         }
         def startTime = System.currentTimeMillis()
         def changedTime = startTime
-        def noRecentMessage = true
+        def noRecentMessage = false
         int received = 0
         while (true) {
             for (Receiver reader in readerList) {
@@ -129,7 +131,6 @@ class TestUtil {
                 if (count > 0) {
                     received += count
                 }
-                Thread.yield()
                 //println("$received : $expectedNum")
             }
             //println("${received.class} : ${expectedNum.class}")
@@ -168,7 +169,7 @@ class TestUtil {
             }
 
         }
-
+        Thread.sleep(500)
         println "Server active in $change seconds"
 
     }
