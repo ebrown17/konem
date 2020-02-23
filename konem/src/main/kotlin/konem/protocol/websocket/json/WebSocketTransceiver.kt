@@ -41,7 +41,7 @@ class WebSocketTransceiver(channelPort: Int) : Transceiver<WebSocketFrame>(chann
    * @param websocketPaths
    */
   fun broadcastMessage(message: KonemMessage, vararg websocketPaths: String) {
-    logger.debug("broadcastMessage to paths:{} message: {}", websocketPaths, message)
+    logger.debug("paths:{} message: {}", websocketPaths, message)
     val kMessage = serializer.toJson(message)
     val frame = TextWebSocketFrame(kMessage)
     try {

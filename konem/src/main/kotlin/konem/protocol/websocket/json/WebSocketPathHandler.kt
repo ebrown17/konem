@@ -67,7 +67,7 @@ class WebSocketPathHandler(
         future.addListener(ChannelFutureListener.CLOSE)
       }
     } else {
-      logger.warn("sendHttpResponse called when channel not active or writable")
+      logger.warn("called when channel not active or writable")
     }
   }
 

@@ -86,7 +86,7 @@ class JsonServer : Server(), ServerTransmitter<KonemMessage>, JsonServerChannelR
   }
 
   override suspend fun readMessage(addr: SocketAddress, port: Int, message: Any) {
-    logger.trace("readMessage got message: {}", message)
+    logger.trace("got message: {}", message)
     val readerListenerList = receiveListeners[port]
     if (readerListenerList != null) {
       for (listener in readerListenerList) {

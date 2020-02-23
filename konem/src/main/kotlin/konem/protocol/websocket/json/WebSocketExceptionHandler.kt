@@ -24,7 +24,7 @@ class WebSocketExceptionHandler : ExceptionHandler() {
           val path = message.uri()
           val addr = ctx.channel().localAddress() as InetSocketAddress
           logger.warn(
-            "channelRead: end of pipeline reached without handling: {} on port {}; closing connection",
+            "end of pipeline reached without handling: {} on port {}; closing connection",
             path,
             addr.port
           )
@@ -36,7 +36,7 @@ class WebSocketExceptionHandler : ExceptionHandler() {
       }
       else -> {
         logger.warn(
-          "channelRead: end of pipeline reached without with unexpected type {}; closing connection",
+          "end of pipeline reached without with unexpected type {}; closing connection",
           message.javaClass
         )
         ctx.close()

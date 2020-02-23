@@ -18,10 +18,10 @@ class WireClient(private val serverAddress: SocketAddress, config: ClientBootstr
 
   override fun sendMessage(message: KonemMessage) {
     if (!isActive()) {
-      logger.warn("sendMessage attempted to send data on null or closed channel")
+      logger.warn("attempted to send data on null or closed channel")
       return
     }
-    logger.trace("sendMessage remote: {} message: {}", channel?.remoteAddress(), message)
+    logger.trace("remote: {} message: {}", channel?.remoteAddress(), message)
     transceiver.transmit(serverAddress, message)
   }
 
@@ -36,7 +36,7 @@ class WireClient(private val serverAddress: SocketAddress, config: ClientBootstr
   }
 
   override suspend fun readMessage(addr: SocketAddress, port: Int, message: Any) {
-    logger.trace("readMessage got message: {}", message)
+    logger.trace("got message: {}", message)
       for (listener in receiveListeners) {
         listener.handle(addr, message)
       }

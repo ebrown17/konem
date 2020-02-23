@@ -23,10 +23,10 @@ class WebSocketClient(
 
   override fun sendMessage(message: KonemMessage) {
     if (!isActive()) {
-      logger.warn("sendMessage attempted to send data on null or closed channel")
+      logger.warn("attempted to send data on null or closed channel")
       return
     }
-    logger.trace("sendMessage remote: {} message: {}", channel?.remoteAddress(), message)
+    logger.trace("remote: {} message: {}", channel?.remoteAddress(), message)
     transceiver.transmit(serverAddress, message)
   }
 
@@ -37,7 +37,7 @@ class WebSocketClient(
   }
 
   override suspend fun readMessage(addr: SocketAddress, channelPort: Int, webSocketPath: String, message: Any) {
-    logger.trace("readMessage got message: {}", message)
+    logger.trace("got message: {}", message)
     for (listener in readListeners) {
       listener.handle(addr, message)
     }

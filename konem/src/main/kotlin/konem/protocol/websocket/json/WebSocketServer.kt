@@ -23,7 +23,7 @@ class WebSocketServer : Server(), ServerTransmitter<KonemMessage>,
 
   override fun addChannel(port: Int, vararg websocketPaths: String): Boolean {
     if (isPortConfigured(port)) {
-      logger.warn("addChannel port {} already in use; not creating channel", port)
+      logger.warn("port {} already in use; not creating channel", port)
       return false
     }
 
@@ -69,7 +69,7 @@ class WebSocketServer : Server(), ServerTransmitter<KonemMessage>,
   }
 
   override suspend fun readMessage(addr: SocketAddress, channelPort: Int, webSocketPath: String, message: Any) {
-    logger.trace("readMessage got message: {}, addr: {} readListenerMap: {} ", message, addr, readListenerMap)
+    logger.trace("got message: {}, addr: {} readListenerMap: {} ", message, addr, readListenerMap)
     val readListeners = readListenerMap[channelPort]
     if (readListeners != null) {
       val readerListenerList = readListeners[webSocketPath]
@@ -104,7 +104,7 @@ class WebSocketServer : Server(), ServerTransmitter<KonemMessage>,
         if (!configuredPaths.contains(path)) {
           continue
         }
-        logger.info("registerChannelReadListener for {}", path)
+        logger.info("{}", path)
         for (readListeners in readListenerMap.values) {
           var readerListenerList: ArrayList<Receiver>? = readListeners[path]
           if (readerListenerList == null) {
@@ -142,7 +142,7 @@ class WebSocketServer : Server(), ServerTransmitter<KonemMessage>,
         if (!configuredPaths.contains(path)) {
           continue
         }
-        logger.info("registerChannelReadListener for {}", path)
+        logger.info("{}", path)
         val readListeners = readListenerMap[port]
         if (readListeners != null) {
           var readerListenerList: ArrayList<Receiver>? = readListeners[path]

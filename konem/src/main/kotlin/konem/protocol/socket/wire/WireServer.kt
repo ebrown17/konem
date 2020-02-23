@@ -19,7 +19,7 @@ class WireServer : Server(), ServerTransmitter<KonemMessage>, WireServerChannelR
 
   override fun addChannel(port: Int, vararg args: String): Boolean {
     if (isPortConfigured(port)) {
-      logger.warn("addChannel port {} already in use; not creating channel", port)
+      logger.warn("port {} already in use; not creating channel", port)
       return false
     }
 
@@ -86,7 +86,7 @@ class WireServer : Server(), ServerTransmitter<KonemMessage>, WireServerChannelR
   }
 
   override suspend fun readMessage(addr: SocketAddress, port: Int, message: Any) {
-    logger.trace("readMessage got message: {}", message)
+    logger.trace("got message: {}", message)
     val readerListenerList = receiveListeners[port]
     if (readerListenerList != null) {
       for (listener in readerListenerList) {
