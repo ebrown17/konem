@@ -6,7 +6,7 @@ import java.net.SocketAddress
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-abstract class Handler<H,T>(val handlerId: Long, val abstractTransceiver: Transceiver<T,H>) :
+abstract class Handler<H, T>(val handlerId: Long, val abstractTransceiver: Transceiver<T, H>) :
   SimpleChannelInboundHandler<H>() {
 
   private val logger: Logger = LoggerFactory.getLogger(javaClass)

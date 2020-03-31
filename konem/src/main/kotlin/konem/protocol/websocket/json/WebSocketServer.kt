@@ -2,20 +2,19 @@ package konem.protocol.websocket.json
 
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.handler.codec.http.websocketx.WebSocketFrame
+import java.net.InetSocketAddress
+import java.net.SocketAddress
+import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import konem.data.json.KonemMessage
 import konem.netty.stream.*
 import konem.netty.stream.server.Server
 import konem.netty.stream.server.ServerTransmitter
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
-import java.net.InetSocketAddress
-import java.net.SocketAddress
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
-
 
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
-class WebSocketServer : Server<WebSocketFrame,WebSocketFrame>(), ServerTransmitter<KonemMessage>,
+class WebSocketServer : Server<WebSocketFrame, WebSocketFrame>(), ServerTransmitter<KonemMessage>,
   WebSocketServerChannelReader {
 
   private val logger = LoggerFactory.getLogger(WebSocketServer::class.java)
@@ -24,8 +23,7 @@ class WebSocketServer : Server<WebSocketFrame,WebSocketFrame>(), ServerTransmitt
     ConcurrentHashMap()
   private val websocketMap: ConcurrentHashMap<Int, Array<String>> = ConcurrentHashMap()
 
-
-  private  val pathConnectionListeners: MutableList<WsConnectListener> = ArrayList()
+  private val pathConnectionListeners: MutableList<WsConnectListener> = ArrayList()
   private val pathDisconnectionListeners: MutableList<WsDisconnectListener> = ArrayList()
 
   override fun addChannel(port: Int, vararg websocketPaths: String): Boolean {
@@ -45,7 +43,7 @@ class WebSocketServer : Server<WebSocketFrame,WebSocketFrame>(), ServerTransmitt
     return if (validPaths.isNotEmpty()) {
       val transceiver = WebSocketTransceiver(port)
       websocketMap.putIfAbsent(port, validPaths.toTypedArray())
-      val added = addChannel(port, transceiver as Transceiver<WebSocketFrame,WebSocketFrame>)
+      val added = addChannel(port, transceiver as Transceiver<WebSocketFrame, WebSocketFrame>)
       if (added) {
         if (readListenerMap[port] == null) {
           readListenerMap[port] = ConcurrentHashMap()
@@ -213,8 +211,7 @@ class WebSocketServer : Server<WebSocketFrame,WebSocketFrame>(), ServerTransmitt
     }
   }
 
-
-  override fun connectionActive(handler: Handler<WebSocketFrame,WebSocketFrame>) {
+  override fun connectionActive(handler: Handler<WebSocketFrame, WebSocketFrame>) {
     val wHandler = handler as WebSocketFrameHandler
     onPathConnect(wHandler.remoteAddress as InetSocketAddress, wHandler.webSocketPath)
     for (listener in connectionListeners) {
@@ -222,13 +219,11 @@ class WebSocketServer : Server<WebSocketFrame,WebSocketFrame>(), ServerTransmitt
     }
   }
 
-  override fun connectionInActive(handler: Handler<WebSocketFrame,WebSocketFrame>) {
+  override fun connectionInActive(handler: Handler<WebSocketFrame, WebSocketFrame>) {
     val wHandler = handler as WebSocketFrameHandler
     onPathDisconnect(wHandler.remoteAddress as InetSocketAddress, wHandler.webSocketPath)
     for (listener in disconnectionListeners) {
       listener.onDisconnection(wHandler.remoteAddress)
     }
-
   }
-
 }

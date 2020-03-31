@@ -15,7 +15,7 @@ class WebSocketClient(
   private val serverAddress: SocketAddress,
   config: ClientBootstrapConfig<WebSocketFrame, WebSocketFrame>,
   private val fullWSPath: URI
-) : Client<WebSocketFrame,WebSocketFrame>(serverAddress, config),
+) : Client<WebSocketFrame, WebSocketFrame>(serverAddress, config),
   ClientTransmitter<KonemMessage>, WebSocketClientChannelReader {
 
   private val logger = LoggerFactory.getLogger(WebSocketClient::class.java)

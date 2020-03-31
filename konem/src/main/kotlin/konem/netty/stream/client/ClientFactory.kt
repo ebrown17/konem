@@ -14,7 +14,7 @@ import konem.netty.stream.Transceiver
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 
-abstract class ClientFactory<T,H> {
+abstract class ClientFactory<T, H> {
 
   protected val workerGroup: EventLoopGroup
   private val channelClass: Class<out Channel>
@@ -28,7 +28,7 @@ abstract class ClientFactory<T,H> {
     this.clientScope = CoroutineScope(CoroutineName("ClientScope"))
   }
 
-  abstract fun createClient(host: String, port: Int, vararg args: String): Client<T,H>
+  abstract fun createClient(host: String, port: Int, vararg args: String): Client<T, H>
 
   private fun createBootStrap(): Bootstrap {
     val bootstrap = Bootstrap()
@@ -40,15 +40,15 @@ abstract class ClientFactory<T,H> {
     return bootstrap
   }
 
-  protected fun createClientConfig(transceiver: Transceiver<T,H>): ClientBootstrapConfig<T,H> {
+  protected fun createClientConfig(transceiver: Transceiver<T, H>): ClientBootstrapConfig<T, H> {
     return ClientBootstrapConfig(transceiver, createBootStrap(), clientScope)
   }
 
   protected abstract fun createClient(
     address: InetSocketAddress,
-    config: ClientBootstrapConfig<T,H>,
+    config: ClientBootstrapConfig<T, H>,
     vararg args: String
-  ): Client<T,H>
+  ): Client<T, H>
 
   abstract fun shutdown()
 

@@ -9,8 +9,8 @@ import konem.netty.stream.client.ClientTransmitter
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 
-class WireClient(private val serverAddress: SocketAddress, config: ClientBootstrapConfig<KonemMessage,KonemMessage>) :
-  Client<KonemMessage,KonemMessage>(serverAddress, config), ClientTransmitter<KonemMessage>, WireClientChannelReader {
+class WireClient(private val serverAddress: SocketAddress, config: ClientBootstrapConfig<KonemMessage, KonemMessage>) :
+  Client<KonemMessage, KonemMessage>(serverAddress, config), ClientTransmitter<KonemMessage>, WireClientChannelReader {
 
   private val logger = LoggerFactory.getLogger(WireClient::class.java)
   private val transceiver = config.transceiver as WireTransceiver

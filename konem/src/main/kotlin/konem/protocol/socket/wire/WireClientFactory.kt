@@ -1,8 +1,8 @@
 package konem.protocol.socket.wire
 
-import konem.data.protobuf.KonemMessage
 import java.net.InetSocketAddress
 import java.util.ArrayList
+import konem.data.protobuf.KonemMessage
 import konem.netty.stream.client.ClientBootstrapConfig
 import konem.netty.stream.client.ClientFactory
 import org.slf4j.LoggerFactory
@@ -24,7 +24,7 @@ class WireClientFactory : ClientFactory<KonemMessage, KonemMessage>() {
 
   override fun createClient(
     address: InetSocketAddress,
-    config: ClientBootstrapConfig<KonemMessage,KonemMessage>,
+    config: ClientBootstrapConfig<KonemMessage, KonemMessage>,
     vararg args: String
   ): WireClient {
     val transceiver = config.transceiver as WireTransceiver

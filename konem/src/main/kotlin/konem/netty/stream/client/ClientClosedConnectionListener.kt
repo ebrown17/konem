@@ -5,7 +5,7 @@ import io.netty.channel.ChannelFutureListener
 import java.util.concurrent.TimeUnit
 import org.slf4j.LoggerFactory
 
-class ClientClosedConnectionListener<T,H> internal constructor(private val client: Client<T,H>) :
+class ClientClosedConnectionListener<T, H> internal constructor(private val client: Client<T, H>) :
   ChannelFutureListener {
 
   @Throws(InterruptedException::class)

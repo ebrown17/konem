@@ -13,7 +13,7 @@ class WebSocketFrameHandler(
   handlerId: Long,
   val transceiver: WebSocketTransceiver,
   val webSocketPath: String
-) : Handler<WebSocketFrame,WebSocketFrame>(handlerId, transceiver) {
+) : Handler<WebSocketFrame, WebSocketFrame>(handlerId, transceiver) {
 
   private val logger = LoggerFactory.getLogger(WebSocketFrameHandler::class.java)
 

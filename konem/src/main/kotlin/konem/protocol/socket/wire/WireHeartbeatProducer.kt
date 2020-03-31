@@ -7,7 +7,7 @@ import konem.data.protobuf.MessageType
 import konem.netty.stream.HeartbeatProducerHandler
 
 class WireHeartbeatProducer(transceiver: WireTransceiver) :
-  HeartbeatProducerHandler<KonemMessage,KonemMessage>(transceiver) {
+  HeartbeatProducerHandler<KonemMessage, KonemMessage>(transceiver) {
 
   private val messageTypeHeartBeat = MessageType.HEARTBEAT
 

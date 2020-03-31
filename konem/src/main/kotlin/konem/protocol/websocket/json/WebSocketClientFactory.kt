@@ -22,7 +22,7 @@ class WebSocketClientFactory : ClientFactory<WebSocketFrame, WebSocketFrame>() {
 
   override fun createClient(
     address: InetSocketAddress,
-    config: ClientBootstrapConfig<WebSocketFrame,WebSocketFrame>,
+    config: ClientBootstrapConfig<WebSocketFrame, WebSocketFrame>,
     vararg webSocketPath: String
   ): WebSocketClient {
       val fullWebSocketUrl = buildFullWebSocketPath(address, webSocketPath[0])

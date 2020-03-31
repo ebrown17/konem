@@ -8,16 +8,15 @@ import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.util.concurrent.DefaultThreadFactory
-import konem.netty.stream.*
-import kotlinx.coroutines.*
-import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 import java.net.SocketAddress
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import konem.netty.stream.*
+import kotlinx.coroutines.*
+import org.slf4j.LoggerFactory
 
-
-abstract class Server<T,H> : ChannelReader, HandlerListener<H,T> {
+abstract class Server<T, H> : ChannelReader, HandlerListener<H, T> {
 
   private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -28,7 +27,7 @@ abstract class Server<T,H> : ChannelReader, HandlerListener<H,T> {
   private val channelListenerMap: ConcurrentHashMap<Int, ArrayList<ChannelFutureListener>> =
     ConcurrentHashMap()
   private val portAddressMap: ConcurrentHashMap<Int, SocketAddress> = ConcurrentHashMap()
-  private val transceiverMap: ConcurrentHashMap<Int, Transceiver<T,H>> = ConcurrentHashMap()
+  private val transceiverMap: ConcurrentHashMap<Int, Transceiver<T, H>> = ConcurrentHashMap()
   internal val channelConnectionMap: ConcurrentHashMap<Int, ArrayList<SocketAddress>> =
     ConcurrentHashMap()
   internal val remoteHostToChannelMap: ConcurrentHashMap<SocketAddress, Int> =
@@ -73,7 +72,7 @@ abstract class Server<T,H> : ChannelReader, HandlerListener<H,T> {
     return bootstrap
   }
 
-  protected fun addChannel(port: Int, transceiver: Transceiver<T,H>): Boolean {
+  protected fun addChannel(port: Int, transceiver: Transceiver<T, H>): Boolean {
     if (!isPortConfigured(port)) {
       if (!isTransceiverConfigured(port)) {
         if (!isBootstrapConfigured(port)) {
@@ -203,7 +202,7 @@ abstract class Server<T,H> : ChannelReader, HandlerListener<H,T> {
     return Collections.unmodifiableMap(remoteHostToChannelMap)
   }
 
-  fun  registerConnectionListener(listener: ConnectionListener) {
+  fun registerConnectionListener(listener: ConnectionListener) {
     connectionListeners.add(listener)
   }
 
@@ -216,7 +215,7 @@ abstract class Server<T,H> : ChannelReader, HandlerListener<H,T> {
     disconnectionListeners.add(listener)
   }
 
-  fun getTransceiverMap(): Map<Int, Transceiver<T,H>> {
+  fun getTransceiverMap(): Map<Int, Transceiver<T, H>> {
     return Collections.unmodifiableMap(transceiverMap)
   }
 
@@ -250,7 +249,7 @@ abstract class Server<T,H> : ChannelReader, HandlerListener<H,T> {
     return transceiverMap[port] != null
   }
 
-  override fun registerActiveHandler(handler: Handler<H,T>,channelPort: Int, remoteConnection: SocketAddress) {
+  override fun registerActiveHandler(handler: Handler<H, T>, channelPort: Int, remoteConnection: SocketAddress) {
     var channelConnections = channelConnectionMap[channelPort]
     if (channelConnections == null) {
       channelConnections = ArrayList()
@@ -268,7 +267,7 @@ abstract class Server<T,H> : ChannelReader, HandlerListener<H,T> {
     channelConnectionMap[channelPort] = channelConnections
   }
 
-  override fun registerInActiveHandler(handler: Handler<H,T>,channelPort: Int, remoteConnection: SocketAddress) {
+  override fun registerInActiveHandler(handler: Handler<H, T>, channelPort: Int, remoteConnection: SocketAddress) {
     val channelConnections = channelConnectionMap[channelPort]
     if (channelConnections != null) {
       channelConnections.remove(remoteConnection)
@@ -281,7 +280,6 @@ abstract class Server<T,H> : ChannelReader, HandlerListener<H,T> {
     }
   }
 
-  protected abstract fun connectionActive(handler: Handler<H,T>)
-  protected abstract fun connectionInActive(handler: Handler<H,T>)
-
+  protected abstract fun connectionActive(handler: Handler<H, T>)
+  protected abstract fun connectionInActive(handler: Handler<H, T>)
 }

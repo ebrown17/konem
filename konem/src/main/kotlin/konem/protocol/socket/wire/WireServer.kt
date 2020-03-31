@@ -11,7 +11,7 @@ import konem.netty.stream.server.ServerTransmitter
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 
-class WireServer : Server<KonemMessage,KonemMessage>(), ServerTransmitter<KonemMessage>, WireServerChannelReader {
+class WireServer : Server<KonemMessage, KonemMessage>(), ServerTransmitter<KonemMessage>, WireServerChannelReader {
 
   private val logger = LoggerFactory.getLogger(WireServer::class.java)
 
@@ -96,13 +96,13 @@ class WireServer : Server<KonemMessage,KonemMessage>(), ServerTransmitter<KonemM
     }
   }
 
-  override fun connectionActive(handler: Handler<KonemMessage,KonemMessage>) {
+  override fun connectionActive(handler: Handler<KonemMessage, KonemMessage>) {
     for (listener in connectionListeners) {
       listener.onConnection(handler.remoteAddress)
     }
   }
 
-  override fun connectionInActive(handler: Handler<KonemMessage,KonemMessage>) {
+  override fun connectionInActive(handler: Handler<KonemMessage, KonemMessage>) {
     for (listener in disconnectionListeners) {
       listener.onDisconnection(handler.remoteAddress)
     }

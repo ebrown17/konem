@@ -6,7 +6,7 @@ import konem.data.json.KonemMessageSerializer
 import konem.netty.stream.Transceiver
 import org.slf4j.LoggerFactory
 
-class JsonTransceiver(channelPort: Int) : Transceiver<KonemMessage,String>(channelPort) {
+class JsonTransceiver(channelPort: Int) : Transceiver<KonemMessage, String>(channelPort) {
   private val logger = LoggerFactory.getLogger(JsonTransceiver::class.java)
   private val serializer = KonemMessageSerializer()
 

@@ -9,8 +9,8 @@ import konem.netty.stream.client.ClientTransmitter
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 
-class JsonClient(private val serverAddress: SocketAddress, config: ClientBootstrapConfig<KonemMessage,String>) :
-  Client<KonemMessage,String>(serverAddress, config), ClientTransmitter<KonemMessage>, JsonClientChannelReader {
+class JsonClient(private val serverAddress: SocketAddress, config: ClientBootstrapConfig<KonemMessage, String>) :
+  Client<KonemMessage, String>(serverAddress, config), ClientTransmitter<KonemMessage>, JsonClientChannelReader {
 
   private val logger = LoggerFactory.getLogger(JsonClient::class.java)
   private val transceiver = config.transceiver as JsonTransceiver

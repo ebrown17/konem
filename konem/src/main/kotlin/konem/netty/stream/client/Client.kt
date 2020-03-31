@@ -13,18 +13,18 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 
-abstract class Client<T,H>(private val serverAddress: SocketAddress, config: ClientBootstrapConfig<T,H>) :
+abstract class Client<T, H>(private val serverAddress: SocketAddress, config: ClientBootstrapConfig<T, H>) :
   ChannelReader {
 
   private val logger = LoggerFactory.getLogger(javaClass)
-  private val transceiver: Transceiver<T,H> = config.transceiver
+  private val transceiver: Transceiver<T, H> = config.transceiver
   protected val bootstrap: Bootstrap = config.bootstrap
   protected val clientScope: CoroutineScope = config.scope
 
   var channel: Channel? = null
 
-  private var retryListener: ClientConnectionListener<T,H>? = null
-  private var closedListener: ClientClosedConnectionListener<T,H>? = null
+  private var retryListener: ClientConnectionListener<T, H>? = null
+  private var closedListener: ClientClosedConnectionListener<T, H>? = null
   private val connectionListeners: MutableList<ConnectListener> = ArrayList()
   private val disconnectionListeners: MutableList<DisconnectListener> = ArrayList()
 

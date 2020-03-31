@@ -11,7 +11,7 @@ import konem.netty.stream.server.ServerTransmitter
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 
-class JsonServer : Server<KonemMessage,String>(), ServerTransmitter<KonemMessage>, JsonServerChannelReader {
+class JsonServer : Server<KonemMessage, String>(), ServerTransmitter<KonemMessage>, JsonServerChannelReader {
 
   private val logger = LoggerFactory.getLogger(JsonServer::class.java)
 
@@ -96,13 +96,13 @@ class JsonServer : Server<KonemMessage,String>(), ServerTransmitter<KonemMessage
     }
   }
 
-  override fun connectionActive(handler: Handler<String,KonemMessage>) {
+  override fun connectionActive(handler: Handler<String, KonemMessage>) {
     for (listener in connectionListeners) {
       listener.onConnection(handler.remoteAddress)
     }
   }
 
-  override fun connectionInActive(handler: Handler<String,KonemMessage>) {
+  override fun connectionInActive(handler: Handler<String, KonemMessage>) {
     for (listener in disconnectionListeners) {
       listener.onDisconnection(handler.remoteAddress)
     }
