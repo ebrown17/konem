@@ -4,7 +4,7 @@ import io.netty.channel.ChannelFuture
 import io.netty.channel.ChannelFutureListener
 import java.util.concurrent.TimeUnit
 
-class ClientConnectionListener internal constructor(private val client: Client) :
+class ClientConnectionListener<T,H> internal constructor(private val client: Client<T,H>) :
   ChannelFutureListener {
   internal var isAttemptingConnection = true
     private set

@@ -1,5 +1,6 @@
 package konem.protocol.websocket.json
 
+import io.netty.handler.codec.http.websocketx.WebSocketFrame
 import java.net.SocketAddress
 import java.net.URI
 import konem.data.json.KonemMessage
@@ -12,9 +13,9 @@ import org.slf4j.LoggerFactory
 
 class WebSocketClient(
   private val serverAddress: SocketAddress,
-  config: ClientBootstrapConfig,
+  config: ClientBootstrapConfig<WebSocketFrame, WebSocketFrame>,
   private val fullWSPath: URI
-) : Client(serverAddress, config),
+) : Client<WebSocketFrame,WebSocketFrame>(serverAddress, config),
   ClientTransmitter<KonemMessage>, WebSocketClientChannelReader {
 
   private val logger = LoggerFactory.getLogger(WebSocketClient::class.java)

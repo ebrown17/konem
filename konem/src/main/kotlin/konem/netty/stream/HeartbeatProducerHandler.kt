@@ -7,7 +7,7 @@ import io.netty.handler.timeout.IdleStateEvent
 import java.net.InetSocketAddress
 import org.slf4j.LoggerFactory
 
-abstract class HeartbeatProducerHandler<I>(private val transceiver: Transceiver<I>) :
+abstract class HeartbeatProducerHandler<T,H>(private val transceiver: Transceiver<T,H>) :
   ChannelDuplexHandler() {
 
   private val logger = LoggerFactory.getLogger(javaClass)
@@ -25,5 +25,5 @@ abstract class HeartbeatProducerHandler<I>(private val transceiver: Transceiver<
     }
   }
 
-  abstract fun generateHeartBeat(): I
+  abstract fun generateHeartBeat(): H
 }

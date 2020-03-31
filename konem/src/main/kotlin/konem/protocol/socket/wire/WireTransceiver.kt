@@ -5,7 +5,7 @@ import konem.data.protobuf.KonemMessage
 import konem.netty.stream.Transceiver
 import org.slf4j.LoggerFactory
 
-class WireTransceiver(channelPort: Int) : Transceiver<KonemMessage>(channelPort) {
+class WireTransceiver(channelPort: Int) : Transceiver<KonemMessage,KonemMessage>(channelPort) {
   private val logger = LoggerFactory.getLogger(WireTransceiver::class.java)
 
   fun handleMessage(addr: SocketAddress, message: KonemMessage) {

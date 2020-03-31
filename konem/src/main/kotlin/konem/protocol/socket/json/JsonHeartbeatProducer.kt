@@ -6,7 +6,7 @@ import konem.data.json.Message
 import konem.netty.stream.HeartbeatProducerHandler
 
 class JsonHeartbeatProducer(transceiver: JsonTransceiver) :
-  HeartbeatProducerHandler<String>(transceiver) {
+  HeartbeatProducerHandler<KonemMessage,String>(transceiver) {
   private val serializer = KonemMessageSerializer()
   override fun generateHeartBeat(): String {
     return serializer.toJson(KonemMessage(Message.Heartbeat()))

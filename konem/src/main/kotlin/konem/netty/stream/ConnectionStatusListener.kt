@@ -20,8 +20,7 @@ class ConnectionListener(private val connected: (SocketAddress) -> Unit) : Conne
   }
 }
 
-class DisconnectionListener(private val disconnected: (SocketAddress) -> Unit) :
-  DisconnectListener {
+class DisconnectionListener(private val disconnected: (SocketAddress) -> Unit) : DisconnectListener {
   override fun onDisconnection(address: SocketAddress) {
     synchronized(this) {
       disconnected(address)

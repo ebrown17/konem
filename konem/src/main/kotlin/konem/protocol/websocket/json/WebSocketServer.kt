@@ -1,18 +1,21 @@
 package konem.protocol.websocket.json
 
 import io.netty.bootstrap.ServerBootstrap
-import java.net.SocketAddress
-import java.util.ArrayList
-import java.util.concurrent.ConcurrentHashMap
+import io.netty.handler.codec.http.websocketx.WebSocketFrame
 import konem.data.json.KonemMessage
-import konem.netty.stream.Receiver
+import konem.netty.stream.*
 import konem.netty.stream.server.Server
 import konem.netty.stream.server.ServerTransmitter
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
+import java.net.InetSocketAddress
+import java.net.SocketAddress
+import java.util.*
+import java.util.concurrent.ConcurrentHashMap
+
 
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
-class WebSocketServer : Server(), ServerTransmitter<KonemMessage>,
+class WebSocketServer : Server<WebSocketFrame,WebSocketFrame>(), ServerTransmitter<KonemMessage>,
   WebSocketServerChannelReader {
 
   private val logger = LoggerFactory.getLogger(WebSocketServer::class.java)
@@ -20,6 +23,10 @@ class WebSocketServer : Server(), ServerTransmitter<KonemMessage>,
   private val readListenerMap: ConcurrentHashMap<Int, ConcurrentHashMap<String, ArrayList<Receiver>>> =
     ConcurrentHashMap()
   private val websocketMap: ConcurrentHashMap<Int, Array<String>> = ConcurrentHashMap()
+
+
+  private  val pathConnectionListeners: MutableList<WsConnectListener> = ArrayList()
+  private val pathDisconnectionListeners: MutableList<WsDisconnectListener> = ArrayList()
 
   override fun addChannel(port: Int, vararg websocketPaths: String): Boolean {
     if (isPortConfigured(port)) {
@@ -38,7 +45,7 @@ class WebSocketServer : Server(), ServerTransmitter<KonemMessage>,
     return if (validPaths.isNotEmpty()) {
       val transceiver = WebSocketTransceiver(port)
       websocketMap.putIfAbsent(port, validPaths.toTypedArray())
-      val added = addChannel(port, transceiver)
+      val added = addChannel(port, transceiver as Transceiver<WebSocketFrame,WebSocketFrame>)
       if (added) {
         if (readListenerMap[port] == null) {
           readListenerMap[port] = ConcurrentHashMap()
@@ -117,7 +124,6 @@ class WebSocketServer : Server(), ServerTransmitter<KonemMessage>,
     }
   }
 
-  // TODO need to allow registering on a specific port
   override fun registerChannelReadListener(port: Int, receiver: Receiver) {
     val readListener = readListenerMap[port]
     if (readListener != null) {
@@ -181,4 +187,48 @@ class WebSocketServer : Server(), ServerTransmitter<KonemMessage>,
       transceiver.transmit(addr, message)
     }
   }
+
+  fun registerPathConnectionListener(listener: WebSocketConnectionListener) {
+    pathConnectionListeners.add(listener)
+  }
+
+  fun registerPathDisconnectionListener(listener: WebSocketDisconnectionListener) {
+    pathDisconnectionListeners.add(listener)
+  }
+
+  fun registerPathConnectionStatusListener(listener: WebSocketConnectionStatusListener) {
+    pathConnectionListeners.add(listener)
+    pathDisconnectionListeners.add(listener)
+  }
+
+  private fun onPathConnect(remoteConnection: InetSocketAddress, paths: String) {
+    for (listener in pathConnectionListeners) {
+      listener.onConnection(remoteConnection, paths)
+    }
+  }
+
+  private fun onPathDisconnect(remoteConnection: InetSocketAddress, paths: String) {
+    for (listener in pathDisconnectionListeners) {
+      listener.onDisconnection(remoteConnection, paths)
+    }
+  }
+
+
+  override fun connectionActive(handler: Handler<WebSocketFrame,WebSocketFrame>) {
+    val wHandler = handler as WebSocketFrameHandler
+    onPathConnect(wHandler.remoteAddress as InetSocketAddress, wHandler.webSocketPath)
+    for (listener in connectionListeners) {
+      listener.onConnection(wHandler.remoteAddress)
+    }
+  }
+
+  override fun connectionInActive(handler: Handler<WebSocketFrame,WebSocketFrame>) {
+    val wHandler = handler as WebSocketFrameHandler
+    onPathDisconnect(wHandler.remoteAddress as InetSocketAddress, wHandler.webSocketPath)
+    for (listener in disconnectionListeners) {
+      listener.onDisconnection(wHandler.remoteAddress)
+    }
+
+  }
+
 }

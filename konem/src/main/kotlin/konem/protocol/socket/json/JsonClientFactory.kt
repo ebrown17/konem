@@ -1,12 +1,13 @@
 package konem.protocol.socket.json
 
+import konem.data.json.KonemMessage
 import java.net.InetSocketAddress
 import java.util.ArrayList
 import konem.netty.stream.client.ClientBootstrapConfig
 import konem.netty.stream.client.ClientFactory
 import org.slf4j.LoggerFactory
 
-class JsonClientFactory : ClientFactory() {
+class JsonClientFactory : ClientFactory<KonemMessage,String>() {
   private val logger = LoggerFactory.getLogger(JsonClientFactory::class.java)
   private val clientArrayList = ArrayList<JsonClient>()
 
@@ -22,7 +23,7 @@ class JsonClientFactory : ClientFactory() {
 
   override fun createClient(
     address: InetSocketAddress,
-    config: ClientBootstrapConfig,
+    config: ClientBootstrapConfig<KonemMessage,String>,
     vararg args: String
   ): JsonClient {
     val transceiver = config.transceiver as JsonTransceiver

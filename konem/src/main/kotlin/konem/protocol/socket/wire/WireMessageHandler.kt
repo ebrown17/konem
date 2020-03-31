@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory
 class WireMessageHandler(
   handlerId: Long,
   val transceiver: WireTransceiver
-) : Handler<KonemMessage>(handlerId, transceiver) {
+) : Handler<KonemMessage,KonemMessage>(handlerId, transceiver) {
 
   private val logger = LoggerFactory.getLogger(WireMessageHandler::class.java)
 

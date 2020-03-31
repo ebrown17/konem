@@ -13,18 +13,18 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 
-abstract class Client(private val serverAddress: SocketAddress, config: ClientBootstrapConfig) :
+abstract class Client<T,H>(private val serverAddress: SocketAddress, config: ClientBootstrapConfig<T,H>) :
   ChannelReader {
 
   private val logger = LoggerFactory.getLogger(javaClass)
-  private val transceiver: Transceiver<*> = config.transceiver
+  private val transceiver: Transceiver<T,H> = config.transceiver
   protected val bootstrap: Bootstrap = config.bootstrap
   protected val clientScope: CoroutineScope = config.scope
 
   var channel: Channel? = null
 
-  private var retryListener: ClientConnectionListener? = null
-  private var closedListener: ClientClosedConnectionListener? = null
+  private var retryListener: ClientConnectionListener<T,H>? = null
+  private var closedListener: ClientClosedConnectionListener<T,H>? = null
   private val connectionListeners: MutableList<ConnectListener> = ArrayList()
   private val disconnectionListeners: MutableList<DisconnectListener> = ArrayList()
 
@@ -144,15 +144,15 @@ abstract class Client(private val serverAddress: SocketAddress, config: ClientBo
     channel?.close()
   }
 
-  fun registerConnectionListener(listener: ConnectionListener) {
+  open fun registerConnectionListener(listener: ConnectionListener) {
     connectionListeners.add(listener)
   }
 
-  fun registerDisconnectionListener(listener: DisconnectionListener) {
+  open fun registerDisconnectionListener(listener: DisconnectionListener) {
     disconnectionListeners.add(listener)
   }
 
-  fun registerConnectionStatusListener(listener: ConnectionStatusListener) {
+  open fun registerConnectionStatusListener(listener: ConnectionStatusListener) {
     connectionListeners.add(listener)
     disconnectionListeners.add(listener)
   }

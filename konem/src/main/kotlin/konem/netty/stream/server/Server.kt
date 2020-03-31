@@ -8,16 +8,16 @@ import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.util.concurrent.DefaultThreadFactory
+import konem.netty.stream.*
+import kotlinx.coroutines.*
+import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 import java.net.SocketAddress
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import konem.netty.stream.*
-import kotlin.collections.ArrayList
-import kotlinx.coroutines.*
-import org.slf4j.LoggerFactory
 
-abstract class Server : ChannelReader, HandlerListener {
+
+abstract class Server<T,H> : ChannelReader, HandlerListener<H,T> {
 
   private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -28,14 +28,14 @@ abstract class Server : ChannelReader, HandlerListener {
   private val channelListenerMap: ConcurrentHashMap<Int, ArrayList<ChannelFutureListener>> =
     ConcurrentHashMap()
   private val portAddressMap: ConcurrentHashMap<Int, SocketAddress> = ConcurrentHashMap()
-  private val transceiverMap: ConcurrentHashMap<Int, Transceiver<*>> = ConcurrentHashMap()
-  private val channelConnectionMap: ConcurrentHashMap<Int, ArrayList<SocketAddress>> =
+  private val transceiverMap: ConcurrentHashMap<Int, Transceiver<T,H>> = ConcurrentHashMap()
+  internal val channelConnectionMap: ConcurrentHashMap<Int, ArrayList<SocketAddress>> =
     ConcurrentHashMap()
-  private val remoteHostToChannelMap: ConcurrentHashMap<SocketAddress, Int> =
+  internal val remoteHostToChannelMap: ConcurrentHashMap<SocketAddress, Int> =
     ConcurrentHashMap()
 
-  private val connectionListeners: MutableList<ConnectListener> = ArrayList()
-  private val disconnectionListeners: MutableList<DisconnectListener> = ArrayList()
+  internal val connectionListeners: MutableList<ConnectListener> = ArrayList()
+  internal val disconnectionListeners: MutableList<DisconnectListener> = ArrayList()
 
   protected val serverScope = CoroutineScope(CoroutineName("ServerScope"))
 
@@ -73,7 +73,7 @@ abstract class Server : ChannelReader, HandlerListener {
     return bootstrap
   }
 
-  protected fun addChannel(port: Int, transceiver: Transceiver<*>): Boolean {
+  protected fun addChannel(port: Int, transceiver: Transceiver<T,H>): Boolean {
     if (!isPortConfigured(port)) {
       if (!isTransceiverConfigured(port)) {
         if (!isBootstrapConfigured(port)) {
@@ -168,7 +168,7 @@ abstract class Server : ChannelReader, HandlerListener {
     logger.info("server fully shutdown")
   }
 
-  private fun handleConnect(remoteConnection: SocketAddress) {
+/*  private fun handleConnect(remoteConnection: SocketAddress) {
     serverScope.launch {
       withTimeout(twoSeconds) {
         delay(oneSecond)
@@ -188,7 +188,7 @@ abstract class Server : ChannelReader, HandlerListener {
         }
       }
     }
-  }
+  }*/
 
   fun getChannelConnections(channelPort: Int): List<SocketAddress> {
     val channelConnections = channelConnectionMap[channelPort]
@@ -203,7 +203,7 @@ abstract class Server : ChannelReader, HandlerListener {
     return Collections.unmodifiableMap(remoteHostToChannelMap)
   }
 
-  fun registerConnectionListener(listener: ConnectionListener) {
+  fun  registerConnectionListener(listener: ConnectionListener) {
     connectionListeners.add(listener)
   }
 
@@ -211,12 +211,12 @@ abstract class Server : ChannelReader, HandlerListener {
     disconnectionListeners.add(listener)
   }
 
-  fun registerConnectionStatusListener(listener: ConnectionStatusListener) {
+ fun registerConnectionStatusListener(listener: ConnectionStatusListener) {
     connectionListeners.add(listener)
     disconnectionListeners.add(listener)
   }
 
-  fun getTransceiverMap(): Map<Int, Transceiver<*>> {
+  fun getTransceiverMap(): Map<Int, Transceiver<T,H>> {
     return Collections.unmodifiableMap(transceiverMap)
   }
 
@@ -250,7 +250,7 @@ abstract class Server : ChannelReader, HandlerListener {
     return transceiverMap[port] != null
   }
 
-  override fun registerActiveHandler(channelPort: Int, remoteConnection: SocketAddress) {
+  override fun registerActiveHandler(handler: Handler<H,T>,channelPort: Int, remoteConnection: SocketAddress) {
     var channelConnections = channelConnectionMap[channelPort]
     if (channelConnections == null) {
       channelConnections = ArrayList()
@@ -258,20 +258,30 @@ abstract class Server : ChannelReader, HandlerListener {
     if (!channelConnections.contains(remoteConnection)) {
       channelConnections.add(remoteConnection)
       remoteHostToChannelMap[remoteConnection] = channelPort
-      handleConnect(remoteConnection)
+      serverScope.launch {
+         // delay(1_000L)
+          connectionActive(handler)
+      }
     }
     val transceiver = transceiverMap[channelPort]
     transceiver?.registerChannelReader(remoteConnection, this)
     channelConnectionMap[channelPort] = channelConnections
   }
 
-  override fun registerInActiveHandler(channelPort: Int, remoteConnection: SocketAddress) {
+  override fun registerInActiveHandler(handler: Handler<H,T>,channelPort: Int, remoteConnection: SocketAddress) {
     val channelConnections = channelConnectionMap[channelPort]
     if (channelConnections != null) {
       channelConnections.remove(remoteConnection)
       remoteHostToChannelMap.remove(remoteConnection)
       channelConnectionMap.putIfAbsent(channelPort, channelConnections)
-      handleDisconnect(remoteConnection)
+      serverScope.launch {
+       // delay(1_000L)
+        connectionInActive(handler)
+      }
     }
   }
+
+  protected abstract fun connectionActive(handler: Handler<H,T>)
+  protected abstract fun connectionInActive(handler: Handler<H,T>)
+
 }

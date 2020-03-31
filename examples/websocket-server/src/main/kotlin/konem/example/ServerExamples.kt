@@ -3,12 +3,12 @@ package konem.example
 import konem.data.json.KonemMessage
 import konem.data.json.Message
 import konem.netty.stream.ConnectionListener
-import konem.netty.stream.ConnectionStatusListener
 import konem.netty.stream.DisconnectionListener
-import konem.protocol.websocket.json.KonemMessageReceiver
-import konem.protocol.websocket.json.WebSocketClientFactory
-import konem.protocol.websocket.json.WebSocketServer
+import konem.netty.stream.StatusListener
+import konem.protocol.websocket.json.*
 import org.slf4j.LoggerFactory
+import java.lang.Thread.sleep
+import java.net.SocketAddress
 
 
 private val logger = LoggerFactory.getLogger("Main")
@@ -30,12 +30,12 @@ fun websocketServerExamples() {
     count++
   })
 
-  server.registerConnectionStatusListener(
-    ConnectionStatusListener(
-    connected = { remoteAddr ->
-      logger.info("Connection from {}", remoteAddr)
-    }, disconnected = { remoteAddr ->
-      logger.info("Disconnection from {}", remoteAddr)
+  server.registerPathConnectionStatusListener(
+    WebSocketConnectionStatusListener(
+    connected = { remoteAddr,path ->
+      logger.info("XXXXX Connection from {} to path {}", remoteAddr,path)
+    }, disconnected = { remoteAddr,path ->
+      logger.info("XXXXX Disconnection from  {} to path {}", remoteAddr,path)
     }
   ))
 
@@ -43,7 +43,7 @@ fun websocketServerExamples() {
   val client = fact.createClient("localhost", 8080, "/tester")
   val client2 = fact.createClient("localhost", 8080, "/tester")
 
-  val connectionListener = ConnectionListener { remoteAddr ->
+  val connectionListener = ConnectionListener { remoteAddr: SocketAddress->
     logger.info("Client connected to {}", remoteAddr)
   }
 
@@ -76,5 +76,8 @@ fun websocketServerExamples() {
 
   client.disconnect()
   client2.disconnect()
+
+
+  sleep(5000)
   server.shutdownServer()
 }

@@ -1,5 +1,6 @@
 package konem.protocol.websocket.json
 
+import io.netty.handler.codec.http.websocketx.WebSocketFrame
 import java.net.InetSocketAddress
 import java.net.URI
 import java.net.URISyntaxException
@@ -9,7 +10,7 @@ import konem.netty.stream.client.ClientFactory
 import org.slf4j.LoggerFactory
 
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
-class WebSocketClientFactory : ClientFactory() {
+class WebSocketClientFactory : ClientFactory<WebSocketFrame, WebSocketFrame>() {
   private val logger = LoggerFactory.getLogger(WebSocketClientFactory::class.java)
   private val clientArrayList = ArrayList<WebSocketClient>()
 
@@ -21,7 +22,7 @@ class WebSocketClientFactory : ClientFactory() {
 
   override fun createClient(
     address: InetSocketAddress,
-    config: ClientBootstrapConfig,
+    config: ClientBootstrapConfig<WebSocketFrame,WebSocketFrame>,
     vararg webSocketPath: String
   ): WebSocketClient {
       val fullWebSocketUrl = buildFullWebSocketPath(address, webSocketPath[0])

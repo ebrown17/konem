@@ -1,5 +1,6 @@
 package konem.protocol.socket.wire
 
+import konem.data.protobuf.KonemMessage
 import java.net.InetSocketAddress
 import java.util.ArrayList
 import konem.netty.stream.client.ClientBootstrapConfig
@@ -7,7 +8,7 @@ import konem.netty.stream.client.ClientFactory
 import org.slf4j.LoggerFactory
 
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
-class WireClientFactory : ClientFactory() {
+class WireClientFactory : ClientFactory<KonemMessage, KonemMessage>() {
   private val logger = LoggerFactory.getLogger(WireClientFactory::class.java)
   private val clientArrayList = ArrayList<WireClient>()
 
@@ -23,7 +24,7 @@ class WireClientFactory : ClientFactory() {
 
   override fun createClient(
     address: InetSocketAddress,
-    config: ClientBootstrapConfig,
+    config: ClientBootstrapConfig<KonemMessage,KonemMessage>,
     vararg args: String
   ): WireClient {
     val transceiver = config.transceiver as WireTransceiver

@@ -4,13 +4,14 @@ import io.netty.bootstrap.ServerBootstrap
 import java.net.SocketAddress
 import java.util.concurrent.ConcurrentHashMap
 import konem.data.protobuf.KonemMessage
+import konem.netty.stream.Handler
 import konem.netty.stream.Receiver
 import konem.netty.stream.server.Server
 import konem.netty.stream.server.ServerTransmitter
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 
-class WireServer : Server(), ServerTransmitter<KonemMessage>, WireServerChannelReader {
+class WireServer : Server<KonemMessage,KonemMessage>(), ServerTransmitter<KonemMessage>, WireServerChannelReader {
 
   private val logger = LoggerFactory.getLogger(WireServer::class.java)
 
@@ -92,6 +93,18 @@ class WireServer : Server(), ServerTransmitter<KonemMessage>, WireServerChannelR
       for (listener in readerListenerList) {
         listener.handle(addr, message)
       }
+    }
+  }
+
+  override fun connectionActive(handler: Handler<KonemMessage,KonemMessage>) {
+    for (listener in connectionListeners) {
+      listener.onConnection(handler.remoteAddress)
+    }
+  }
+
+  override fun connectionInActive(handler: Handler<KonemMessage,KonemMessage>) {
+    for (listener in disconnectionListeners) {
+      listener.onDisconnection(handler.remoteAddress)
     }
   }
 }

@@ -4,8 +4,8 @@ import io.netty.bootstrap.Bootstrap
 import konem.netty.stream.Transceiver
 import kotlinx.coroutines.CoroutineScope
 
-data class ClientBootstrapConfig constructor(
-  val transceiver: Transceiver<*>,
+data class ClientBootstrapConfig<T,H> constructor(
+  val transceiver: Transceiver<T,H>,
   val bootstrap: Bootstrap,
   val scope: CoroutineScope
 )

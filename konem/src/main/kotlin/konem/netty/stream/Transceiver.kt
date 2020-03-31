@@ -5,24 +5,24 @@ import java.util.ArrayList
 import java.util.concurrent.ConcurrentHashMap
 import org.slf4j.LoggerFactory
 
-open class Transceiver<I>(protected val channelPort: Int) {
+open class Transceiver<T,H>(protected val channelPort: Int) {
 
   private val logger = LoggerFactory.getLogger(javaClass)
 
-  protected val activeHandlers: ConcurrentHashMap<SocketAddress, Handler<I>> =
+  protected val activeHandlers: ConcurrentHashMap<SocketAddress, Handler<H,T>> =
     ConcurrentHashMap()
   protected val channelReaders: ConcurrentHashMap<SocketAddress, ChannelReader> =
     ConcurrentHashMap()
-  protected val handlerListeners: MutableList<HandlerListener> = ArrayList()
+  protected val handlerListeners: MutableList<HandlerListener<H,T>> = ArrayList()
   protected val activeLock = Any()
 
-  fun handlerActive(addr: SocketAddress, handler: Handler<I>) {
+  fun handlerActive(addr: SocketAddress, handler: Handler<H,T>) {
     logger.info("remote: {}", addr)
     synchronized(activeLock) {
       val activeHandler = activeHandlers[addr]
       if (activeHandler == null) {
         activeHandlers.putIfAbsent(addr, handler)
-        handlerListeners.forEach { listener -> listener.registerActiveHandler(channelPort, addr) }
+        handlerListeners.forEach { listener -> listener.registerActiveHandler(handler,channelPort,addr) }
       }
     }
   }
@@ -30,8 +30,10 @@ open class Transceiver<I>(protected val channelPort: Int) {
   fun handlerInActive(addr: SocketAddress) {
     logger.info("handler inactive for remote: {}", addr)
     synchronized(activeLock) {
-      activeHandlers.remove(addr)
-      handlerListeners.forEach { listener -> listener.registerInActiveHandler(channelPort, addr) }
+      val handler = activeHandlers.remove(addr)
+      if(handler!=null){
+        handlerListeners.forEach { listener -> listener.registerInActiveHandler(handler,channelPort,addr ) }
+      }
     }
   }
 
@@ -39,7 +41,7 @@ open class Transceiver<I>(protected val channelPort: Int) {
     channelReaders.putIfAbsent(addr, reader)
   }
 
-  fun registerHandlerListener(listener: HandlerListener) {
+  fun registerHandlerListener(listener: HandlerListener<H,T>) {
     if (!handlerListeners.contains(listener)) {
       handlerListeners.add(listener)
     }
@@ -50,7 +52,7 @@ open class Transceiver<I>(protected val channelPort: Int) {
    * @param addr
    * @param message
    */
-  fun transmit(addr: SocketAddress, message: I) {
+  fun transmit(addr: SocketAddress, message: H) {
     synchronized(activeLock) {
       logger.debug("to addr: {} with {}", addr, message)
       val handler = activeHandlers[addr]

@@ -5,7 +5,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame
 import konem.netty.stream.HeartbeatProducerHandler
 
 class WebSocketPingHandler(transceiver: WebSocketTransceiver) :
-  HeartbeatProducerHandler<WebSocketFrame>(transceiver) {
+  HeartbeatProducerHandler<WebSocketFrame,WebSocketFrame>(transceiver) {
 
   override fun generateHeartBeat(): WebSocketFrame {
     return PingWebSocketFrame()

@@ -8,7 +8,7 @@ import konem.data.json.KonemMessageSerializer
 import konem.netty.stream.Transceiver
 import org.slf4j.LoggerFactory
 
-class WebSocketTransceiver(channelPort: Int) : Transceiver<WebSocketFrame>(channelPort) {
+class WebSocketTransceiver(channelPort: Int) : Transceiver<WebSocketFrame,WebSocketFrame>(channelPort) {
   private val logger = LoggerFactory.getLogger(WebSocketTransceiver::class.java)
   private val serializer = KonemMessageSerializer()
 

@@ -6,15 +6,15 @@ import java.net.SocketAddress
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-abstract class Handler<I>(val handlerId: Long, val abstractTransceiver: Transceiver<I>) :
-  SimpleChannelInboundHandler<I>() {
+abstract class Handler<H,T>(val handlerId: Long, val abstractTransceiver: Transceiver<T,H>) :
+  SimpleChannelInboundHandler<H>() {
 
   private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
   private lateinit var context: ChannelHandlerContext
-  protected lateinit var remoteAddress: SocketAddress
+  internal lateinit var remoteAddress: SocketAddress
 
-  fun sendMessage(message: I) {
+  fun sendMessage(message: H) {
     if (isActive()) {
       logger.trace("{} to {} written to wire", message.toString(), remoteAddress)
       context.writeAndFlush(message)
@@ -35,8 +35,8 @@ abstract class Handler<I>(val handlerId: Long, val abstractTransceiver: Transcei
   @Throws(Exception::class)
   override fun channelInactive(ctx: ChannelHandlerContext) {
     logger.info("remote peer: {} disconnected", ctx.channel().remoteAddress())
-    ctx.fireChannelInactive()
     abstractTransceiver.handlerInActive(remoteAddress)
+    ctx.fireChannelInactive()
   }
 
   fun isActive(): Boolean {

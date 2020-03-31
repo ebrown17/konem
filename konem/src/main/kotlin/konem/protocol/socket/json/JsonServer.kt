@@ -4,13 +4,14 @@ import io.netty.bootstrap.ServerBootstrap
 import java.net.SocketAddress
 import java.util.concurrent.ConcurrentHashMap
 import konem.data.json.KonemMessage
+import konem.netty.stream.Handler
 import konem.netty.stream.Receiver
 import konem.netty.stream.server.Server
 import konem.netty.stream.server.ServerTransmitter
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 
-class JsonServer : Server(), ServerTransmitter<KonemMessage>, JsonServerChannelReader {
+class JsonServer : Server<KonemMessage,String>(), ServerTransmitter<KonemMessage>, JsonServerChannelReader {
 
   private val logger = LoggerFactory.getLogger(JsonServer::class.java)
 
@@ -92,6 +93,18 @@ class JsonServer : Server(), ServerTransmitter<KonemMessage>, JsonServerChannelR
       for (listener in readerListenerList) {
         listener.handle(addr, message)
       }
+    }
+  }
+
+  override fun connectionActive(handler: Handler<String,KonemMessage>) {
+    for (listener in connectionListeners) {
+      listener.onConnection(handler.remoteAddress)
+    }
+  }
+
+  override fun connectionInActive(handler: Handler<String,KonemMessage>) {
+    for (listener in disconnectionListeners) {
+      listener.onDisconnection(handler.remoteAddress)
     }
   }
 }
