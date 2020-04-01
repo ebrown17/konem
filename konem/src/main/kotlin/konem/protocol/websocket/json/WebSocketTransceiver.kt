@@ -8,14 +8,14 @@ import konem.data.json.KonemMessageSerializer
 import konem.netty.stream.Transceiver
 import org.slf4j.LoggerFactory
 
+@Suppress("UNCHECKED_CAST")
 class WebSocketTransceiver(channelPort: Int) : Transceiver<WebSocketFrame, WebSocketFrame>(channelPort) {
   private val logger = LoggerFactory.getLogger(WebSocketTransceiver::class.java)
   private val serializer = KonemMessageSerializer()
 
-  fun handleMessage(addr: SocketAddress, webSocketPath: String, message: String) {
+  fun handleMessage(addr: SocketAddress, webSocketPath: String, message: KonemMessage) {
     logger.trace("from {} with {}", addr, message)
-    val reader = channelReaders[addr] as WebSocketChannelReader
-    logger.trace("channelReaders: {} reader got: {}", channelReaders.size, reader)
+    val reader = channelReaders[addr] as WebSocketChannelReader<KonemMessage>
     reader.handleChannelRead(addr, channelPort, webSocketPath, message)
   }
 

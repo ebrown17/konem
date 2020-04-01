@@ -11,7 +11,6 @@ class WireTransceiver(channelPort: Int) : Transceiver<KonemMessage, KonemMessage
   fun handleMessage(addr: SocketAddress, message: KonemMessage) {
     logger.trace("from {} with {}", addr, message)
     val reader = channelReaders[addr] as WireChannelReader
-    logger.trace("channelReaders: {} reader got: {}", channelReaders.size, reader)
     reader.handleChannelRead(addr, channelPort, message)
   }
 

@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
 class WebSocketServer : Server<WebSocketFrame, WebSocketFrame>(), ServerTransmitter<KonemMessage>,
-  WebSocketServerChannelReader {
+  WebSocketServerChannelReader<KonemMessage> {
 
   private val logger = LoggerFactory.getLogger(WebSocketServer::class.java)
 
@@ -67,13 +67,13 @@ class WebSocketServer : Server<WebSocketFrame, WebSocketFrame>(), ServerTransmit
     return createServerBootstrap(channel)
   }
 
-  override fun handleChannelRead(addr: SocketAddress, channelPort: Int, webSocketPath: String, message: Any) {
+  override fun handleChannelRead(addr: SocketAddress, channelPort: Int, webSocketPath: String, message: KonemMessage) {
     serverScope.launch {
       readMessage(addr, channelPort, webSocketPath, message)
     }
   }
 
-  override suspend fun readMessage(addr: SocketAddress, channelPort: Int, webSocketPath: String, message: Any) {
+  override suspend fun readMessage(addr: SocketAddress, channelPort: Int, webSocketPath: String, message: KonemMessage) {
     logger.trace("got message: {}, addr: {} readListenerMap: {} ", message, addr, readListenerMap)
     val readListeners = readListenerMap[channelPort]
     if (readListeners != null) {

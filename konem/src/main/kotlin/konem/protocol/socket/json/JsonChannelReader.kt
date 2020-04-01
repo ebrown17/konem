@@ -4,12 +4,12 @@ import java.net.SocketAddress
 import konem.netty.stream.ChannelReader
 import konem.netty.stream.ServerChannelReader
 
-interface JsonChannelReader {
-  fun handleChannelRead(addr: SocketAddress, port: Int, message: Any)
+interface JsonChannelReader<T> {
+  fun handleChannelRead(addr: SocketAddress, port: Int, message: T)
 
-  suspend fun readMessage(addr: SocketAddress, port: Int, message: Any)
+  suspend fun readMessage(addr: SocketAddress, port: Int, message: T)
 }
 
-interface JsonClientChannelReader : ChannelReader, JsonChannelReader
+interface JsonClientChannelReader<T> : ChannelReader, JsonChannelReader<T>
 
-interface JsonServerChannelReader : ServerChannelReader, JsonChannelReader
+interface JsonServerChannelReader<T> : ServerChannelReader, JsonChannelReader<T>

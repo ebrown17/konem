@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 
 class JsonClient(private val serverAddress: SocketAddress, config: ClientBootstrapConfig<KonemMessage, String>) :
-  Client<KonemMessage, String>(serverAddress, config), ClientTransmitter<KonemMessage>, JsonClientChannelReader {
+  Client<KonemMessage, String>(serverAddress, config), ClientTransmitter<KonemMessage>, JsonClientChannelReader<KonemMessage> {
 
   private val logger = LoggerFactory.getLogger(JsonClient::class.java)
   private val transceiver = config.transceiver as JsonTransceiver
@@ -29,13 +29,13 @@ class JsonClient(private val serverAddress: SocketAddress, config: ClientBootstr
     receiveListeners.add(receiver)
   }
 
-  override fun handleChannelRead(addr: SocketAddress, port: Int, message: Any) {
+  override fun handleChannelRead(addr: SocketAddress, port: Int, message: KonemMessage) {
     clientScope.launch {
       readMessage(addr, port, message)
     }
   }
 
-  override suspend fun readMessage(addr: SocketAddress, port: Int, message: Any) {
+  override suspend fun readMessage(addr: SocketAddress, port: Int, message: KonemMessage) {
     logger.trace("got message: {}", message)
     for (listener in receiveListeners) {
       listener.handle(addr, message)

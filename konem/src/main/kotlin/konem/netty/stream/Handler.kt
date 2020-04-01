@@ -16,7 +16,7 @@ abstract class Handler<H, T>(val handlerId: Long, val abstractTransceiver: Trans
 
   fun sendMessage(message: H) {
     if (isActive()) {
-      logger.trace("{} to {} written to wire", message.toString(), remoteAddress)
+      logger.trace("[write2Wire] dest: {} msg: {} ",remoteAddress, message.toString())
       context.writeAndFlush(message)
     } else {
       logger.warn("called when channel not active or writable")

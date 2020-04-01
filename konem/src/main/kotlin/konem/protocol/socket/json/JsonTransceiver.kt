@@ -1,3 +1,5 @@
+@file:Suppress("UNCHECKED_CAST")
+
 package konem.protocol.socket.json
 
 import java.net.SocketAddress
@@ -6,14 +8,14 @@ import konem.data.json.KonemMessageSerializer
 import konem.netty.stream.Transceiver
 import org.slf4j.LoggerFactory
 
+@Suppress("UNCHECKED_CAST")
 class JsonTransceiver(channelPort: Int) : Transceiver<KonemMessage, String>(channelPort) {
   private val logger = LoggerFactory.getLogger(JsonTransceiver::class.java)
   private val serializer = KonemMessageSerializer()
 
-  fun handleMessage(addr: SocketAddress, message: String) {
+  fun handleMessage(addr: SocketAddress, message: KonemMessage) {
     logger.trace("from {} with {}", addr, message)
-    val reader = channelReaders[addr] as JsonChannelReader
-    logger.trace("channelReaders: {} reader got: {}", channelReaders.size, reader)
+    val reader = channelReaders[addr] as JsonChannelReader<KonemMessage>
     reader.handleChannelRead(addr, channelPort, message)
   }
 

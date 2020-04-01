@@ -5,13 +5,13 @@ import konem.netty.stream.ChannelReader
 import konem.netty.stream.Receiver
 import konem.netty.stream.ServerChannelReader
 
-interface WebSocketChannelReader {
-  fun handleChannelRead(addr: SocketAddress, channelPort: Int, webSocketPath: String, message: Any)
-  suspend fun readMessage(addr: SocketAddress, channelPort: Int, webSocketPath: String, message: Any)
+interface WebSocketChannelReader<T> {
+  fun handleChannelRead(addr: SocketAddress, channelPort: Int, webSocketPath: String, message: T)
+  suspend fun readMessage(addr: SocketAddress, channelPort: Int, webSocketPath: String, message: T)
 }
 
-interface WebSocketClientChannelReader : ChannelReader,
-  WebSocketChannelReader {
+interface WebSocketClientChannelReader<T> : ChannelReader,
+  WebSocketChannelReader<T> {
 
   /**
    * Registers a receiver on the specified websocket paths.
@@ -22,8 +22,8 @@ interface WebSocketClientChannelReader : ChannelReader,
   fun registerChannelReadListener(receiver: Receiver, vararg args: String)
 }
 
-interface WebSocketServerChannelReader : ServerChannelReader,
-  WebSocketChannelReader {
+interface WebSocketServerChannelReader<T> : ServerChannelReader,
+  WebSocketChannelReader<T> {
 
   /**
    * Registers a receiver on the specified websocket paths.

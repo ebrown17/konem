@@ -26,23 +26,23 @@ fun websocketServerExamples() {
   var count = 0
 
   server.registerChannelReadListener(KonemMessageReceiver { _, message ->
-    logger.info("KoneMessageReceiver: {} ", message)
+    logger.info("KoneMessageReceiver: got {} ", message)
     count++
   })
 
   server.registerPathConnectionStatusListener(
     WebSocketConnectionStatusListener(
     connected = { remoteAddr,path ->
-      logger.info("XXXXX Connection from {} to path {}", remoteAddr,path)
+      logger.info("Connection from {} to path {}", remoteAddr,path)
     }, disconnected = { remoteAddr,path ->
-      logger.info("XXXXX Disconnection from  {} to path {}", remoteAddr,path)
+      logger.info("Disconnection from  {} to path {}", remoteAddr,path)
     }
   ))
 
   val fact = WebSocketClientFactory()
   val client = fact.createClient("localhost", 8080, "/tester")
   val client2 = fact.createClient("localhost", 8080, "/tester")
-
+  val client3 = fact.createClient("localhost", 8080, "/tester")
   val connectionListener = ConnectionListener { remoteAddr: SocketAddress->
     logger.info("Client connected to {}", remoteAddr)
   }
@@ -53,22 +53,15 @@ fun websocketServerExamples() {
     logger.info("Client {} disconnected from {}", client.toString(), remoteAddr)
   })
 
-  client2.registerConnectionListener(connectionListener)
-
-  client2.registerDisconnectionListener(DisconnectionListener { remoteAddr ->
-    logger.info("Client {} disconnected from {}", client.toString(), remoteAddr)
-  })
-
   client.connect()
-
   client2.connect()
+  client3.connect()
 
   Thread.sleep(1000)
 
   repeat(10) {
     client.sendMessage(KonemMessage(Message.Heartbeat("$it")))
-    client2.sendMessage(KonemMessage(Message.Heartbeat("$it")))
-    Thread.sleep(1000)
+    Thread.sleep(500)
   }
   Thread.sleep(1000)
   println(count)
@@ -76,7 +69,7 @@ fun websocketServerExamples() {
 
   client.disconnect()
   client2.disconnect()
-
+  client3.disconnect()
 
   sleep(5000)
   server.shutdownServer()

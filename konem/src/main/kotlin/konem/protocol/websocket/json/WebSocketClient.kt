@@ -16,7 +16,7 @@ class WebSocketClient(
   config: ClientBootstrapConfig<WebSocketFrame, WebSocketFrame>,
   private val fullWSPath: URI
 ) : Client<WebSocketFrame, WebSocketFrame>(serverAddress, config),
-  ClientTransmitter<KonemMessage>, WebSocketClientChannelReader {
+  ClientTransmitter<KonemMessage>, WebSocketClientChannelReader<KonemMessage> {
 
   private val logger = LoggerFactory.getLogger(WebSocketClient::class.java)
   private val transceiver = config.transceiver as WebSocketTransceiver
@@ -31,13 +31,13 @@ class WebSocketClient(
     transceiver.transmit(serverAddress, message)
   }
 
-  override fun handleChannelRead(addr: SocketAddress, channelPort: Int, webSocketPath: String, message: Any) {
+  override fun handleChannelRead(addr: SocketAddress, channelPort: Int, webSocketPath: String, message: KonemMessage) {
     clientScope.launch {
       readMessage(addr, channelPort, webSocketPath, message)
     }
   }
 
-  override suspend fun readMessage(addr: SocketAddress, channelPort: Int, webSocketPath: String, message: Any) {
+  override suspend fun readMessage(addr: SocketAddress, channelPort: Int, webSocketPath: String, message: KonemMessage) {
     logger.trace("got message: {}", message)
     for (listener in readListeners) {
       listener.handle(addr, message)

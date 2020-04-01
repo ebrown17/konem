@@ -11,7 +11,7 @@ import konem.netty.stream.server.ServerTransmitter
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 
-class JsonServer : Server<KonemMessage, String>(), ServerTransmitter<KonemMessage>, JsonServerChannelReader {
+class JsonServer : Server<KonemMessage, String>(), ServerTransmitter<KonemMessage>, JsonServerChannelReader<KonemMessage> {
 
   private val logger = LoggerFactory.getLogger(JsonServer::class.java)
 
@@ -80,13 +80,13 @@ class JsonServer : Server<KonemMessage, String>(), ServerTransmitter<KonemMessag
     }
   }
 
-  override fun handleChannelRead(addr: SocketAddress, port: Int, message: Any) {
+  override fun handleChannelRead(addr: SocketAddress, port: Int, message: KonemMessage) {
     serverScope.launch {
       readMessage(addr, port, message)
     }
   }
 
-  override suspend fun readMessage(addr: SocketAddress, port: Int, message: Any) {
+  override suspend fun readMessage(addr: SocketAddress, port: Int, message: KonemMessage) {
     logger.trace("got message: {}", message)
     val readerListenerList = receiveListeners[port]
     if (readerListenerList != null) {

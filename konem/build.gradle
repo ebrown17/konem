@@ -2,22 +2,17 @@ apply plugin: 'com.squareup.wire'
 
 description = "Kotlin Netty Medium"
 
-
 configurations {
     ktlint
 }
 
 dependencies {
-
     implementation libs.kotlin.coroutines.core
     implementation libs.kotlin.kotlinSerialization
-
     implementation libs.netty
     implementation libs.wire
-
     testImplementation libs.spock
     testImplementation libs.junit
-
     ktlint libs.ktlint
 }
 
@@ -25,7 +20,6 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = jvmTargetVersion
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
-
 }
 
 task ktlint(type: JavaExec, group: "verification") {
@@ -49,11 +43,9 @@ detekt {
     ignoreFailures = true
     config = files("config/detekt/yaml/detekt-config.yml")
     filters = "**/*.Examples.kt,**/protobuf/*.KonemMessage.kt,**/*.WebSocketFrameHandler.kt"
-
     reports {
         html {
             enabled = true
-
         }
         xml {enabled = false}
         txt {enabled = false}
@@ -67,13 +59,10 @@ test {
 
 
 wire {
-
     sourcePath {
         srcDir "${projectDir}/config/proto"
     }
-
     kotlin {
         out "${projectDir}/src/main/kotlin"
     }
 }
-
