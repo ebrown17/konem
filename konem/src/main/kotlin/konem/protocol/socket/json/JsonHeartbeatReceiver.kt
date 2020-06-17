@@ -16,10 +16,10 @@ class JsonHeartbeatReceiver(expectedInterval: Int, missLimit: Int) :
     when (message) {
       is KonemMessage -> {
         when (message.konemMessage) {
-          is Message.Data -> {
+          is Message.Heartbeat -> {
             logger.trace(
               "received {} from {}",
-              Message.Data,
+              Message.Heartbeat,
               ctx.channel().remoteAddress()
             )
             resetMissCounter()

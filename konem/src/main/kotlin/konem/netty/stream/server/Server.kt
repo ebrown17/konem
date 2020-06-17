@@ -138,13 +138,15 @@ abstract class Server<T, H> : ChannelReader, HandlerListener<H, T> {
 
     channel.close().addListener { future ->
       if (!future.isSuccess) {
-        logger.warn("channel {} error {}", port, future.cause())
+        logger.warn("channel {} not properly closed; error {}", port, future.cause())
+      }
+      else{
+        logger.info("channel {} now closed", port)
       }
       channelMap.remove(port)
       channelListenerMap.remove(port)
       portAddressMap.remove(port)
 
-      logger.info("channel {} now closed", port)
     }
   }
 
@@ -156,7 +158,7 @@ abstract class Server<T, H> : ChannelReader, HandlerListener<H, T> {
   }
 
   fun shutdownServer() {
-    logger.info("explicitly called Shutting down server ")
+    logger.info("explicitly called; shutting down server")
 
     for (port in channelMap.keys) {
       closeChannel(port)
@@ -166,28 +168,6 @@ abstract class Server<T, H> : ChannelReader, HandlerListener<H, T> {
     workerGroup.shutdownGracefully()
     logger.info("server fully shutdown")
   }
-
-/*  private fun handleConnect(remoteConnection: SocketAddress) {
-    serverScope.launch {
-      withTimeout(twoSeconds) {
-        delay(oneSecond)
-        for (listener in connectionListeners) {
-          listener.onConnection(remoteConnection)
-        }
-      }
-    }
-  }
-
-  private fun handleDisconnect(remoteConnection: SocketAddress) {
-    serverScope.launch {
-      withTimeout(twoSeconds) {
-        delay(oneSecond)
-        for (listener in disconnectionListeners) {
-          listener.onDisconnection(remoteConnection)
-        }
-      }
-    }
-  }*/
 
   fun getChannelConnections(channelPort: Int): List<SocketAddress> {
     val channelConnections = channelConnectionMap[channelPort]
@@ -241,11 +221,11 @@ abstract class Server<T, H> : ChannelReader, HandlerListener<H, T> {
     return portAddressMap[port] != null
   }
 
-  fun isTransceiverConfigured(port: Int): Boolean {
+  private fun isTransceiverConfigured(port: Int): Boolean {
     return transceiverMap[port] != null
   }
 
-  fun isBootstrapConfigured(port: Int): Boolean {
+  private fun isBootstrapConfigured(port: Int): Boolean {
     return transceiverMap[port] != null
   }
 
@@ -264,7 +244,7 @@ abstract class Server<T, H> : ChannelReader, HandlerListener<H, T> {
     }
     val transceiver = transceiverMap[channelPort]
     transceiver?.registerChannelReader(remoteConnection, this)
-    channelConnectionMap[channelPort] = channelConnections
+    channelConnectionMap.putIfAbsent(channelPort,channelConnections)
   }
 
   override fun registerInActiveHandler(handler: Handler<H, T>, channelPort: Int, remoteConnection: SocketAddress) {
