@@ -613,18 +613,22 @@ class WebSocketCommunicationSpec extends Specification {
                 }
             }
         }
+
         TestUtil.ensureClientsActive(clientList)
-
+        long start = System.currentTimeMillis()
         when:
-
+        print "Server "
         TestUtil.waitForAllMessages(receiverSList, totalMessages, receiveTime)
-
+        long end = System.currentTimeMillis()
+        long waitMs = end - start
+        println ("XXX Waited $waitMs")
         then:
 
         def serverMessages = serverReceiver.messageCount
+        println "server connections ${connectionList.size()} == $totalMessages clients "
         println "server recieved $serverMessages == $totalMessages client messages sent"
         serverMessages == totalMessages
-        println "server connections ${connectionList.size()} == $totalMessages clients "
+
         def serverSize = connectionList.size()
         serverSize == totalMessages
         println "-----------------------------"

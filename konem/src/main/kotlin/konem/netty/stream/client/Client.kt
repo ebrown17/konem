@@ -84,21 +84,18 @@ abstract class Client<T, H>(private val serverAddress: SocketAddress, config: Cl
     handleDisconnection()
   }
 
-  private fun handleConnection() {
-    clientScope.launch {
-      delay(oneSecond)
-      for (listener in connectionListeners) {
-        listener.onConnection(serverAddress)
-      }
+  private fun handleConnection() = clientScope.launch {
+    delay(1000L)
+    for (listener in connectionListeners) {
+      listener.onConnection(serverAddress)
     }
+
   }
 
-  private fun handleDisconnection() {
-    clientScope.launch {
-      delay(oneSecond)
-      for (listener in disconnectionListeners) {
-        listener.onDisconnection(serverAddress)
-      }
+  private fun handleDisconnection() = clientScope.launch {
+    delay(1000L)
+    for (listener in disconnectionListeners) {
+      listener.onDisconnection(serverAddress)
     }
   }
 

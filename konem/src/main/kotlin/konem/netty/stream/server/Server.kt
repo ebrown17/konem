@@ -139,8 +139,7 @@ abstract class Server<T, H> : ChannelReader, HandlerListener<H, T> {
     channel.close().addListener { future ->
       if (!future.isSuccess) {
         logger.warn("channel {} not properly closed; error {}", port, future.cause())
-      }
-      else{
+      } else {
         logger.info("channel {} now closed", port)
       }
       channelMap.remove(port)
@@ -190,7 +189,7 @@ abstract class Server<T, H> : ChannelReader, HandlerListener<H, T> {
     disconnectionListeners.add(listener)
   }
 
- fun registerConnectionStatusListener(listener: ConnectionStatusListener) {
+  fun registerConnectionStatusListener(listener: ConnectionStatusListener) {
     connectionListeners.add(listener)
     disconnectionListeners.add(listener)
   }
@@ -238,13 +237,13 @@ abstract class Server<T, H> : ChannelReader, HandlerListener<H, T> {
       channelConnections.add(remoteConnection)
       remoteHostToChannelMap[remoteConnection] = channelPort
       serverScope.launch {
-         // delay(1_000L)
-          connectionActive(handler)
+        delay(1000L)
+        connectionActive(handler)
       }
     }
     val transceiver = transceiverMap[channelPort]
     transceiver?.registerChannelReader(remoteConnection, this)
-    channelConnectionMap.putIfAbsent(channelPort,channelConnections)
+    channelConnectionMap.putIfAbsent(channelPort, channelConnections)
   }
 
   override fun registerInActiveHandler(handler: Handler<H, T>, channelPort: Int, remoteConnection: SocketAddress) {
@@ -254,7 +253,7 @@ abstract class Server<T, H> : ChannelReader, HandlerListener<H, T> {
       remoteHostToChannelMap.remove(remoteConnection)
       channelConnectionMap.putIfAbsent(channelPort, channelConnections)
       serverScope.launch {
-       // delay(1_000L)
+        delay(1000L)
         connectionInActive(handler)
       }
     }

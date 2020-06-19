@@ -148,7 +148,7 @@ class TestUtil {
             Thread.sleep(100)
         }
         def endTime = System.currentTimeMillis()
-        if (noRecentMessage) {
+        if (!noRecentMessage) {
             print "Took ${(endTime - startTime) / 1000} seconds for readers to recieve all messages\n"
         } else {
             println "Readers did not recieve all messages in the configured max_message_wait of ${MAX_TIME_BETWEEN_MESSAGE} seconds"

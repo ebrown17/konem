@@ -216,7 +216,7 @@ class WebSocketClientConnectionSpec extends Specification {
         configurations                               | waitTime | retryCount
         [[port: 6060, paths: ["/test"], clients: 1]] | 1500     | 1
         [[port: 6060, paths: ["/test"], clients: 1]] | 15000    | 2
-        [[port: 6060, paths: ["/test"], clients: 1]] | 22500    | 3
+        [[port: 6060, paths: ["/test"], clients: 1]] | 25500    | 3
     }
 
     def "Connecting to a port with a ws path that's not configured returns properly"() {
