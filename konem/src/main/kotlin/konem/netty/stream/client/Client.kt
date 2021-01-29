@@ -66,7 +66,7 @@ abstract class Client<T, H>(private val serverAddress: SocketAddress, config: Cl
     isDisconnectInitiated = false
     channel = future.channel()
     transceiver.registerChannelReader(serverAddress, this)
-    closedListener = ClientClosedConnectionListener(this)
+    closedListener = ClientClosedConnectionListener(this) { handleDisconnection() }
     channel!!.closeFuture().addListener(closedListener)
     handleConnection()
   }

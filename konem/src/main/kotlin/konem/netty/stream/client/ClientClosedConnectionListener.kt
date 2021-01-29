@@ -5,7 +5,7 @@ import io.netty.channel.ChannelFutureListener
 import java.util.concurrent.TimeUnit
 import org.slf4j.LoggerFactory
 
-class ClientClosedConnectionListener<T, H> internal constructor(private val client: Client<T, H>) :
+class ClientClosedConnectionListener<T, H> internal constructor(private val client: Client<T, H>, private val closeAction:() -> Unit) :
   ChannelFutureListener {
 
   @Throws(InterruptedException::class)
@@ -14,6 +14,7 @@ class ClientClosedConnectionListener<T, H> internal constructor(private val clie
       future.channel().close().awaitUninterruptibly(1, TimeUnit.SECONDS)
       logger.info("connect.closeFuture > Client fully disconnected")
     } else {
+      closeAction()
       future.channel().eventLoop().schedule({
         try {
           client.connect()
