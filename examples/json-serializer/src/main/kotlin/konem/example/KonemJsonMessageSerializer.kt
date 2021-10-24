@@ -1,8 +1,6 @@
 package konem.example
 
-import konem.data.json.KonemMessage
-import konem.data.json.KonemMessageSerializer
-import konem.data.json.Message
+import konem.data.json.*
 import konem.protocol.websocket.json.KonemMessageReceiver
 import java.net.InetSocketAddress
 import kotlin.system.measureTimeMillis
@@ -20,7 +18,7 @@ fun konemJsonMessageSerializer() {
 
   for (i in 1..1000) {
     for (j in 1..1000) {
-      val kotlinBeat = KonemMessage(Message.Heartbeat())
+      val kotlinBeat = KonemMessage(Heartbeat())
       val jsonBeat = serializer.toJson(kotlinBeat)
       serializer.toKonemMessage(jsonBeat)
     }
@@ -29,7 +27,7 @@ fun konemJsonMessageSerializer() {
   val timeT = measureTimeMillis {
     for (i in 1..1000) {
       for (j in 1..100) {
-        val kotlinBeat = KonemMessage(Message.Heartbeat())
+        val kotlinBeat = KonemMessage(Heartbeat())
         val jsonBeat = serializer.toJson(kotlinBeat)
         serializer.toKonemMessage(jsonBeat)
         count++
@@ -39,7 +37,8 @@ fun konemJsonMessageSerializer() {
 
   println("Kotlin serialization of $count Took $timeT ms")
 
-  val kotlinBeat = KonemMessage(Message.Heartbeat())
+  val kotlinBeat = KonemMessage(Heartbeat())
+    sleep(1000)
   val jsonBeat = serializer.toJson(kotlinBeat)
   val back = serializer.toKonemMessage(jsonBeat)
 
@@ -47,7 +46,7 @@ fun konemJsonMessageSerializer() {
   println("jsonBeat $jsonBeat")
   println("back $back")
 
-  val kotlinStatus = KonemMessage(Message.Status("Good Times", 0, 500, 199, "All good here"))
+  val kotlinStatus = KonemMessage(Status("Good Times", 0, 500, 199, "All good here"))
   val jsonStatus = serializer.toJson(kotlinStatus)
   val statBack = serializer.toKonemMessage(jsonStatus)
 
@@ -55,7 +54,7 @@ fun konemJsonMessageSerializer() {
   println("jsonStatus $jsonStatus")
   println("statBack $statBack")
 
-  val kotlinUnknown = KonemMessage(Message.Unknown())
+  val kotlinUnknown = KonemMessage(Unknown("WHAT IUS THIS"))
   val jsonUnknown = serializer.toJson(kotlinUnknown)
   val unknownBack = serializer.toKonemMessage(jsonUnknown)
 
@@ -65,12 +64,12 @@ fun konemJsonMessageSerializer() {
 
 
   sleep(1000)
-  println("${KonemMessage(Message.Heartbeat())}")
+  println("${KonemMessage(Heartbeat())}")
 
   sleep(1000)
-  println("${KonemMessage(Message.Status())}")
+  println("${KonemMessage(Status())}")
 
   sleep(1000)
-  println("${KonemMessage(Message.Heartbeat())}")
-  println("${KonemMessage(Message.Unknown())}")
+  println("${KonemMessage(Heartbeat())}")
+  println("${KonemMessage(Unknown())}")
 }

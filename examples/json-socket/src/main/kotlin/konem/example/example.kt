@@ -1,8 +1,9 @@
 package konem.example
 
+import konem.data.json.Data
 import konem.data.json.KonemMessage
 import konem.data.json.Message
-import konem.data.protobuf.Data
+
 import konem.netty.stream.ConnectionListener
 import konem.protocol.socket.json.JsonClientFactory
 import konem.protocol.socket.json.JsonServer
@@ -18,7 +19,7 @@ fun main(){
     Thread.sleep(500)
 
     server.sendMessage(from,
-      KonemMessage(konemMessage = Message.Data("Send message ${count++}")
+      KonemMessage(message = Data("Send message ${count++}")
     ))
   })
 
@@ -32,21 +33,15 @@ fun main(){
   client.connect()
 
   client.registerConnectionListener(ConnectionListener {
-    client.sendMessage(
-      KonemMessage(
-        konemMessage = Message.Data("Send message ${count++}")
-      )
-    )
+    client.sendMessage(KonemMessage(message = Data("Send message ${count++}") ))
   })
 
   client.registerChannelReadListener(KonemMessageReceiver{from, msg ->
     println("CLIENT Msg: $msg from $from")
-    Thread.sleep(500)
+
 
     if(count < 10) {
-      client.sendMessage(
-        KonemMessage(konemMessage = Message.Data("Send message ${count++}"))
-      )
+        client.sendMessage( KonemMessage(message = Data("Send message ${count++}")))
     }
   })
 

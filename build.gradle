@@ -2,7 +2,7 @@ buildscript {
     apply from: "dependencies.gradle"
 
     repositories {
-        jcenter()
+        mavenCentral()
     }
 
     dependencies {
@@ -15,6 +15,8 @@ buildscript {
 plugins {
     id 'org.jetbrains.kotlin.jvm' version "$kotlinVersion"
     id "io.gitlab.arturbosch.detekt" version "$detektVersion"
+    id "org.jlleitschuh.gradle.ktlint" version "$ktlintGradleVersion"
+
 }
 
 allprojects {
@@ -23,29 +25,22 @@ allprojects {
     apply plugin: 'groovy'
     apply plugin: 'idea'
 
-    group = GROUP
-    version = VERSION_NAME
-
     repositories {
-        jcenter()
+        mavenCentral()
     }
     
     dependencies{
-        implementation libs.kotlin.stdlib.jdk8
-        implementation libs.groovy
-        implementation libs.slf4j
-        implementation libs.logback
+        implementation libs.kotlin.stdlib_jdk8
     }
 
     compileKotlin {
         kotlinOptions.jvmTarget = jvmTargetVersion
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
-
     }
 
 }
 
 wrapper {
-    gradleVersion = '6.0'
+    gradleVersion = '7.1.1'
 }

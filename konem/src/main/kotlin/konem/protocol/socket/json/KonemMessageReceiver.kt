@@ -2,9 +2,7 @@ package konem.protocol.socket.json
 
 import java.net.SocketAddress
 import konem.data.json.KonemMessage
-import konem.data.json.KonemMessageSerializer
 import konem.netty.stream.ReceiverHandler
-import kotlinx.serialization.json.JsonDecodingException
 import org.slf4j.LoggerFactory
 
 open class KonemMessageReceiver(private val receive: (SocketAddress, KonemMessage) -> Unit) :
@@ -17,7 +15,7 @@ open class KonemMessageReceiver(private val receive: (SocketAddress, KonemMessag
     synchronized(this) {
       try {
         receive(addr, message)
-      } catch (e: JsonDecodingException) {
+      } catch (e: Exception) {
         logger.error("JsonParsingException in serializing to KonemMessage with message: {} ", e.message)
       }
     }
