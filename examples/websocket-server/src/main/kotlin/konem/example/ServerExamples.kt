@@ -1,11 +1,13 @@
 package konem.example
 
+import konem.data.json.Heartbeat
 import konem.data.json.KonemMessage
-import konem.data.json.Message
 import konem.netty.stream.ConnectionListener
 import konem.netty.stream.DisconnectionListener
-import konem.netty.stream.StatusListener
-import konem.protocol.websocket.json.*
+import konem.protocol.websocket.json.KonemMessageReceiver
+import konem.protocol.websocket.json.WebSocketClientFactory
+import konem.protocol.websocket.json.WebSocketConnectionStatusListener
+import konem.protocol.websocket.json.WebSocketServer
 import org.slf4j.LoggerFactory
 import java.lang.Thread.sleep
 import java.net.SocketAddress
@@ -60,7 +62,7 @@ fun websocketServerExamples() {
   Thread.sleep(1000)
 
   repeat(10) {
-    client.sendMessage(KonemMessage(Message.Heartbeat("$it")))
+    client.sendMessage(KonemMessage(Heartbeat("$it")))
     Thread.sleep(500)
   }
   Thread.sleep(1000)

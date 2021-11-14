@@ -10,16 +10,16 @@ import konem.netty.stream.server.ServerChannel
 
 class WireServerChannel(private val transceiver: WireTransceiver) : ServerChannel() {
 
-  override fun initChannel(channel: SocketChannel) {
-    val pipeline = channel.pipeline()
-    pipeline.addLast("serverSslHandler", SslContextManager.getServerContext().newHandler(channel.alloc()))
-    pipeline.addLast("frameDecoder", ProtobufVarint32FrameDecoder())
-    pipeline.addLast("protobufDecoder", WireDecoder())
-    pipeline.addLast("frameEncoder", ProtobufVarint32LengthFieldPrepender())
-    pipeline.addLast("protobufEncoder", WireEncoder())
-    pipeline.addLast("messagehandler", WireMessageHandler(channelIds.incrementAndGet(), transceiver))
-    pipeline.addLast("idleStateHandler", IdleStateHandler(0, WRITE_IDLE_TIME, 0))
-    pipeline.addLast("heartBeatHandler", WireHeartbeatProducer(transceiver))
-    pipeline.addLast("exceptionHandler", ExceptionHandler())
-  }
+    override fun initChannel(channel: SocketChannel) {
+        val pipeline = channel.pipeline()
+        pipeline.addLast("serverSslHandler", SslContextManager.getServerContext().newHandler(channel.alloc()))
+        pipeline.addLast("frameDecoder", ProtobufVarint32FrameDecoder())
+        pipeline.addLast("protobufDecoder", WireDecoder())
+        pipeline.addLast("frameEncoder", ProtobufVarint32LengthFieldPrepender())
+        pipeline.addLast("protobufEncoder", WireEncoder())
+        pipeline.addLast("messagehandler", WireMessageHandler(channelIds.incrementAndGet(), transceiver))
+        pipeline.addLast("idleStateHandler", IdleStateHandler(0, WRITE_IDLE_TIME, 0))
+        pipeline.addLast("heartBeatHandler", WireHeartbeatProducer(transceiver))
+        pipeline.addLast("exceptionHandler", ExceptionHandler())
+    }
 }

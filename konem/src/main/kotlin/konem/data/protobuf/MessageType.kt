@@ -10,31 +10,31 @@ import kotlin.jvm.JvmField
 import kotlin.jvm.JvmStatic
 
 enum class MessageType(
-  override val value: Int
+    override val value: Int
 ) : WireEnum {
-  UNKNOWN(0),
+    UNKNOWN(0),
 
-  STATUS(1),
+    STATUS(1),
 
-  HEARTBEAT(2),
+    HEARTBEAT(2),
 
-  DATA(3);
+    DATA(3);
 
-  companion object {
-    @JvmField
-    val ADAPTER: ProtoAdapter<MessageType> = object : EnumAdapter<MessageType>(
-      MessageType::class
-    ) {
-      override fun fromValue(value: Int): MessageType? = MessageType.fromValue(value)
+    companion object {
+        @JvmField
+        val ADAPTER: ProtoAdapter<MessageType> = object : EnumAdapter<MessageType>(
+            MessageType::class
+        ) {
+            override fun fromValue(value: Int): MessageType? = MessageType.fromValue(value)
+        }
+
+        @JvmStatic
+        fun fromValue(value: Int): MessageType? = when (value) {
+            0 -> UNKNOWN
+            1 -> STATUS
+            2 -> HEARTBEAT
+            3 -> DATA
+            else -> null
+        }
     }
-
-    @JvmStatic
-    fun fromValue(value: Int): MessageType? = when (value) {
-      0 -> UNKNOWN
-      1 -> STATUS
-      2 -> HEARTBEAT
-      3 -> DATA
-      else -> null
-    }
-  }
 }

@@ -9,6 +9,7 @@ import com.squareup.wire.ProtoReader
 import com.squareup.wire.ProtoWriter
 import com.squareup.wire.WireField
 import com.squareup.wire.internal.missingRequiredFields
+import okio.ByteString
 import kotlin.Any
 import kotlin.AssertionError
 import kotlin.Boolean
@@ -18,81 +19,80 @@ import kotlin.Int
 import kotlin.Nothing
 import kotlin.String
 import kotlin.jvm.JvmField
-import okio.ByteString
 
 class HeartBeat(
-  @field:WireField(
-    tag = 1,
-    adapter = "com.squareup.wire.ProtoAdapter#STRING",
-    label = WireField.Label.REQUIRED
-  )
-  val time: String,
-  unknownFields: ByteString = ByteString.EMPTY
+    @field:WireField(
+        tag = 1,
+        adapter = "com.squareup.wire.ProtoAdapter#STRING",
+        label = WireField.Label.REQUIRED
+    )
+    val time: String,
+    unknownFields: ByteString = ByteString.EMPTY
 ) : Message<HeartBeat, Nothing>(ADAPTER, unknownFields) {
-  @Deprecated(
-    message = "Shouldn't be used in Kotlin",
-    level = DeprecationLevel.HIDDEN
-  )
-  override fun newBuilder(): Nothing = throw AssertionError()
+    @Deprecated(
+        message = "Shouldn't be used in Kotlin",
+        level = DeprecationLevel.HIDDEN
+    )
+    override fun newBuilder(): Nothing = throw AssertionError()
 
-  override fun equals(other: Any?): Boolean {
-    if (other === this) return true
-    if (other !is HeartBeat) return false
-    return unknownFields == other.unknownFields &&
-        time == other.time
-  }
-
-  override fun hashCode(): Int {
-    var result = super.hashCode
-    if (result == 0) {
-      result = unknownFields.hashCode()
-      result = result * 37 + time.hashCode()
-      super.hashCode = result
+    override fun equals(other: Any?): Boolean {
+        if (other === this) return true
+        if (other !is HeartBeat) return false
+        return unknownFields == other.unknownFields &&
+            time == other.time
     }
-    return result
-  }
 
-  override fun toString(): String {
-    val result = mutableListOf<String>()
-    result += """time=$time"""
-    return result.joinToString(prefix = "HeartBeat{", separator = ", ", postfix = "}")
-  }
-
-  fun copy(time: String = this.time, unknownFields: ByteString = this.unknownFields): HeartBeat =
-      HeartBeat(time, unknownFields)
-
-  companion object {
-    @JvmField
-    val ADAPTER: ProtoAdapter<HeartBeat> = object : ProtoAdapter<HeartBeat>(
-      FieldEncoding.LENGTH_DELIMITED,
-      HeartBeat::class
-    ) {
-      override fun encodedSize(value: HeartBeat): Int =
-        ProtoAdapter.STRING.encodedSizeWithTag(1, value.time) +
-        value.unknownFields.size
-
-      override fun encode(writer: ProtoWriter, value: HeartBeat) {
-        ProtoAdapter.STRING.encodeWithTag(writer, 1, value.time)
-        writer.writeBytes(value.unknownFields)
-      }
-
-      override fun decode(reader: ProtoReader): HeartBeat {
-        var time: String? = null
-        val unknownFields = reader.forEachTag { tag ->
-          when (tag) {
-            1 -> time = ProtoAdapter.STRING.decode(reader)
-            else -> reader.readUnknownField(tag)
-          }
+    override fun hashCode(): Int {
+        var result = super.hashCode
+        if (result == 0) {
+            result = unknownFields.hashCode()
+            result = result * 37 + time.hashCode()
+            super.hashCode = result
         }
-        return HeartBeat(
-          time = time ?: throw missingRequiredFields(time, "time"),
-          unknownFields = unknownFields
-        )
-      }
-
-      override fun redact(value: HeartBeat): HeartBeat = value.copy(
-        unknownFields = ByteString.EMPTY
-      )
+        return result
     }
-  }
+
+    override fun toString(): String {
+        val result = mutableListOf<String>()
+        result += """time=$time"""
+        return result.joinToString(prefix = "HeartBeat{", separator = ", ", postfix = "}")
+    }
+
+    fun copy(time: String = this.time, unknownFields: ByteString = this.unknownFields): HeartBeat =
+        HeartBeat(time, unknownFields)
+
+    companion object {
+        @JvmField
+        val ADAPTER: ProtoAdapter<HeartBeat> = object : ProtoAdapter<HeartBeat>(
+            FieldEncoding.LENGTH_DELIMITED,
+            HeartBeat::class
+        ) {
+            override fun encodedSize(value: HeartBeat): Int =
+                ProtoAdapter.STRING.encodedSizeWithTag(1, value.time) +
+                    value.unknownFields.size
+
+            override fun encode(writer: ProtoWriter, value: HeartBeat) {
+                ProtoAdapter.STRING.encodeWithTag(writer, 1, value.time)
+                writer.writeBytes(value.unknownFields)
+            }
+
+            override fun decode(reader: ProtoReader): HeartBeat {
+                var time: String? = null
+                val unknownFields = reader.forEachTag { tag ->
+                    when (tag) {
+                        1 -> time = ProtoAdapter.STRING.decode(reader)
+                        else -> reader.readUnknownField(tag)
+                    }
+                }
+                return HeartBeat(
+                    time = time ?: throw missingRequiredFields(time, "time"),
+                    unknownFields = unknownFields
+                )
+            }
+
+            override fun redact(value: HeartBeat): HeartBeat = value.copy(
+                unknownFields = ByteString.EMPTY
+            )
+        }
+    }
 }

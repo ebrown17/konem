@@ -1,3 +1,4 @@
 dependencies{
     implementation project(':konem')
+    implementation libs.logback
 }

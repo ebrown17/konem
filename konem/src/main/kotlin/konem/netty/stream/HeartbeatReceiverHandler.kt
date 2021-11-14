@@ -23,37 +23,37 @@ import org.slf4j.LoggerFactory
  */
 
 abstract class HeartbeatReceiverHandler<I>(
-  private val expectedInterval: Int,
-  private val missedLimit: Int
+    private val expectedInterval: Int,
+    private val missedLimit: Int
 ) : ChannelDuplexHandler() {
 
-  private val logger = LoggerFactory.getLogger(javaClass)
-  private var missCount = 0
+    private val logger = LoggerFactory.getLogger(javaClass)
+    private var missCount = 0
 
-  @Throws(Exception::class)
-  override fun userEventTriggered(ctx: ChannelHandlerContext, evt: Any) {
-    logger.trace("userEventTriggered")
-    if (evt is IdleStateEvent) {
-      logger.trace("userEventTriggered {} miss count {}", evt.state(), missCount)
+    @Throws(Exception::class)
+    override fun userEventTriggered(ctx: ChannelHandlerContext, evt: Any) {
+        logger.trace("userEventTriggered")
+        if (evt is IdleStateEvent) {
+            logger.trace("userEventTriggered {} miss count {}", evt.state(), missCount)
 
-      if (evt.state() == IdleState.READER_IDLE) {
-        if (missCount >= missedLimit) {
-          logger.info(
-            "userEventTriggered no heartbeat read for {} seconds. Closing Connection.",
-            missedLimit * expectedInterval
-          )
-          ctx.close()
-        } else {
-          missCount++
+            if (evt.state() == IdleState.READER_IDLE) {
+                if (missCount >= missedLimit) {
+                    logger.info(
+                        "userEventTriggered no heartbeat read for {} seconds. Closing Connection.",
+                        missedLimit * expectedInterval
+                    )
+                    ctx.close()
+                } else {
+                    missCount++
+                }
+            }
         }
-      }
     }
-  }
 
-  /**
-   * Sets the heartbeat miss counter to zero.
-   */
-  protected fun resetMissCounter() {
-    missCount = 0
-  }
+    /**
+     * Sets the heartbeat miss counter to zero.
+     */
+    protected fun resetMissCounter() {
+        missCount = 0
+    }
 }

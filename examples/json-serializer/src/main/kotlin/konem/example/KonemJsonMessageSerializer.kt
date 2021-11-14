@@ -38,12 +38,13 @@ fun konemJsonMessageSerializer() {
   println("Kotlin serialization of $count Took $timeT ms")
 
   val kotlinBeat = KonemMessage(Heartbeat())
-    sleep(1000)
+sleep(1000)
   val jsonBeat = serializer.toJson(kotlinBeat)
   val back = serializer.toKonemMessage(jsonBeat)
 
   println("kotlinBeat $kotlinBeat")
-  println("jsonBeat $jsonBeat")
+
+  println("jsonBeat ${jsonBeat.toString()}")
   println("back $back")
 
   val kotlinStatus = KonemMessage(Status("Good Times", 0, 500, 199, "All good here"))
@@ -72,4 +73,5 @@ fun konemJsonMessageSerializer() {
   sleep(1000)
   println("${KonemMessage(Heartbeat())}")
   println("${KonemMessage(Unknown())}")
+
 }

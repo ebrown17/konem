@@ -16,7 +16,7 @@ ext {
     detektVersion = '1.17.1'
     ktlintVersion = '0.41.0'
     ktlintGradleVersion = '10.1.0'
-    kotestVersion = '4.6.0'
+    kotestVersion = '4.6.3'
 
 
     buildPlugins = [
