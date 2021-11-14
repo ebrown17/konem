@@ -30,6 +30,7 @@ class JsonCommunicationSpec extends Specification {
         factory.shutdown()
     }
 
+
     def "Server readers can register before server starts and then see messages"() {
         given:
         def serverReceiver

@@ -19,77 +19,8 @@ import konem.protocol.socket.json.JsonServer
 import konem.protocol.socket.json.KonemMessageReceiver
 import java.net.SocketAddress
 
-@ExperimentalTime
-@ExperimentalKotest
-class MyTests : ShouldSpec() {
-
-    private var test = 0
-
-    init {
-        should("increment to 1") {
-            test++
-            until(Duration.seconds(5), Duration.milliseconds(250).fixed()) {
-                test == 1
-            }
-        }
-        should("increment to 2") {
-            test++
-            until(Duration.seconds(5), Duration.milliseconds(250).fixed()) {
-                test == 2
-            }
-        }
-    }
-}
-
-val beforeTest: BeforeEach = {
-    println("Before")
-}
-
-val afterTest: AfterEach = {
-    println("After")
-}
-
-
-
-@ExperimentalTime
-@ExperimentalKotest
-class MyTest2 : ShouldSpec() {
-
-    private var test = 0
-    private val logger = logger(MyTest2::class.java)
-
-
-
-    init {
-        should("increment to 1") {
-            forAll(
-                row(1, 2),
-                row(2, 4),
-
-            ) { t1, t2 ->
-
-                   test = t1 + t1
-                    println(("XXX $test"))
-                    until(Duration.seconds(5), Duration.milliseconds(250).fixed()) {
-                        test == t2
-                    }
-                test = t1 + t1
-                println(("XXX2 $test"))
-                until(Duration.seconds(5), Duration.milliseconds(250).fixed()) {
-                    test == t2
-                }
-
-            }
-
-        }
-
-    }
-}
-
-
 lateinit var server: JsonServer
 lateinit var clientFactory:  JsonClientFactory
-lateinit var serverReceiver : JsonTestReceiver
 
 var testSetup = {
     server = JsonServer()
@@ -133,24 +64,25 @@ class JsonCommunicationSpec : ShouldSpec( {
           forAll(
               row(1, arrayOf(ClientConfig(6060,1))),
               row(5, arrayOf(ClientConfig(6060,10))),
-              row(5, arrayOf(ClientConfig(6060,1),ClientConfig(6061,10))),
-              row(35, arrayOf(ClientConfig(6060,1),ClientConfig(6061,10))),
-              row(49, arrayOf(ClientConfig(6060,1),ClientConfig(6061,10),ClientConfig(6062,21))),
-              row(66, arrayOf(ClientConfig(6060,1),ClientConfig(6061,10),ClientConfig(6062,21),ClientConfig(6063,43))),
+              row(5, arrayOf(ClientConfig(6060,1), ClientConfig(6061,10))),
+              row(35, arrayOf(ClientConfig(6060,1), ClientConfig(6061,10))),
+              row(49, arrayOf(ClientConfig(6060,1), ClientConfig(6061,10),
+                  ClientConfig(6062,21))),
+              row(66, arrayOf(ClientConfig(6060,1), ClientConfig(6061,10),
+                  ClientConfig(6062,21), ClientConfig(6063,43))),
               ) { sends, configs ->
-
               testSetup()
+              lateinit var serverReceiver : JsonTestReceiver
+              var totalMessages = 0
+              val clientList = mutableListOf<JsonClient>()
+
               serverReceiver = JsonTestReceiver { from, msg ->
                   serverReceiver.messageCount++
               }
 
-              var totalMessages = 0
-              val clientList = mutableListOf<JsonClient>()
-
               configs.forEach { config  ->
                   totalMessages += (config.totalClients * (sends))
                   server.registerChannelReadListener(config.port, serverReceiver)
-
                   for(i in 1..config.totalClients){
                       clientList.add(clientFactory.createClient("localhost",config.port))
                   }
@@ -162,9 +94,7 @@ class JsonCommunicationSpec : ShouldSpec( {
                   server.allActive()
               }
 
-              for (client in clientList) {
-                  client.connect()
-              }
+              clientList.forEach { client -> client.connect() }
 
               until(Duration.seconds(5), Duration.milliseconds(250).fixed()) {
                   areClientsActive(clientList)
@@ -188,19 +118,21 @@ class JsonCommunicationSpec : ShouldSpec( {
         forAll(
             row(1, arrayOf(ClientConfig(6060,1))),
             row(5, arrayOf(ClientConfig(6060,10))),
-            row(5, arrayOf(ClientConfig(6060,1),ClientConfig(6061,10))),
-            row(35, arrayOf(ClientConfig(6060,1),ClientConfig(6061,10))),
-            row(49, arrayOf(ClientConfig(6060,1),ClientConfig(6061,10),ClientConfig(6062,21))),
-            row(66, arrayOf(ClientConfig(6060,1),ClientConfig(6061,10),ClientConfig(6062,21),ClientConfig(6063,43))),
+            row(5, arrayOf(ClientConfig(6060,1), ClientConfig(6061,10))),
+            row(35, arrayOf(ClientConfig(6060,1), ClientConfig(6061,10))),
+            row(49, arrayOf(ClientConfig(6060,1), ClientConfig(6061,10),
+                ClientConfig(6062,21))),
+            row(66, arrayOf(ClientConfig(6060,1), ClientConfig(6061,10),
+                ClientConfig(6062,21), ClientConfig(6063,43))),
         ) { sends, configs ->
-
             testSetup()
+            lateinit var serverReceiver : JsonTestReceiver
+            var totalMessages = 0
+            val clientList = mutableListOf<JsonClient>()
+
             serverReceiver = JsonTestReceiver { from, msg ->
                 serverReceiver.messageCount++
             }
-
-            var totalMessages = 0
-            val clientList = mutableListOf<JsonClient>()
 
             server.startServer()
 
@@ -216,9 +148,7 @@ class JsonCommunicationSpec : ShouldSpec( {
                 server.allActive()
             }
 
-            for (client in clientList) {
-                client.connect()
-            }
+            clientList.forEach { client -> client.connect() }
 
             until(Duration.seconds(5), Duration.milliseconds(250).fixed()) {
                 areClientsActive(clientList)
