@@ -22,6 +22,7 @@ dependencies {
 
     implementation libs.slf4j
 
+    testImplementation libs.slf4j
     testImplementation libs.logback
     testImplementation libs.kotest.junit5
     testImplementation libs.kotest.assertions
@@ -67,6 +68,7 @@ test {
     systemProperties 'SKIP.LONG': '1'
 
     useJUnitPlatform()
+
 }
 
 wire {
