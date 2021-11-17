@@ -8,10 +8,12 @@ import io.kotest.data.forAll
 import io.kotest.data.row
 import konem.data.json.Data
 import konem.data.json.KonemMessage
+import konem.netty.stream.*
 import konem.protocol.socket.json.JsonClient
 import konem.protocol.socket.json.JsonClientFactory
 import konem.protocol.socket.json.JsonServer
 import konem.protocol.socket.json.KonemMessageReceiver
+import kotlinx.coroutines.delay
 import java.net.SocketAddress
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
@@ -22,6 +24,7 @@ var clientFactory:  JsonClientFactory? = null
 val DEBUG = true
 val activeTime = 3
 val waitForMsgTime = 3
+val delayDurationMs = 1000
 
 val testSetup = {
     clientFactory?.let { it.shutdown() }
@@ -47,6 +50,21 @@ class JsonTestClientReceiver(var client: JsonClient,receive: (SocketAddress, Kon
     var messageCount = 0
     var messageList = mutableListOf<KonemMessage>()
     var clientId = ""
+}
+
+class TestConnectionListener(connected: (SocketAddress) -> Unit):ConnectionListener(connected){
+    var connections = 0
+}
+
+class TestDisconnectionListener(disconnected: (SocketAddress) -> Unit) : DisconnectionListener(disconnected) {
+    var disconnections = 0
+}
+
+class TestConnectionStatusListener(connected: (SocketAddress) -> Unit,
+                                   disconnected: (SocketAddress) -> Unit
+) : ConnectionStatusListener(connected, disconnected) {
+    var connections = 0
+    var disconnections = 0
 }
 
 data class ClientConfig(val port: Int,val totalClients: Int)
@@ -123,6 +141,58 @@ suspend fun waitForMessagesClient(totalMessages:Int ,receiverList : MutableList<
 }
 
 @ExperimentalTime
+suspend fun waitForClientStatusChange(totalChanges:Int ,list : MutableList<out StatusListener>,debug: Boolean = false,checkConnect:Boolean = false) : Boolean{
+    return until(Duration.seconds(waitForMsgTime), Duration.milliseconds(250).fixed()) {
+        var type = ""
+        val received: Int = list.sumOf { statusChange ->
+            when(statusChange){
+                is TestConnectionListener -> { type = "Connections" ; statusChange.connections    }
+                is TestDisconnectionListener -> { type = "Disconnections"; statusChange.disconnections  }
+                is TestConnectionStatusListener -> {
+                    if(checkConnect) {
+                        type = "Connections" ; statusChange.connections
+                    }
+                    else{
+                        type = "Disconnections"; statusChange.disconnections
+                    }
+                }
+                else -> 0
+            }
+        }
+        if(debug){
+            println("Client $type received: $received out of $totalChanges")
+        }
+        received == totalChanges
+    }
+}
+
+@ExperimentalTime
+suspend fun waitForServerStatusChange(totalChanges:Int ,list : MutableList<out StatusListener>,debug: Boolean = false,checkConnect:Boolean = false) : Boolean{
+    return until(Duration.seconds(waitForMsgTime), Duration.milliseconds(250).fixed()) {
+        var type = ""
+        val received: Int = list.sumOf { statusChange ->
+            when(statusChange){
+                is TestConnectionListener -> { type = "Connections" ; statusChange.connections    }
+                is TestDisconnectionListener -> { type = "Disconnections"; statusChange.disconnections  }
+                is TestConnectionStatusListener -> {
+                    if(checkConnect) {
+                        type = "Connections" ; statusChange.connections
+                    }
+                    else{
+                        type = "Disconnections"; statusChange.disconnections
+                    }
+                }
+                else -> 0
+            }
+        }
+        if(debug){
+            println("Server $type received: $received out of $totalChanges")
+        }
+        received == totalChanges
+    }
+}
+
+@ExperimentalTime
 suspend fun waitForMessagesReceiverClient(totalMessages:Int ,receiverList : MutableList<JsonTestClientReceiver>,debug: Boolean = false) : Boolean{
     return until(Duration.seconds(waitForMsgTime), Duration.milliseconds(250).fixed()) {
         val received: Int = receiverList.sumOf { it.messageCount }
@@ -181,6 +251,12 @@ fun serverBroadcastOnAllChannels(messageSendCount: Int){
 @ExperimentalTime
 @ExperimentalKotest
 class JsonCommunicationSpec : ShouldSpec({
+
+    afterTest {
+        clientFactory?.shutdown()
+        server?.shutdownServer()
+    }
+
     should(": Server readers can register before server starts and then see messages") {
         forAll(
             row(1, arrayOf(ClientConfig(6060, 1))),
@@ -513,5 +589,308 @@ class JsonCommunicationSpec : ShouldSpec({
         }
     }
 
+    should(": Each Client's ConnectionListener is called after connected to a server") {
+        forAll(
+            row(arrayOf(ClientConfig(6060, 1))),
+            row(arrayOf(ClientConfig(6060, 10))),
+            row(arrayOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+            row(arrayOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+            row(arrayOf(
+                ClientConfig(6060, 1), ClientConfig(6061, 10),
+                ClientConfig(6062, 21)
+            )
+            ),
+            row(arrayOf(
+                ClientConfig(6060, 1), ClientConfig(6061, 10),
+                ClientConfig(6062, 21), ClientConfig(6063, 43)
+            )
+            ),
+        ) { configs ->
+            testSetup()
+
+            val clientList = mutableListOf<JsonClient>()
+            val clientDiscList = mutableListOf<TestConnectionListener>()
+            var totalClientConnections = 0
+
+            lateinit var clientConnnectListenerGlobal: TestConnectionListener
+            clientConnnectListenerGlobal = TestConnectionListener {
+                clientConnnectListenerGlobal.connections++
+            }
+
+            configs.forEach { config ->
+                totalClientConnections += config.totalClients
+                for (i in 1..config.totalClients) {
+                    clientFactory?.createClient("localhost",config.port)?.let { client ->
+                        lateinit var clientConnnectListener: TestConnectionListener
+                        clientConnnectListener = TestConnectionListener {
+                            clientConnnectListener.connections++
+                        }
+                        client.registerConnectionListener(clientConnnectListener)
+                        client.registerConnectionListener(clientConnnectListenerGlobal)
+                        clientDiscList.add(clientConnnectListener)
+                        clientList.add(client)
+                    }
+                }
+            }
+
+            startServer()
+            connectClients(clientList)
+            delay(Duration.milliseconds(delayDurationMs))
+
+            waitForClientStatusChange(totalClientConnections, mutableListOf(clientConnnectListenerGlobal), DEBUG)
+            waitForClientStatusChange(totalClientConnections,clientDiscList, DEBUG)
+            if (DEBUG) println("-----------------------------------")
+        }
+
+    }
+
+    should(": Server's ConnectionListener is called after each client connects") {
+        forAll(
+            row(arrayOf(ClientConfig(6060, 1))),
+            row(arrayOf(ClientConfig(6060, 10))),
+            row(arrayOf(ClientConfig(6060, 11), ClientConfig(6061, 10))),
+            row(arrayOf(ClientConfig(6060, 11), ClientConfig(6061, 20))),
+            row(arrayOf(
+                ClientConfig(6060, 11), ClientConfig(6061, 20),
+                ClientConfig(6062, 21)
+            )
+            ),
+            row(arrayOf(
+                ClientConfig(6060, 11), ClientConfig(6061, 20),
+                ClientConfig(6062, 21), ClientConfig(6063, 43)
+            )
+            ),
+        ) { configs ->
+            testSetup()
+
+            val clientList = mutableListOf<JsonClient>()
+            val serverConList = mutableListOf<TestConnectionListener>()
+            var totalServerConnections = 0
+            lateinit var serverConnectionListener: TestConnectionListener
+
+            server?.let{ srv ->
+                serverConnectionListener = TestConnectionListener {
+                    serverConnectionListener.connections++
+                }
+                srv.registerConnectionListener(serverConnectionListener)
+                serverConList.add(serverConnectionListener)
+            }
+
+            configs.forEach { config ->
+                totalServerConnections += config.totalClients
+                for (i in 1..config.totalClients) {
+                    clientFactory?.createClient("localhost",config.port)?.let { client ->
+                        clientList.add(client)
+                    }
+                }
+            }
+
+            startServer()
+            connectClients(clientList)
+            delay(Duration.milliseconds(delayDurationMs))
+
+            waitForServerStatusChange(totalServerConnections,serverConList, DEBUG)
+
+            if (DEBUG) println("-----------------------------------")
+        }
+    }
+
+    should(": Client's DisconnectionListener is called after a disconnect") {
+        forAll(
+            row(arrayOf(ClientConfig(6060, 1))),
+            row(arrayOf(ClientConfig(6060, 10))),
+            row(arrayOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+            row(arrayOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+            row(arrayOf(
+                ClientConfig(6060, 1), ClientConfig(6061, 10),
+                ClientConfig(6062, 21)
+            )
+            ),
+            row(arrayOf(
+                ClientConfig(6060, 1), ClientConfig(6061, 10),
+                ClientConfig(6062, 21), ClientConfig(6063, 43)
+            )
+            ),
+        ) { configs ->
+            testSetup()
+
+            val clientList = mutableListOf<JsonClient>()
+            val serverConList = mutableListOf<TestConnectionListener>()
+            val clientDiscList = mutableListOf<TestDisconnectionListener>()
+            var totalServerConnections = 0
+            var totalClientDisconnects = 0
+            lateinit var serverConnectionListener: TestConnectionListener
+
+            server?.let{ srv ->
+                serverConnectionListener = TestConnectionListener {
+                    serverConnectionListener.connections++
+                }
+                srv.registerConnectionListener(serverConnectionListener)
+                serverConList.add(serverConnectionListener)
+            }
+
+            configs.forEach { config ->
+                totalServerConnections += config.totalClients
+                totalClientDisconnects = totalServerConnections
+                for (i in 1..config.totalClients) {
+                    clientFactory?.createClient("localhost",config.port)?.let { client ->
+                        lateinit var clientDisonnectListener: TestDisconnectionListener
+                        clientDisonnectListener = TestDisconnectionListener {
+                            clientDisonnectListener.disconnections++
+                        }
+                        client.registerDisconnectionListener(clientDisonnectListener)
+                        clientDiscList.add(clientDisonnectListener)
+                        clientList.add(client)
+                    }
+                }
+            }
+
+            startServer()
+            connectClients(clientList)
+            delay(Duration.milliseconds(delayDurationMs))
+
+            waitForServerStatusChange(totalServerConnections,serverConList, DEBUG)
+            server?.shutdownServer()
+            delay(Duration.milliseconds(delayDurationMs))
+
+            waitForClientStatusChange(totalClientDisconnects,clientDiscList, DEBUG)
+            if (DEBUG) println("-----------------------------------")
+        }
+    }
+
+    should(": Server's DisconnectionListener is called after each client disconnects") {
+        forAll(
+            row(arrayOf(ClientConfig(6060, 1))),
+            row(arrayOf(ClientConfig(6060, 10))),
+            row(arrayOf(ClientConfig(6060, 11), ClientConfig(6061, 10))),
+            row(arrayOf(ClientConfig(6060, 11), ClientConfig(6061, 20))),
+            row(arrayOf(
+                ClientConfig(6060, 11), ClientConfig(6061, 20),
+                ClientConfig(6062, 21)
+            )
+            ),
+            row(arrayOf(
+                ClientConfig(6060, 11), ClientConfig(6061, 20),
+                ClientConfig(6062, 21), ClientConfig(6063, 43)
+            )
+            ),
+        ) { configs ->
+            testSetup()
+
+            val clientList = mutableListOf<JsonClient>()
+            var totalServerDisconnections = 0
+            lateinit var serverDisconnectionListener: TestDisconnectionListener
+
+            server?.let{ srv ->
+                serverDisconnectionListener = TestDisconnectionListener {
+                    serverDisconnectionListener.disconnections++
+                }
+                srv.registerDisconnectionListener(serverDisconnectionListener)
+            }
+
+            configs.forEach { config ->
+                totalServerDisconnections += config.totalClients
+                for (i in 1..config.totalClients) {
+                    clientFactory?.createClient("localhost",config.port)?.let { client ->
+                        clientList.add(client)
+                    }
+                }
+            }
+
+            startServer()
+            connectClients(clientList)
+            disconnectClients(clientList)
+            delay(Duration.milliseconds(delayDurationMs))
+
+            waitForServerStatusChange(totalServerDisconnections, mutableListOf(serverDisconnectionListener), DEBUG)
+
+            if (DEBUG) println("-----------------------------------")
+        }
+    }
+
+
+    should(": Server and Client's ConnectionStatusListener is called after each connect and disconnect") {
+        forAll(
+            row(arrayOf(ClientConfig(6060, 1))),
+            row(arrayOf(ClientConfig(6060, 10))),
+            row(arrayOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+            row(arrayOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+            row(arrayOf(
+                ClientConfig(6060, 1), ClientConfig(6061, 10),
+                ClientConfig(6062, 21)
+            )
+            ),
+            row(arrayOf(
+                ClientConfig(6060, 1), ClientConfig(6061, 10),
+                ClientConfig(6062, 21), ClientConfig(6063, 43)
+            )
+            ),
+        ) { configs ->
+            testSetup()
+
+            val clientList = mutableListOf<JsonClient>()
+            val clientStatusList = mutableListOf<TestConnectionStatusListener>()
+            val serverStatusList = mutableListOf<TestConnectionStatusListener>()
+            var totalConnections = 0
+            lateinit var serverStatusListener: TestConnectionStatusListener
+
+            server?.let{ srv ->
+                serverStatusListener = TestConnectionStatusListener(
+                    connected = { serverStatusListener.connections++ },
+                    disconnected = { serverStatusListener.disconnections++ }
+                )
+                srv.registerConnectionStatusListener(serverStatusListener)
+                serverStatusList.add(serverStatusListener)
+            }
+
+            lateinit var clientStatusListenerG: TestConnectionStatusListener
+            clientStatusListenerG = TestConnectionStatusListener(
+                connected = { clientStatusListenerG.connections++ },
+                disconnected = { clientStatusListenerG.disconnections++ }
+            )
+
+            configs.forEach { config ->
+                totalConnections += config.totalClients
+                for (i in 1..config.totalClients) {
+                    clientFactory?.createClient("localhost",config.port)?.let { client ->
+                        lateinit var clientStatusListener: TestConnectionStatusListener
+                        clientStatusListener = TestConnectionStatusListener(
+                            connected = { clientStatusListener.connections++ },
+                            disconnected = { clientStatusListener.disconnections++ }
+                        )
+                        client.registerConnectionStatusListener(clientStatusListener)
+                        client.registerConnectionStatusListener(clientStatusListenerG)
+                        clientStatusList.add(clientStatusListener)
+                        clientList.add(client)
+                    }
+                }
+            }
+
+            startServer()
+            connectClients(clientList)
+            delay(Duration.milliseconds(delayDurationMs))
+            waitForServerStatusChange(totalConnections,serverStatusList, DEBUG,true)
+            waitForClientStatusChange(totalConnections,clientStatusList, DEBUG,true)
+            waitForClientStatusChange(totalConnections, mutableListOf(clientStatusListenerG), debug=false,true)
+            disconnectClients(clientList)
+            delay(Duration.milliseconds(delayDurationMs))
+            waitForServerStatusChange(totalConnections,serverStatusList, DEBUG,false)
+            waitForClientStatusChange(totalConnections,clientStatusList, DEBUG,false)
+            waitForClientStatusChange(totalConnections, mutableListOf(clientStatusListenerG), debug=false,false)
+
+            connectClients(clientList)
+            delay(Duration.milliseconds(delayDurationMs))
+            waitForServerStatusChange(totalConnections*2,serverStatusList, DEBUG,true)
+            waitForClientStatusChange(totalConnections*2,clientStatusList, DEBUG,true)
+            waitForClientStatusChange(totalConnections*2, mutableListOf(clientStatusListenerG), debug=false,true)
+
+            server?.shutdownServer()
+            delay(Duration.milliseconds(delayDurationMs))
+            waitForClientStatusChange(totalConnections*2,clientStatusList, DEBUG,false)
+            waitForClientStatusChange(totalConnections*2, mutableListOf(clientStatusListenerG), debug=false,false)
+
+            if (DEBUG) println("-----------------------------------")
+        }
+    }
 })
 
