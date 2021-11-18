@@ -6,8 +6,6 @@ import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.data.forAll
 import io.kotest.data.row
-import konem.protocol.socket.json.JsonClient
-import konem.protocol.socket.json.JsonClientFactory
 import konem.protocol.socket.json.JsonServer
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
@@ -27,6 +25,9 @@ class JsonServerStartupSpec : ShouldSpec({
         forAll(
             row(1, arrayOf(6060)),
             row(3, arrayOf(6060,6061,6062)),
+            row(6, arrayOf(6060,6061,6062,6063,6064,6065)),
+            row(3, arrayOf(6060,6061,6062,6060,6061,6062)),
+            row(4, arrayOf(6060,6061,6062,6061,6062,6065)),
         ) { totalConfigured, ports ->
 
             clientFactory?.shutdown()
