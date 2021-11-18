@@ -27,6 +27,7 @@ abstract class Client<T, H>(private val serverAddress: SocketAddress, config: Cl
     private var closedListener: ClientClosedConnectionListener<T, H>? = null
     private val connectionListeners: MutableList<ConnectListener> = ArrayList()
     private val disconnectionListeners: MutableList<DisconnectListener> = ArrayList()
+    private val statusChangeTime = 0L
 
     var retryCount = 0
         private set
@@ -85,14 +86,14 @@ abstract class Client<T, H>(private val serverAddress: SocketAddress, config: Cl
     }
 
     private fun handleConnection() = clientScope.launch {
-        delay(1000L)
+        delay(statusChangeTime)
         for (listener in connectionListeners) {
             listener.onConnection(serverAddress)
         }
     }
 
     private fun handleDisconnection() = clientScope.launch {
-        delay(1000L)
+        delay(statusChangeTime)
         for (listener in disconnectionListeners) {
             listener.onDisconnection(serverAddress)
         }

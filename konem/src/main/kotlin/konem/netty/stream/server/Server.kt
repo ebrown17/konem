@@ -40,6 +40,7 @@ abstract class Server<T, H> : ChannelReader, HandlerListener<H, T> {
 
     companion object {
         private const val soBacklog = 25
+        private const val statusChangeTime = 0L
         private const val oneSecond = 1_000L
         private const val twoSeconds = 2_000L
     }
@@ -236,7 +237,7 @@ abstract class Server<T, H> : ChannelReader, HandlerListener<H, T> {
             channelConnections.add(remoteConnection)
             remoteHostToChannelMap[remoteConnection] = channelPort
             serverScope.launch {
-                delay(1000L)
+                delay(statusChangeTime)
                 connectionActive(handler)
             }
         }
@@ -252,7 +253,7 @@ abstract class Server<T, H> : ChannelReader, HandlerListener<H, T> {
             remoteHostToChannelMap.remove(remoteConnection)
             channelConnectionMap.putIfAbsent(channelPort, channelConnections)
             serverScope.launch {
-                delay(1000L)
+                delay(statusChangeTime)
                 connectionInActive(handler)
             }
         }
