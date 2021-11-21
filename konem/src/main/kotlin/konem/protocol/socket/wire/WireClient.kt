@@ -29,7 +29,7 @@ class WireClient(private val serverAddress: SocketAddress, config: ClientBootstr
         receiveListeners.add(receiver)
     }
 
-    override fun handleChannelRead(addr: SocketAddress, port: Int, message: Any) {
+    override  fun handleChannelRead(addr: SocketAddress, port: Int, message: Any) {
         clientScope.launch {
             readMessage(addr, port, message)
         }

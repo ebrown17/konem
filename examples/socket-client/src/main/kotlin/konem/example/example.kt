@@ -22,8 +22,6 @@ fun main() {
   val client = clientFactory.createClient("localhost", 6060)
 
   client.connect()
-
-
   client.registerConnectionListener(ConnectionListener {
 
     client.sendMessage(

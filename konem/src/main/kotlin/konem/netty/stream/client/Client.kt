@@ -18,20 +18,19 @@ abstract class Client<T, H>(private val serverAddress: SocketAddress, config: Cl
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val transceiver: Transceiver<T, H> = config.transceiver
-    protected val bootstrap: Bootstrap = config.bootstrap
-    protected val clientScope: CoroutineScope = config.scope
-
-    var channel: Channel? = null
+    private val bootstrap: Bootstrap = config.bootstrap
+    internal val clientScope: CoroutineScope = config.scope
 
     private var retryListener: ClientConnectionListener<T, H>? = null
     private var closedListener: ClientClosedConnectionListener<T, H>? = null
     private val connectionListeners: MutableList<ConnectListener> = ArrayList()
     private val disconnectionListeners: MutableList<DisconnectListener> = ArrayList()
-    private val statusChangeTime = 0L
 
-    var retryCount = 0
+    internal var channel: Channel? = null
         private set
-    var retryTime: Long = 0
+    internal var retryCount = 0
+        private set
+    internal var retryTime: Long = 0
         private set
     internal var isDisconnectInitiated = true
         private set
@@ -137,7 +136,6 @@ abstract class Client<T, H>(private val serverAddress: SocketAddress, config: Cl
     }
 
     fun shutdown() {
-        val channel = channel
         channel?.close()
     }
 
@@ -155,6 +153,7 @@ abstract class Client<T, H>(private val serverAddress: SocketAddress, config: Cl
     }
 
     companion object {
+        private const val statusChangeTime = 0L
         private const val RETRY_TIME = 10L
         private const val MAX_RETRY_TIME = 60L
         private const val MAX_RETRY_UNTIL_INCR = 30
