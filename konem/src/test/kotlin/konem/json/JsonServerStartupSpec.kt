@@ -6,6 +6,7 @@ import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.data.forAll
 import io.kotest.data.row
+import io.kotest.datatest.withData
 import konem.protocol.socket.json.JsonServer
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
@@ -16,26 +17,25 @@ import kotlin.time.ExperimentalTime
 @ExperimentalKotest
 class JsonServerStartupSpec : ShouldSpec({
 
-    afterTest {
+    afterContainer {
         clientFactory?.shutdown()
         server?.shutdownServer()
     }
 
-    should(": Server starts with expected ports and values") {
-        forAll(
-            row(1, arrayOf(6060)),
-            row(3, arrayOf(6060,6061,6062)),
-            row(6, arrayOf(6060,6061,6062,6063,6064,6065)),
-            row(3, arrayOf(6060,6061,6062,6060,6061,6062)),
-            row(4, arrayOf(6060,6061,6062,6061,6062,6065)),
-        ) { totalConfigured, ports ->
+    should(": Server starts with expected ports and values: ") {
+        withData(
+            nameFn = { data: ServerStartup -> "${this.testCase.displayName} ${data.totalConfigured} ${data.portsToConfigure}" },
+            ServerStartup(1, mutableListOf(6060)),
+            ServerStartup(3, mutableListOf(6060,6061,6062)),
+            ServerStartup(6, mutableListOf(6060,6061,6062,6063,6064,6065)),
+            ServerStartup(3, mutableListOf(6060,6061,6062,6060,6061,6062)),
+            ServerStartup(4, mutableListOf(6060,6061,6062,6061,6062,6065)),
 
-            clientFactory?.shutdown()
-            server?.shutdownServer()
+        ) { (totalConfigured, portsToConfigure) ->
 
             server = JsonServer()
             server?.let { srv ->
-                ports.forEach { port ->
+                portsToConfigure.forEach { port ->
                     srv.addChannel(port)
                 }
             }
@@ -46,7 +46,7 @@ class JsonServerStartupSpec : ShouldSpec({
                 if (server != null) {
                     var allPortsConfigured = true
 
-                    ports.forEach { port ->
+                    portsToConfigure.forEach { port ->
                         if (!server!!.isPortConfigured(port)) {
                             allPortsConfigured = false
                         }
@@ -56,7 +56,7 @@ class JsonServerStartupSpec : ShouldSpec({
                     var allTransceiversConfigured = true
 
                     transceiverMap.forEach { (port, _) ->
-                        if (!ports.contains(port)) {
+                        if (!portsToConfigure.contains(port)) {
                             allTransceiversConfigured = false
                         }
                     }

@@ -2,9 +2,10 @@ package konem.json
 
 import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.ShouldSpec
-import io.kotest.data.forAll
-import io.kotest.data.row
+import io.kotest.datatest.withData
 import konem.protocol.socket.json.JsonClient
+import konem.protocol.socket.json.JsonClientFactory
+import konem.protocol.socket.json.JsonServer
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
@@ -13,31 +14,40 @@ import kotlin.time.ExperimentalTime
 @ExperimentalKotest
 class JsonCommunicationSpec : ShouldSpec({
 
-    afterTest {
+    beforeContainer {
+        server = JsonServer()
+        server?.let {
+            it.addChannel(6060)
+            it.addChannel(6061)
+            it.addChannel(6062)
+            it.addChannel(6063)
+        }
+
+        clientFactory = JsonClientFactory()
+    }
+
+    afterContainer {
         clientFactory?.shutdown()
         server?.shutdownServer()
     }
 
-    should(": Server readers can register before server starts and then see messages") {
-        forAll(
-            row(1, arrayOf(ClientConfig(6060, 1))),
-            row(5, arrayOf(ClientConfig(6060, 10))),
-            row(5, arrayOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
-            row(35, arrayOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
-            row(
-                49, arrayOf(
-                    ClientConfig(6060, 1), ClientConfig(6061, 10),
-                    ClientConfig(6062, 21)
-                )
-            ),
-            row(
-                66, arrayOf(
-                    ClientConfig(6060, 1), ClientConfig(6061, 10),
-                    ClientConfig(6062, 21), ClientConfig(6063, 43)
-                )
-            ),
-        ) { sends, configs ->
-            testSetup()
+    should(": Server readers can register and then see messages: ") {
+        withData(
+            nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.displayName} ${data.msgCount} ${data.clientConfigs}" },
+            ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
+            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
+            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+            ClientCommConfigsV1(35, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+            ClientCommConfigsV1(49, mutableListOf(
+                ClientConfig(6060, 1), ClientConfig(6061, 10),
+                ClientConfig(6062, 21)
+            )),
+            ClientCommConfigsV1(66, mutableListOf(
+                ClientConfig(6060, 1), ClientConfig(6061, 10),
+                ClientConfig(6062, 21), ClientConfig(6063, 43)
+            )),
+
+        ) { (msgCount, clientConfigs ) ->
             lateinit var serverReceiver: JsonTestServerReceiver
             var totalMessagesSent = 0
             val clientList = mutableListOf<JsonClient>()
@@ -48,7 +58,7 @@ class JsonCommunicationSpec : ShouldSpec({
             }
             serverReceiverList.add(serverReceiver)
 
-            configs.forEach { config ->
+            clientConfigs.forEach { config ->
                 server?.registerChannelReadListener(config.port, serverReceiver)
                 for (i in 1..config.totalClients) {
                     clientFactory?.createClient("localhost",config.port)?.let {
@@ -66,32 +76,29 @@ class JsonCommunicationSpec : ShouldSpec({
 
             startServer()
             connectClients(clientList)
-            totalMessagesSent += sendClientMessages(sends, clientList)
+            totalMessagesSent += sendClientMessages(msgCount, clientList)
             waitForMessagesServer(totalMessagesSent, serverReceiverList, DEBUG)
             if (DEBUG) println("-----------------------------------")
         }
     }
 
-    should(": Clients can register reader; connect and then can send and receive messages from server") {
-        forAll(
-            row(1, arrayOf(ClientConfig(6060, 1))),
-            row(5, arrayOf(ClientConfig(6060, 10))),
-            row(5, arrayOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
-            row(35, arrayOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
-            row(
-                49, arrayOf(
-                    ClientConfig(6060, 1), ClientConfig(6061, 10),
-                    ClientConfig(6062, 21)
-                )
-            ),
-            row(
-                66, arrayOf(
-                    ClientConfig(6060, 1), ClientConfig(6061, 10),
-                    ClientConfig(6062, 21), ClientConfig(6063, 43)
-                )
-            ),
-        ) { sends, configs ->
-            testSetup()
+
+    should(": Clients can register reader; connect; send and receive messages from server: ") {
+        withData(
+            nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.displayName} ${data.msgCount} ${data.clientConfigs}" },
+            ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
+            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
+            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+            ClientCommConfigsV1(35, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+            ClientCommConfigsV1(49, mutableListOf(
+                ClientConfig(6060, 1), ClientConfig(6061, 10),
+                ClientConfig(6062, 21)
+            )),
+            ClientCommConfigsV1(66, mutableListOf(
+                ClientConfig(6060, 1), ClientConfig(6061, 10),
+                ClientConfig(6062, 21), ClientConfig(6063, 43)
+            )),
+            ) { (msgCount, clientConfigs ) ->
             lateinit var serverReceiver: JsonTestServerReceiver
             var totalMessagesSent = 0
             val clientList = mutableListOf<JsonClient>()
@@ -104,7 +111,7 @@ class JsonCommunicationSpec : ShouldSpec({
             }
             serverReceiverList.add(serverReceiver)
 
-            configs.forEach { config ->
+            clientConfigs.forEach { config ->
                 server?.registerChannelReadListener(config.port, serverReceiver)
 
                 for (i in 1..config.totalClients) {
@@ -124,25 +131,31 @@ class JsonCommunicationSpec : ShouldSpec({
 
             startServer()
             connectClients(clientList)
-            totalMessagesSent += sendClientMessages(sends, clientList)
+            totalMessagesSent += sendClientMessages(msgCount, clientList)
             waitForMessagesServer(totalMessagesSent, serverReceiverList, DEBUG)
             waitForMessagesClient(totalMessagesSent, clientReceiverList, DEBUG)
             if (DEBUG) println("-----------------------------------")
         }
     }
 
-    should(": Clients can register reader; connect and then can send and receive messages from server after a reconnect") {
-        forAll(
-            row(1, arrayOf(ClientConfig(6060,1))),
-            row(5, arrayOf(ClientConfig(6060,10))),
-            row(5, arrayOf(ClientConfig(6060,1), ClientConfig(6061,10))),
-            row(35, arrayOf(ClientConfig(6060,1), ClientConfig(6061,10))),
-            row(49, arrayOf(ClientConfig(6060,1), ClientConfig(6061,10),
-                ClientConfig(6062,21))),
-            row(66, arrayOf(ClientConfig(6060,1), ClientConfig(6061,10),
-                ClientConfig(6062,21), ClientConfig(6063,43))),
-        ) { sends, configs ->
-            testSetup()
+
+    should(": Clients can register reader; connect and then can send and receive messages from server after a reconnect: ") {
+        withData(
+            nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.displayName} ${data.msgCount} ${data.clientConfigs}" },
+            ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
+            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
+            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+            ClientCommConfigsV1(35, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+            ClientCommConfigsV1(49, mutableListOf(
+                ClientConfig(6060, 1), ClientConfig(6061, 10),
+                ClientConfig(6062, 21)
+            )),
+            ClientCommConfigsV1(66, mutableListOf(
+                ClientConfig(6060, 1), ClientConfig(6061, 10),
+                ClientConfig(6062, 21), ClientConfig(6063, 43)
+            )),
+        ) { (msgCount, clientConfigs ) ->
+
             lateinit var serverReceiver : JsonTestServerReceiver
             var totalMessagesSent = 0
             val clientList = mutableListOf<JsonClient>()
@@ -155,7 +168,7 @@ class JsonCommunicationSpec : ShouldSpec({
             }
             serverReceiverList.add(serverReceiver)
 
-            configs.forEach { config  ->
+            clientConfigs.forEach { config  ->
                 server?.registerChannelReadListener(config.port, serverReceiver)
 
                 for(i in 1..config.totalClients){
@@ -175,12 +188,12 @@ class JsonCommunicationSpec : ShouldSpec({
 
             startServer()
             connectClients(clientList)
-            totalMessagesSent += sendClientMessages(sends, clientList)
+            totalMessagesSent += sendClientMessages(msgCount, clientList)
             waitForMessagesServer(totalMessagesSent, serverReceiverList)
             waitForMessagesClient(totalMessagesSent, clientReceiverList)
             disconnectClients(clientList)
             connectClients(clientList)
-            totalMessagesSent += sendClientMessages(sends, clientList)
+            totalMessagesSent += sendClientMessages(msgCount, clientList)
             waitForMessagesServer(totalMessagesSent, serverReceiverList, DEBUG)
             waitForMessagesClient(totalMessagesSent, clientReceiverList, DEBUG)
             if (DEBUG) println("-----------------------------------")
@@ -188,468 +201,466 @@ class JsonCommunicationSpec : ShouldSpec({
         }
     }
 
-    should(": Server's broadcastOnChannel sends to all clients on correct port") {
-        forAll(
-            row(5, arrayOf(6060), arrayOf(ClientConfig(6060, 1))),
-            row(5, arrayOf(6061), arrayOf(ClientConfig(6060, 1))),
-            row(5, arrayOf(6060), arrayOf(ClientConfig(6060, 5))),
-            row(5, arrayOf(6060,6061), arrayOf(ClientConfig(6060, 5),
-                ClientConfig(6061, 11))),
-            row(25, arrayOf(6060,6061), arrayOf(ClientConfig(6060, 15),
-                ClientConfig(6061, 11),ClientConfig(6062, 11))),
-            row(25, arrayOf(6060,6061,6062,6063), arrayOf(ClientConfig(6060, 15),
-                ClientConfig(6061, 11),ClientConfig(6062, 11))),
-            row(50, arrayOf(6060,6061,6062,6063), arrayOf(ClientConfig(6060, 15),
-                ClientConfig(6061, 11),ClientConfig(6062, 11),
-                ClientConfig(6063, 25))),
-        ) { sends,broadcastPorts, configs ->
-            testSetup()
-            lateinit var serverReceiver: JsonTestServerReceiver
-            var totalMessagesSent = 0
-            val clientList = mutableListOf<JsonClient>()
-            val serverReceiverList = mutableListOf<JsonTestServerReceiver>()
-            val clientReceiverList = mutableListOf<JsonTestClientReceiver>()
-            serverReceiver = JsonTestServerReceiver { from, msg ->
-                serverReceiver.messageCount++
-            }
-            serverReceiverList.add(serverReceiver)
 
-            configs.forEach { config ->
-                server?.registerChannelReadListener(config.port, serverReceiver)
-                if (config.port in broadcastPorts) {
-                    totalMessagesSent += (config.totalClients * (sends))
-                }
-                for (i in 1..config.totalClients) {
-                    clientFactory?.createClient("localhost",config.port)?.let {
-                        lateinit var clientReceiver: JsonTestClientReceiver
-                        clientReceiver = JsonTestClientReceiver(it) { _, msg ->
-                            clientReceiver.messageCount++
-                            clientReceiver.messageList.add(msg)
-                        }
-                        clientReceiver.clientId = "client-$i-${config.port}"
-                        clientReceiverList.add(clientReceiver)
-                        it.registerChannelReadListener(clientReceiver)
-                        clientList.add(it)
-                    }
-                }
-            }
+   should(": Server's broadcastOnChannel sends to all clients on correct port: ") {
+       withData(
+           nameFn = { data: ClientCommConfigsV2 -> "${this.testCase.displayName} ${data.msgCount} ${data.broadcastPorts} ${data.clientConfigs}" },
+           ClientCommConfigsV2(1, mutableListOf(6060), mutableListOf(ClientConfig(6060, 1))),
+           ClientCommConfigsV2(5,  mutableListOf(6061),  mutableListOf(ClientConfig(6060, 10))),
+           ClientCommConfigsV2(5, mutableListOf(6060), mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+           ClientCommConfigsV2(35, mutableListOf(6060,6061),mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+           ClientCommConfigsV2(49,mutableListOf(6060,6061), mutableListOf(
+               ClientConfig(6060, 1), ClientConfig(6061, 10),
+               ClientConfig(6062, 21)
+           )),
+           ClientCommConfigsV2(66, mutableListOf(6060,6061,6062,6063), mutableListOf(
+               ClientConfig(6060, 1), ClientConfig(6061, 10),
+               ClientConfig(6062, 21), ClientConfig(6063, 43)
+           )),
+       ) { (msgCount,broadcastPorts, clientConfigs ) ->
 
-            startServer()
-            connectClients(clientList)
-            serverBroadcastOnChannels(sends,broadcastPorts )
-            waitForMessagesClient(totalMessagesSent, clientReceiverList, DEBUG)
-            if (DEBUG) println("-----------------------------------")
-        }
-    }
+           lateinit var serverReceiver: JsonTestServerReceiver
+           var totalMessagesSent = 0
+           val clientList = mutableListOf<JsonClient>()
+           val serverReceiverList = mutableListOf<JsonTestServerReceiver>()
+           val clientReceiverList = mutableListOf<JsonTestClientReceiver>()
+           serverReceiver = JsonTestServerReceiver { from, msg ->
+               serverReceiver.messageCount++
+           }
+           serverReceiverList.add(serverReceiver)
 
-    should(": Server's broadcastOnAllChannels sends to all clients on all ports") {
-        forAll(
-            row(5, arrayOf(6060), arrayOf(ClientConfig(6060, 1))),
-            row(5, arrayOf(6061), arrayOf(ClientConfig(6060, 1))),
-            row(5, arrayOf(6060), arrayOf(ClientConfig(6060, 5))),
-            row(5, arrayOf(6060,6061), arrayOf(ClientConfig(6060, 5),
-                ClientConfig(6061, 11))),
-            row(25, arrayOf(6060,6061), arrayOf(ClientConfig(6060, 15),
-                ClientConfig(6061, 11),ClientConfig(6062, 11))),
-            row(25, arrayOf(6060,6061,6062,6063), arrayOf(ClientConfig(6060, 15),
-                ClientConfig(6061, 11),ClientConfig(6062, 11))),
-            row(50, arrayOf(6060,6061,6062,6063), arrayOf(ClientConfig(6060, 15),
-                ClientConfig(6061, 11),ClientConfig(6062, 11),
-                ClientConfig(6063, 25))),
-        ) { sends,broadcastPorts, configs ->
-            testSetup()
-            lateinit var serverReceiver: JsonTestServerReceiver
-            var totalMessagesSent = 0
-            val clientList = mutableListOf<JsonClient>()
-            val serverReceiverList = mutableListOf<JsonTestServerReceiver>()
-            val clientReceiverList = mutableListOf<JsonTestClientReceiver>()
-            serverReceiver = JsonTestServerReceiver { _, _ ->
-                serverReceiver.messageCount++
-            }
-            serverReceiverList.add(serverReceiver)
+           clientConfigs.forEach { config ->
+               server?.registerChannelReadListener(config.port, serverReceiver)
+               if (config.port in broadcastPorts) {
+                   totalMessagesSent += (config.totalClients * (msgCount))
+               }
+               for (i in 1..config.totalClients) {
+                   clientFactory?.createClient("localhost",config.port)?.let {
+                       lateinit var clientReceiver: JsonTestClientReceiver
+                       clientReceiver = JsonTestClientReceiver(it) { _, msg ->
+                           clientReceiver.messageCount++
+                           clientReceiver.messageList.add(msg)
+                       }
+                       clientReceiver.clientId = "client-$i-${config.port}"
+                       clientReceiverList.add(clientReceiver)
+                       it.registerChannelReadListener(clientReceiver)
+                       clientList.add(it)
+                   }
+               }
+           }
 
-            configs.forEach { config ->
-                server?.registerChannelReadListener(config.port, serverReceiver)
+           startServer()
+           connectClients(clientList)
+           serverBroadcastOnChannels(msgCount,broadcastPorts )
+           waitForMessagesClient(totalMessagesSent, clientReceiverList, DEBUG)
+           if (DEBUG) println("-----------------------------------")
+       }
+   }
 
-                totalMessagesSent += (config.totalClients * (sends))
+   should(": Server's broadcastOnAllChannels sends to all clients on all ports: ") {
+       withData(
+           nameFn = { data: ClientCommConfigsV2 -> "${this.testCase.displayName} ${data.msgCount} ${data.broadcastPorts} ${data.clientConfigs}" },
+           ClientCommConfigsV2(1, mutableListOf(6060), mutableListOf(ClientConfig(6060, 1))),
+           ClientCommConfigsV2(5,  mutableListOf(6061),  mutableListOf(ClientConfig(6060, 10))),
+           ClientCommConfigsV2(5, mutableListOf(6060), mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+           ClientCommConfigsV2(35, mutableListOf(6060,6061),mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+           ClientCommConfigsV2(49,mutableListOf(6060,6061), mutableListOf(
+               ClientConfig(6060, 1), ClientConfig(6061, 10),
+               ClientConfig(6062, 21)
+           )),
+           ClientCommConfigsV2(66, mutableListOf(6060,6061,6062,6063), mutableListOf(
+               ClientConfig(6060, 1), ClientConfig(6061, 10),
+               ClientConfig(6062, 21), ClientConfig(6063, 43)
+           )),
+       ) { (msgCount,broadcastPorts, clientConfigs ) ->
 
-                for (i in 1..config.totalClients) {
-                    clientFactory?.createClient("localhost",config.port)?.let {
-                        lateinit var clientReceiver: JsonTestClientReceiver
-                        clientReceiver = JsonTestClientReceiver(it) { _, msg ->
-                            clientReceiver.messageCount++
-                            clientReceiver.messageList.add(msg)
-                        }
-                        clientReceiver.clientId = "client-$i-${config.port}"
-                        clientReceiverList.add(clientReceiver)
-                        it.registerChannelReadListener(clientReceiver)
-                        clientList.add(it)
-                    }
-                }
-            }
+           lateinit var serverReceiver: JsonTestServerReceiver
+           var totalMessagesSent = 0
+           val clientList = mutableListOf<JsonClient>()
+           val serverReceiverList = mutableListOf<JsonTestServerReceiver>()
+           val clientReceiverList = mutableListOf<JsonTestClientReceiver>()
+           serverReceiver = JsonTestServerReceiver { _, _ ->
+               serverReceiver.messageCount++
+           }
+           serverReceiverList.add(serverReceiver)
 
-            startServer()
-            connectClients(clientList)
-            serverBroadcastOnAllChannels(sends)
-            waitForMessagesClient(totalMessagesSent, clientReceiverList, DEBUG)
-            if (DEBUG) println("-----------------------------------")
-        }
-    }
+           clientConfigs.forEach { config ->
+               server?.registerChannelReadListener(config.port, serverReceiver)
 
-    should(": Server can receive and then respond to correct clients") {
-        forAll(
-            row(1, arrayOf(ClientConfig(6060,1))),
-            row(5, arrayOf(ClientConfig(6060,10))),
-            row(5, arrayOf(ClientConfig(6060,1), ClientConfig(6061,10))),
-            row(35, arrayOf(ClientConfig(6060,1), ClientConfig(6061,10))),
-            row(49, arrayOf(ClientConfig(6060,1), ClientConfig(6061,10),
-                ClientConfig(6062,21))),
-            row(66, arrayOf(ClientConfig(6060,1), ClientConfig(6061,10),
-                ClientConfig(6062,21), ClientConfig(6063,43))),
-        ) { sends, configs ->
-            testSetup()
-            lateinit var serverReceiver : JsonTestServerReceiver
-            var totalMessagesSent = 0
-            val clientList = mutableListOf<JsonClient>()
-            val serverReceiverList = mutableListOf<JsonTestServerReceiver>()
-            val clientReceiverList = mutableListOf<JsonTestClientReceiver>()
+               totalMessagesSent += (config.totalClients * (msgCount))
 
-            serverReceiver = JsonTestServerReceiver { from, msg ->
-                serverReceiver.messageCount++
-                server?.sendMessage(from,msg)
-            }
-            serverReceiverList.add(serverReceiver)
+               for (i in 1..config.totalClients) {
+                   clientFactory?.createClient("localhost",config.port)?.let {
+                       lateinit var clientReceiver: JsonTestClientReceiver
+                       clientReceiver = JsonTestClientReceiver(it) { _, msg ->
+                           clientReceiver.messageCount++
+                           clientReceiver.messageList.add(msg)
+                       }
+                       clientReceiver.clientId = "client-$i-${config.port}"
+                       clientReceiverList.add(clientReceiver)
+                       it.registerChannelReadListener(clientReceiver)
+                       clientList.add(it)
+                   }
+               }
+           }
 
-            configs.forEach { config  ->
-                server?.registerChannelReadListener(config.port, serverReceiver)
+           startServer()
+           connectClients(clientList)
+           serverBroadcastOnAllChannels(msgCount)
+           waitForMessagesClient(totalMessagesSent, clientReceiverList, DEBUG)
+           if (DEBUG) println("-----------------------------------")
+       }
+   }
 
-                for(i in 1..config.totalClients){
-                    clientFactory?.createClient("localhost",config.port)?.let {
-                        lateinit var clientReceiver: JsonTestClientReceiver
-                        clientReceiver = JsonTestClientReceiver(it) { _, msg ->
-                            clientReceiver.messageCount++
-                            clientReceiver.messageList.add(msg)
-                        }
-                        clientReceiver.clientId = "client-$i-${config.port}"
-                        clientReceiverList.add(clientReceiver)
-                        it.registerChannelReadListener(clientReceiver)
-                        clientList.add(it)
-                    }
-                }
-            }
+   should(": Server can receive and then respond to correct clients: ") {
+       withData(
+           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.displayName} ${data.msgCount} ${data.clientConfigs}" },
+           ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
+           ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
+           ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+           ClientCommConfigsV1(35, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+           ClientCommConfigsV1(49, mutableListOf(
+               ClientConfig(6060, 1), ClientConfig(6061, 10),
+               ClientConfig(6062, 21)
+           )),
+           ClientCommConfigsV1(66, mutableListOf(
+               ClientConfig(6060, 1), ClientConfig(6061, 10),
+               ClientConfig(6062, 21), ClientConfig(6063, 43)
+           )),
+       ) { (msgCount, clientConfigs ) ->
+           lateinit var serverReceiver : JsonTestServerReceiver
+           var totalMessagesSent = 0
+           val clientList = mutableListOf<JsonClient>()
+           val serverReceiverList = mutableListOf<JsonTestServerReceiver>()
+           val clientReceiverList = mutableListOf<JsonTestClientReceiver>()
 
-            startServer()
-            connectClients(clientList)
-            totalMessagesSent += sendClientMessageWithReceiver(sends, clientReceiverList)
+           serverReceiver = JsonTestServerReceiver { from, msg ->
+               serverReceiver.messageCount++
+               server?.sendMessage(from,msg)
+           }
+           serverReceiverList.add(serverReceiver)
 
-            waitForMessagesServer(totalMessagesSent, serverReceiverList,DEBUG)
-            waitForMessagesReceiverClient(totalMessagesSent, clientReceiverList,DEBUG)
+           clientConfigs.forEach { config  ->
+               server?.registerChannelReadListener(config.port, serverReceiver)
 
-            if (DEBUG) println("-----------------------------------")
+               for(i in 1..config.totalClients){
+                   clientFactory?.createClient("localhost",config.port)?.let {
+                       lateinit var clientReceiver: JsonTestClientReceiver
+                       clientReceiver = JsonTestClientReceiver(it) { _, msg ->
+                           clientReceiver.messageCount++
+                           clientReceiver.messageList.add(msg)
+                       }
+                       clientReceiver.clientId = "client-$i-${config.port}"
+                       clientReceiverList.add(clientReceiver)
+                       it.registerChannelReadListener(clientReceiver)
+                       clientList.add(it)
+                   }
+               }
+           }
 
-        }
-    }
+           startServer()
+           connectClients(clientList)
+           totalMessagesSent += sendClientMessageWithReceiver(msgCount, clientReceiverList)
 
-    should(": Each Client's ConnectionListener is called after connected to a server") {
-        forAll(
-            row(arrayOf(ClientConfig(6060, 1))),
-            row(arrayOf(ClientConfig(6060, 10))),
-            row(arrayOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
-            row(arrayOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
-            row(arrayOf(
-                ClientConfig(6060, 1), ClientConfig(6061, 10),
-                ClientConfig(6062, 21)
-            )
-            ),
-            row(arrayOf(
-                ClientConfig(6060, 1), ClientConfig(6061, 10),
-                ClientConfig(6062, 21), ClientConfig(6063, 43)
-            )
-            ),
-        ) { configs ->
-            testSetup()
+           waitForMessagesServer(totalMessagesSent, serverReceiverList,DEBUG)
+           waitForMessagesReceiverClient(totalMessagesSent, clientReceiverList,DEBUG)
 
-            val clientList = mutableListOf<JsonClient>()
-            val clientDiscList = mutableListOf<TestConnectionListener>()
-            var totalClientConnections = 0
+           if (DEBUG) println("-----------------------------------")
 
-            lateinit var clientConnnectListenerGlobal: TestConnectionListener
-            clientConnnectListenerGlobal = TestConnectionListener {
-                clientConnnectListenerGlobal.connections++
-            }
+       }
+   }
 
-            configs.forEach { config ->
-                totalClientConnections += config.totalClients
-                for (i in 1..config.totalClients) {
-                    clientFactory?.createClient("localhost",config.port)?.let { client ->
-                        lateinit var clientConnnectListener: TestConnectionListener
-                        clientConnnectListener = TestConnectionListener {
-                            clientConnnectListener.connections++
-                        }
-                        client.registerConnectionListener(clientConnnectListener)
-                        client.registerConnectionListener(clientConnnectListenerGlobal)
-                        clientDiscList.add(clientConnnectListener)
-                        clientList.add(client)
-                    }
-                }
-            }
+   should(": Each Client's ConnectionListener is called after connected to a server: ") {
+       withData(
+           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.displayName} ${data.msgCount} ${data.clientConfigs}" },
+           ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
+           ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
+           ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+           ClientCommConfigsV1(35, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+           ClientCommConfigsV1(49, mutableListOf(
+               ClientConfig(6060, 1), ClientConfig(6061, 10),
+               ClientConfig(6062, 21)
+           )),
+           ClientCommConfigsV1(66, mutableListOf(
+               ClientConfig(6060, 1), ClientConfig(6061, 10),
+               ClientConfig(6062, 21), ClientConfig(6063, 43)
+           )),
+       ) { (_, clientConfigs ) ->
 
-            startServer()
-            connectClients(clientList)
-            delay(Duration.milliseconds(delayDurationMs))
+           val clientList = mutableListOf<JsonClient>()
+           val clientDiscList = mutableListOf<TestConnectionListener>()
+           var totalClientConnections = 0
 
-            waitForClientStatusChange(totalClientConnections, mutableListOf(clientConnnectListenerGlobal), DEBUG)
-            waitForClientStatusChange(totalClientConnections,clientDiscList, DEBUG)
-            if (DEBUG) println("-----------------------------------")
-        }
+           lateinit var clientConnnectListenerGlobal: TestConnectionListener
+           clientConnnectListenerGlobal = TestConnectionListener {
+               clientConnnectListenerGlobal.connections++
+           }
 
-    }
+           clientConfigs.forEach { config ->
+               totalClientConnections += config.totalClients
+               for (i in 1..config.totalClients) {
+                   clientFactory?.createClient("localhost",config.port)?.let { client ->
+                       lateinit var clientConnnectListener: TestConnectionListener
+                       clientConnnectListener = TestConnectionListener {
+                           clientConnnectListener.connections++
+                       }
+                       client.registerConnectionListener(clientConnnectListener)
+                       client.registerConnectionListener(clientConnnectListenerGlobal)
+                       clientDiscList.add(clientConnnectListener)
+                       clientList.add(client)
+                   }
+               }
+           }
 
-    should(": Server's ConnectionListener is called after each client connects") {
-        forAll(
-            row(arrayOf(ClientConfig(6060, 1))),
-            row(arrayOf(ClientConfig(6060, 10))),
-            row(arrayOf(ClientConfig(6060, 11), ClientConfig(6061, 10))),
-            row(arrayOf(ClientConfig(6060, 11), ClientConfig(6061, 20))),
-            row(arrayOf(
-                ClientConfig(6060, 11), ClientConfig(6061, 20),
-                ClientConfig(6062, 21)
-            )
-            ),
-            row(arrayOf(
-                ClientConfig(6060, 11), ClientConfig(6061, 20),
-                ClientConfig(6062, 21), ClientConfig(6063, 43)
-            )
-            ),
-        ) { configs ->
-            testSetup()
+           startServer()
+           connectClients(clientList)
+           delay(Duration.milliseconds(delayDurationMs))
 
-            val clientList = mutableListOf<JsonClient>()
-            val serverConList = mutableListOf<TestConnectionListener>()
-            var totalServerConnections = 0
-            lateinit var serverConnectionListener: TestConnectionListener
+           waitForClientStatusChange(totalClientConnections, mutableListOf(clientConnnectListenerGlobal), DEBUG)
+           waitForClientStatusChange(totalClientConnections,clientDiscList, DEBUG)
+           if (DEBUG) println("-----------------------------------")
+       }
 
-            server?.let{ srv ->
-                serverConnectionListener = TestConnectionListener {
-                    serverConnectionListener.connections++
-                }
-                srv.registerConnectionListener(serverConnectionListener)
-                serverConList.add(serverConnectionListener)
-            }
+   }
 
-            configs.forEach { config ->
-                totalServerConnections += config.totalClients
-                for (i in 1..config.totalClients) {
-                    clientFactory?.createClient("localhost",config.port)?.let { client ->
-                        clientList.add(client)
-                    }
-                }
-            }
+   should(": Server's ConnectionListener is called after each client connects: ") {
+       withData(
+           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.displayName} ${data.msgCount} ${data.clientConfigs}" },
+           ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
+           ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
+           ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+           ClientCommConfigsV1(35, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+           ClientCommConfigsV1(49, mutableListOf(
+               ClientConfig(6060, 1), ClientConfig(6061, 10),
+               ClientConfig(6062, 21)
+           )),
+           ClientCommConfigsV1(66, mutableListOf(
+               ClientConfig(6060, 1), ClientConfig(6061, 10),
+               ClientConfig(6062, 21), ClientConfig(6063, 43)
+           )),
+       ) { (_, clientConfigs ) ->
 
-            startServer()
-            connectClients(clientList)
-            delay(Duration.milliseconds(delayDurationMs))
+           val clientList = mutableListOf<JsonClient>()
+           val serverConList = mutableListOf<TestConnectionListener>()
+           var totalServerConnections = 0
+           lateinit var serverConnectionListener: TestConnectionListener
 
-            waitForServerStatusChange(totalServerConnections,serverConList, DEBUG)
+           server?.let{ srv ->
+               serverConnectionListener = TestConnectionListener {
+                   serverConnectionListener.connections++
+               }
+               srv.registerConnectionListener(serverConnectionListener)
+               serverConList.add(serverConnectionListener)
+           }
 
-            if (DEBUG) println("-----------------------------------")
-        }
-    }
+           clientConfigs.forEach { config ->
+               totalServerConnections += config.totalClients
+               for (i in 1..config.totalClients) {
+                   clientFactory?.createClient("localhost",config.port)?.let { client ->
+                       clientList.add(client)
+                   }
+               }
+           }
 
-    should(": Client's DisconnectionListener is called after a disconnect") {
-        forAll(
-            row(arrayOf(ClientConfig(6060, 1))),
-            row(arrayOf(ClientConfig(6060, 10))),
-            row(arrayOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
-            row(arrayOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
-            row(arrayOf(
-                ClientConfig(6060, 1), ClientConfig(6061, 10),
-                ClientConfig(6062, 21)
-            )
-            ),
-            row(arrayOf(
-                ClientConfig(6060, 1), ClientConfig(6061, 10),
-                ClientConfig(6062, 21), ClientConfig(6063, 43)
-            )
-            ),
-        ) { configs ->
-            testSetup()
+           startServer()
+           connectClients(clientList)
+           delay(Duration.milliseconds(delayDurationMs))
 
-            val clientList = mutableListOf<JsonClient>()
-            val serverConList = mutableListOf<TestConnectionListener>()
-            val clientDiscList = mutableListOf<TestDisconnectionListener>()
-            var totalServerConnections = 0
-            var totalClientDisconnects = 0
-            lateinit var serverConnectionListener: TestConnectionListener
+           waitForServerStatusChange(totalServerConnections,serverConList, DEBUG)
 
-            server?.let{ srv ->
-                serverConnectionListener = TestConnectionListener {
-                    serverConnectionListener.connections++
-                }
-                srv.registerConnectionListener(serverConnectionListener)
-                serverConList.add(serverConnectionListener)
-            }
+           if (DEBUG) println("-----------------------------------")
+       }
+   }
 
-            configs.forEach { config ->
-                totalServerConnections += config.totalClients
-                totalClientDisconnects = totalServerConnections
-                for (i in 1..config.totalClients) {
-                    clientFactory?.createClient("localhost",config.port)?.let { client ->
-                        lateinit var clientDisonnectListener: TestDisconnectionListener
-                        clientDisonnectListener = TestDisconnectionListener {
-                            clientDisonnectListener.disconnections++
-                        }
-                        client.registerDisconnectionListener(clientDisonnectListener)
-                        clientDiscList.add(clientDisonnectListener)
-                        clientList.add(client)
-                    }
-                }
-            }
+   should(": Client's DisconnectionListener is called after a disconnect: ") {
+       withData(
+           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.displayName} ${data.msgCount} ${data.clientConfigs}" },
+           ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
+           ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
+           ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+           ClientCommConfigsV1(35, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+           ClientCommConfigsV1(49, mutableListOf(
+               ClientConfig(6060, 1), ClientConfig(6061, 10),
+               ClientConfig(6062, 21)
+           )),
+           ClientCommConfigsV1(66, mutableListOf(
+               ClientConfig(6060, 1), ClientConfig(6061, 10),
+               ClientConfig(6062, 21), ClientConfig(6063, 43)
+           )),
+       ) { (_, clientConfigs ) ->
 
-            startServer()
-            connectClients(clientList)
-            delay(Duration.milliseconds(delayDurationMs))
+           val clientList = mutableListOf<JsonClient>()
+           val serverConList = mutableListOf<TestConnectionListener>()
+           val clientDiscList = mutableListOf<TestDisconnectionListener>()
+           var totalServerConnections = 0
+           var totalClientDisconnects = 0
+           lateinit var serverConnectionListener: TestConnectionListener
 
-            waitForServerStatusChange(totalServerConnections,serverConList, DEBUG)
-            server?.shutdownServer()
-            delay(Duration.milliseconds(delayDurationMs))
+           server?.let{ srv ->
+               serverConnectionListener = TestConnectionListener {
+                   serverConnectionListener.connections++
+               }
+               srv.registerConnectionListener(serverConnectionListener)
+               serverConList.add(serverConnectionListener)
+           }
 
-            waitForClientStatusChange(totalClientDisconnects,clientDiscList, DEBUG)
-            if (DEBUG) println("-----------------------------------")
-        }
-    }
+           clientConfigs.forEach { config ->
+               totalServerConnections += config.totalClients
+               totalClientDisconnects = totalServerConnections
+               for (i in 1..config.totalClients) {
+                   clientFactory?.createClient("localhost",config.port)?.let { client ->
+                       lateinit var clientDisonnectListener: TestDisconnectionListener
+                       clientDisonnectListener = TestDisconnectionListener {
+                           clientDisonnectListener.disconnections++
+                       }
+                       client.registerDisconnectionListener(clientDisonnectListener)
+                       clientDiscList.add(clientDisonnectListener)
+                       clientList.add(client)
+                   }
+               }
+           }
 
-    should(": Server's DisconnectionListener is called after each client disconnects") {
-        forAll(
-            row(arrayOf(ClientConfig(6060, 1))),
-            row(arrayOf(ClientConfig(6060, 10))),
-            row(arrayOf(ClientConfig(6060, 11), ClientConfig(6061, 10))),
-            row(arrayOf(ClientConfig(6060, 11), ClientConfig(6061, 20))),
-            row(arrayOf(
-                ClientConfig(6060, 11), ClientConfig(6061, 20),
-                ClientConfig(6062, 21)
-            )
-            ),
-            row(arrayOf(
-                ClientConfig(6060, 11), ClientConfig(6061, 20),
-                ClientConfig(6062, 21), ClientConfig(6063, 43)
-            )
-            ),
-        ) { configs ->
-            testSetup()
+           startServer()
+           connectClients(clientList)
+           delay(Duration.milliseconds(delayDurationMs))
 
-            val clientList = mutableListOf<JsonClient>()
-            var totalServerDisconnections = 0
-            lateinit var serverDisconnectionListener: TestDisconnectionListener
+           waitForServerStatusChange(totalServerConnections,serverConList, DEBUG)
+           server?.shutdownServer()
+           delay(Duration.milliseconds(delayDurationMs))
 
-            server?.let{ srv ->
-                serverDisconnectionListener = TestDisconnectionListener {
-                    serverDisconnectionListener.disconnections++
-                }
-                srv.registerDisconnectionListener(serverDisconnectionListener)
-            }
+           waitForClientStatusChange(totalClientDisconnects,clientDiscList, DEBUG)
+           if (DEBUG) println("-----------------------------------")
+       }
+   }
 
-            configs.forEach { config ->
-                totalServerDisconnections += config.totalClients
-                for (i in 1..config.totalClients) {
-                    clientFactory?.createClient("localhost",config.port)?.let { client ->
-                        clientList.add(client)
-                    }
-                }
-            }
+   should(": Server's DisconnectionListener is called after each client disconnects: ") {
+       withData(
+           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.displayName} ${data.msgCount} ${data.clientConfigs}" },
+           ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
+           ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
+           ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+           ClientCommConfigsV1(35, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+           ClientCommConfigsV1(49, mutableListOf(
+               ClientConfig(6060, 1), ClientConfig(6061, 10),
+               ClientConfig(6062, 21)
+           )),
+           ClientCommConfigsV1(66, mutableListOf(
+               ClientConfig(6060, 1), ClientConfig(6061, 10),
+               ClientConfig(6062, 21), ClientConfig(6063, 43)
+           )),
+       ) { (_, clientConfigs ) ->
 
-            startServer()
-            connectClients(clientList)
-            disconnectClients(clientList)
-            delay(Duration.milliseconds(delayDurationMs))
+           val clientList = mutableListOf<JsonClient>()
+           var totalServerDisconnections = 0
+           lateinit var serverDisconnectionListener: TestDisconnectionListener
 
-            waitForServerStatusChange(totalServerDisconnections, mutableListOf(serverDisconnectionListener), DEBUG)
+           server?.let{ srv ->
+               serverDisconnectionListener = TestDisconnectionListener {
+                   serverDisconnectionListener.disconnections++
+               }
+               srv.registerDisconnectionListener(serverDisconnectionListener)
+           }
 
-            if (DEBUG) println("-----------------------------------")
-        }
-    }
+           clientConfigs.forEach { config ->
+               totalServerDisconnections += config.totalClients
+               for (i in 1..config.totalClients) {
+                   clientFactory?.createClient("localhost",config.port)?.let { client ->
+                       clientList.add(client)
+                   }
+               }
+           }
 
-    should(": Server and Client's ConnectionStatusListener is called after each connect and disconnect") {
-        forAll(
-            row(arrayOf(ClientConfig(6060, 1))),
-            row(arrayOf(ClientConfig(6060, 10))),
-            row(arrayOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
-            row(arrayOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
-            row(arrayOf(
-                ClientConfig(6060, 1), ClientConfig(6061, 10),
-                ClientConfig(6062, 21)
-            )
-            ),
-            row(arrayOf(
-                ClientConfig(6060, 1), ClientConfig(6061, 10),
-                ClientConfig(6062, 21), ClientConfig(6063, 43)
-            )
-            ),
-        ) { configs ->
-            testSetup()
+           startServer()
+           connectClients(clientList)
+           disconnectClients(clientList)
+           delay(Duration.milliseconds(delayDurationMs))
 
-            val clientList = mutableListOf<JsonClient>()
-            val clientStatusList = mutableListOf<TestConnectionStatusListener>()
-            val serverStatusList = mutableListOf<TestConnectionStatusListener>()
-            var totalConnections = 0
-            lateinit var serverStatusListener: TestConnectionStatusListener
+           waitForServerStatusChange(totalServerDisconnections, mutableListOf(serverDisconnectionListener), DEBUG)
 
-            server?.let{ srv ->
-                serverStatusListener = TestConnectionStatusListener(
-                    connected = { serverStatusListener.connections++ },
-                    disconnected = { serverStatusListener.disconnections++ }
-                )
-                srv.registerConnectionStatusListener(serverStatusListener)
-                serverStatusList.add(serverStatusListener)
-            }
+           if (DEBUG) println("-----------------------------------")
+       }
+   }
 
-            lateinit var clientStatusListenerG: TestConnectionStatusListener
-            clientStatusListenerG = TestConnectionStatusListener(
-                connected = { clientStatusListenerG.connections++ },
-                disconnected = { clientStatusListenerG.disconnections++ }
-            )
+   should(": Server and Client's ConnectionStatusListener is called after each connect and disconnect: ") {
+       withData(
+           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.displayName} ${data.msgCount} ${data.clientConfigs}" },
+           ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
+           ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
+           ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+           ClientCommConfigsV1(35, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+           ClientCommConfigsV1(49, mutableListOf(
+               ClientConfig(6060, 1), ClientConfig(6061, 10),
+               ClientConfig(6062, 21)
+           )),
+           ClientCommConfigsV1(66, mutableListOf(
+               ClientConfig(6060, 1), ClientConfig(6061, 10),
+               ClientConfig(6062, 21), ClientConfig(6063, 43)
+           )),
+       ) { (_, clientConfigs ) ->
 
-            configs.forEach { config ->
-                totalConnections += config.totalClients
-                for (i in 1..config.totalClients) {
-                    clientFactory?.createClient("localhost",config.port)?.let { client ->
-                        lateinit var clientStatusListener: TestConnectionStatusListener
-                        clientStatusListener = TestConnectionStatusListener(
-                            connected = { clientStatusListener.connections++ },
-                            disconnected = { clientStatusListener.disconnections++ }
-                        )
-                        client.registerConnectionStatusListener(clientStatusListener)
-                        client.registerConnectionStatusListener(clientStatusListenerG)
-                        clientStatusList.add(clientStatusListener)
-                        clientList.add(client)
-                    }
-                }
-            }
+           val clientList = mutableListOf<JsonClient>()
+           val clientStatusList = mutableListOf<TestConnectionStatusListener>()
+           val serverStatusList = mutableListOf<TestConnectionStatusListener>()
+           var totalConnections = 0
+           lateinit var serverStatusListener: TestConnectionStatusListener
 
-            startServer()
-            connectClients(clientList)
-            delay(Duration.milliseconds(delayDurationMs))
-            waitForServerStatusChange(totalConnections,serverStatusList, DEBUG,true)
-            waitForClientStatusChange(totalConnections,clientStatusList, DEBUG,true)
-            waitForClientStatusChange(totalConnections, mutableListOf(clientStatusListenerG), debug=false,true)
-            disconnectClients(clientList)
-            delay(Duration.milliseconds(delayDurationMs))
-            waitForServerStatusChange(totalConnections,serverStatusList, DEBUG,false)
-            waitForClientStatusChange(totalConnections,clientStatusList, DEBUG,false)
-            waitForClientStatusChange(totalConnections, mutableListOf(clientStatusListenerG), debug=false,false)
+           server?.let{ srv ->
+               serverStatusListener = TestConnectionStatusListener(
+                   connected = { serverStatusListener.connections++ },
+                   disconnected = { serverStatusListener.disconnections++ }
+               )
+               srv.registerConnectionStatusListener(serverStatusListener)
+               serverStatusList.add(serverStatusListener)
+           }
 
-            connectClients(clientList)
-            delay(Duration.milliseconds(delayDurationMs))
-            waitForServerStatusChange(totalConnections*2,serverStatusList, DEBUG,true)
-            waitForClientStatusChange(totalConnections*2,clientStatusList, DEBUG,true)
-            waitForClientStatusChange(totalConnections*2, mutableListOf(clientStatusListenerG), debug=false,true)
+           lateinit var clientStatusListenerG: TestConnectionStatusListener
+           clientStatusListenerG = TestConnectionStatusListener(
+               connected = { clientStatusListenerG.connections++ },
+               disconnected = { clientStatusListenerG.disconnections++ }
+           )
 
-            server?.shutdownServer()
-            delay(Duration.milliseconds(delayDurationMs))
-            waitForClientStatusChange(totalConnections*2,clientStatusList, DEBUG,false)
-            waitForClientStatusChange(totalConnections*2, mutableListOf(clientStatusListenerG), debug=false,false)
+           clientConfigs.forEach { config ->
+               totalConnections += config.totalClients
+               for (i in 1..config.totalClients) {
+                   clientFactory?.createClient("localhost",config.port)?.let { client ->
+                       lateinit var clientStatusListener: TestConnectionStatusListener
+                       clientStatusListener = TestConnectionStatusListener(
+                           connected = { clientStatusListener.connections++ },
+                           disconnected = { clientStatusListener.disconnections++ }
+                       )
+                       client.registerConnectionStatusListener(clientStatusListener)
+                       client.registerConnectionStatusListener(clientStatusListenerG)
+                       clientStatusList.add(clientStatusListener)
+                       clientList.add(client)
+                   }
+               }
+           }
 
-            if (DEBUG) println("-----------------------------------")
-        }
-    }
+           startServer()
+           connectClients(clientList)
+           delay(Duration.milliseconds(delayDurationMs))
+           waitForServerStatusChange(totalConnections,serverStatusList, DEBUG,true)
+           waitForClientStatusChange(totalConnections,clientStatusList, DEBUG,true)
+           waitForClientStatusChange(totalConnections, mutableListOf(clientStatusListenerG), debug=false,true)
+           disconnectClients(clientList)
+           delay(Duration.milliseconds(delayDurationMs))
+           waitForServerStatusChange(totalConnections,serverStatusList, DEBUG,false)
+           waitForClientStatusChange(totalConnections,clientStatusList, DEBUG,false)
+           waitForClientStatusChange(totalConnections, mutableListOf(clientStatusListenerG), debug=false,false)
+
+           connectClients(clientList)
+           delay(Duration.milliseconds(delayDurationMs))
+           waitForServerStatusChange(totalConnections*2,serverStatusList, DEBUG,true)
+           waitForClientStatusChange(totalConnections*2,clientStatusList, DEBUG,true)
+           waitForClientStatusChange(totalConnections*2, mutableListOf(clientStatusListenerG), debug=false,true)
+
+           server?.shutdownServer()
+           delay(Duration.milliseconds(delayDurationMs))
+           waitForClientStatusChange(totalConnections*2,clientStatusList, DEBUG,false)
+           waitForClientStatusChange(totalConnections*2, mutableListOf(clientStatusListenerG), debug=false,false)
+
+           if (DEBUG) println("-----------------------------------")
+       }
+   }
+
 })

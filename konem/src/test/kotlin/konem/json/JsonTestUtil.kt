@@ -40,6 +40,9 @@ val testSetup = {
 }
 
 data class ClientConfig(val port: Int,val totalClients: Int)
+data class ClientCommConfigsV1(val msgCount:Int, val clientConfigs: MutableList<ClientConfig>)
+data class ClientCommConfigsV2(val msgCount:Int, val broadcastPorts: MutableList<Int>, val clientConfigs: MutableList<ClientConfig>)
+data class ServerStartup(val totalConfigured: Int ,val portsToConfigure: MutableList<Int>)
 
 class JsonTestServerReceiver(receive: (SocketAddress, KonemMessage) -> Unit) : KonemMessageReceiver(receive) {
     var messageCount = 0
@@ -111,7 +114,7 @@ fun sendClientMessageWithReceiver(messageSendCount: Int, clientList: MutableList
     return totalMessagesSent
 }
 
-fun serverBroadcastOnChannels(messageSendCount: Int, broadcastPorts: Array<Int>){
+fun serverBroadcastOnChannels(messageSendCount: Int, broadcastPorts: MutableList<Int>){
     broadcastPorts.forEach { port ->
         for(i in 1..messageSendCount){
             server?.broadcastOnChannel(port,KonemMessage(message = Data("Server message $i")))

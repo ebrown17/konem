@@ -27,6 +27,7 @@ dependencies {
     testImplementation libs.kotest.junit5
     testImplementation libs.kotest.assertions
     testImplementation libs.kotest.property
+    testImplementation libs.kotest.datatest
 
     testImplementation libs.groovy
     testImplementation libs.spock
