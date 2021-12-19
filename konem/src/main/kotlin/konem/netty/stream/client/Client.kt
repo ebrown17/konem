@@ -14,7 +14,7 @@ import java.util.ArrayList
 import java.util.concurrent.TimeUnit
 
 abstract class Client<T, H>(private val serverAddress: SocketAddress, config: ClientBootstrapConfig<T, H>) :
-    ChannelReader {
+    ChannelReader{
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val transceiver: Transceiver<T, H> = config.transceiver
@@ -139,15 +139,15 @@ abstract class Client<T, H>(private val serverAddress: SocketAddress, config: Cl
         channel?.close()
     }
 
-    open fun registerConnectionListener(listener: ConnectionListener) {
+    fun registerConnectionListener(listener: ConnectionListener) {
         connectionListeners.add(listener)
     }
 
-    open fun registerDisconnectionListener(listener: DisconnectionListener) {
+    fun registerDisconnectionListener(listener: DisconnectionListener) {
         disconnectionListeners.add(listener)
     }
 
-    open fun registerConnectionStatusListener(listener: ConnectionStatusListener) {
+    fun registerConnectionStatusListener(listener: ConnectionStatusListener) {
         connectionListeners.add(listener)
         disconnectionListeners.add(listener)
     }

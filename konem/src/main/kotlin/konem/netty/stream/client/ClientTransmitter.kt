@@ -2,7 +2,7 @@ package konem.netty.stream.client
 
 interface ClientTransmitter<I> {
     /**
-     * Sends a message to specified server
+     * Sends a message to connected server
      *
      * @param message
      */

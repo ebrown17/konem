@@ -8,8 +8,7 @@ import java.util.concurrent.TimeUnit
 class ClientClosedConnectionListener<T, H> internal constructor(
     private val client: Client<T, H>,
     private val closeAction: () -> Unit
-) :
-    ChannelFutureListener {
+) : ChannelFutureListener {
 
     @Throws(InterruptedException::class)
     override fun operationComplete(future: ChannelFuture) {

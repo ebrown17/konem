@@ -36,7 +36,7 @@ abstract class ClientFactory<T, H> {
         bootstrap.channel(channelClass)
         bootstrap.option(ChannelOption.TCP_NODELAY, true)
         bootstrap.option(ChannelOption.SO_KEEPALIVE, true)
-        bootstrap.option<ByteBufAllocator>(ChannelOption.ALLOCATOR, allocator)
+        bootstrap.option(ChannelOption.ALLOCATOR, allocator)
         return bootstrap
     }
 

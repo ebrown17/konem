@@ -14,7 +14,7 @@ class WireMessageHandler(
     private val logger = LoggerFactory.getLogger(WireMessageHandler::class.java)
 
     override fun channelRead0(ctx: ChannelHandlerContext?, message: KonemMessage?) {
-        logger.info("{} sent: {}", remoteAddress, message.toString())
+        logger.trace("from: {} received: {}", remoteAddress, message?.toString())
 
         when (message?.messageType) {
             MessageType.DATA -> {

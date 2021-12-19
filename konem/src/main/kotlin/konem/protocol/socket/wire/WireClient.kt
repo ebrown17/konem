@@ -1,7 +1,9 @@
 package konem.protocol.socket.wire
 
 import konem.data.protobuf.KonemMessage
+import konem.netty.stream.ChannelReader
 import konem.netty.stream.Receiver
+import konem.netty.stream.ServerChannelReader
 import konem.netty.stream.client.Client
 import konem.netty.stream.client.ClientBootstrapConfig
 import konem.netty.stream.client.ClientTransmitter
@@ -29,7 +31,7 @@ class WireClient(private val serverAddress: SocketAddress, config: ClientBootstr
         receiveListeners.add(receiver)
     }
 
-    override  fun handleChannelRead(addr: SocketAddress, port: Int, message: Any) {
+    override fun handleChannelRead(addr: SocketAddress, port: Int, message: Any) {
         clientScope.launch {
             readMessage(addr, port, message)
         }

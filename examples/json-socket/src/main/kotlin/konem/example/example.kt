@@ -29,7 +29,6 @@ fun main(){
   val clientFactory = JsonClientFactory()
 
   val client = clientFactory.createClient("localhost", 6069)
-
   client.connect()
 
   client.registerConnectionListener(ConnectionListener {
@@ -51,6 +50,7 @@ fun main(){
 
   Thread.sleep(1000)
 
+    println(client.toString())
 
   server.shutdownServer()
 }

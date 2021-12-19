@@ -1,4 +1,4 @@
-package konem.netty.stream
+package konem.netty.tcp
 
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
@@ -6,15 +6,20 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.SocketAddress
 
-abstract class Handler<H, T>(val handlerId: Long, private val abstractTransceiver: Transceiver<T, H>) :
-    SimpleChannelInboundHandler<H>() {
+interface HandlerListener<I> {
+    fun registerActiveHandler(handler: Handler<I>, channelPort: Int, remoteConnection: SocketAddress)
+    fun registerInActiveHandler(handler: Handler<I>, channelPort: Int, remoteConnection: SocketAddress)
+}
+
+abstract class Handler<I>(val handlerId: Long, private val transceiver: Transceiver<I>) :
+    SimpleChannelInboundHandler<I>() {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     private lateinit var context: ChannelHandlerContext
     internal lateinit var remoteAddress: SocketAddress
 
-    fun sendMessage(message: H) {
+    fun sendMessage(message: I) {
         if (isActive()) {
             logger.trace("[write2Wire] dest: {} msg: {} ", remoteAddress, message.toString())
             context.writeAndFlush(message)
@@ -23,19 +28,17 @@ abstract class Handler<H, T>(val handlerId: Long, private val abstractTransceive
         }
     }
 
-    @Throws(Exception::class)
     override fun channelActive(ctx: ChannelHandlerContext) {
         logger.info("remote peer: {} connected", ctx.channel().remoteAddress())
         context = ctx
         remoteAddress = ctx.channel().remoteAddress()
-        abstractTransceiver.handlerActive(remoteAddress, this)
+        transceiver.handlerActive(remoteAddress, this)
         ctx.fireChannelActive()
     }
 
-    @Throws(Exception::class)
     override fun channelInactive(ctx: ChannelHandlerContext) {
         logger.info("remote peer: {} disconnected", ctx.channel().remoteAddress())
-        abstractTransceiver.handlerInActive(remoteAddress)
+        transceiver.handlerInActive(remoteAddress)
         ctx.fireChannelInactive()
     }
 
