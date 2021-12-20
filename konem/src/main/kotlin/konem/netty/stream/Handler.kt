@@ -14,7 +14,7 @@ abstract class Handler<H, T>(val handlerId: Long, private val abstractTransceive
     private lateinit var context: ChannelHandlerContext
     internal lateinit var remoteAddress: SocketAddress
 
-    fun sendMessage(message: H) {
+    open fun sendMessage(message: H) {
         if (isActive()) {
             logger.trace("[write2Wire] dest: {} msg: {} ", remoteAddress, message.toString())
             context.writeAndFlush(message)

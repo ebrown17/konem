@@ -1,17 +1,35 @@
 package konem.netty.tcp
 
-import org.slf4j.LoggerFactory
 import java.net.SocketAddress
 import java.util.ArrayList
 import java.util.concurrent.ConcurrentHashMap
+import konem.logger
 
-open class Transceiver<I>(protected val channelPort: Int) {
+abstract class Transceiver<I>(protected val channelPort: Int) {
 
-    private val logger = LoggerFactory.getLogger(javaClass)
+    protected val channelReceiver: ConcurrentHashMap<SocketAddress, ChannelReceiver<I>> =
+        ConcurrentHashMap()
+
+    fun registerChannelReceiver(addr: SocketAddress, reader: ChannelReceiver<I>) {
+        channelReceiver.putIfAbsent(addr, reader)
+    }
+
+    abstract fun transmit(addr: SocketAddress, message: I, vararg extra: String)
+
+    abstract fun receive(addr: SocketAddress, message: I, vararg extra: String)
+
+    override fun toString(): String {
+        return (
+            "Transceiver{" + " channelReaders=" + channelReceiver.size + ", channelPort=" + channelPort + '}'.toString()
+            )
+    }
+}
+
+abstract class ServerTransceiver<I>( channelPort: Int):Transceiver<I>(channelPort) {
+
+    private val logger = logger(javaClass)
 
     protected val activeHandlers: ConcurrentHashMap<SocketAddress, Handler<I>> =
-        ConcurrentHashMap()
-    protected val channelReceiver: ConcurrentHashMap<SocketAddress, ChannelReceiver<I>> =
         ConcurrentHashMap()
     protected val handlerListeners: MutableList<HandlerListener<I>> = ArrayList()
     protected val activeLock = Any()
@@ -37,32 +55,17 @@ open class Transceiver<I>(protected val channelPort: Int) {
         }
     }
 
-    fun registerChannelReceiver(addr: SocketAddress, reader: ChannelReceiver<I>) {
-        channelReceiver.putIfAbsent(addr, reader)
-    }
-
     fun registerHandlerListener(listener: HandlerListener<I>) {
         if (!handlerListeners.contains(listener)) {
             handlerListeners.add(listener)
         }
     }
 
-    /**
-     * Sends a message to specified address if connected to this transceiver
-     * @param addr
-     * @param message
-     */
-    fun transmit(addr: SocketAddress, message: I) {
-        synchronized(activeLock) {
-            logger.trace("to addr: {} with {}", addr, message)
-            val handler = activeHandlers[addr]
-            handler?.sendMessage(message)
-        }
-    }
+    abstract fun broadcast(message: I, vararg extra: String)
 
     override fun toString(): String {
         return (
-            "Transceiver{" + "activeHandlers=" + activeHandlers.size + ", channelReaders=" + channelReceiver.size +
+            "ServerTransceiver{" + "activeHandlers=" + activeHandlers.size + ", channelReaders=" + channelReceiver.size +
                 ", handlerListeners=" + handlerListeners.size + ", channelPort=" + channelPort + '}'.toString()
             )
     }
