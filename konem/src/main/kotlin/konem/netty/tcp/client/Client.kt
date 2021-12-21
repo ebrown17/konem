@@ -17,10 +17,9 @@ data class ClientBootstrapConfig<I> constructor(
     val transceiver: Transceiver<I>,
     val bootstrap: Bootstrap,
     val scope: CoroutineScope,
-    val retry_period : Long,
-    val max_retry_period: Long,
-    var retries_until_period_increase : Int,
-    val use_ssl : Boolean,
+    val retryInfo: RetryInfo,
+    val useSSL: Boolean,
+
 )
 
 interface Client<I> {
@@ -38,7 +37,7 @@ interface Client<I> {
     fun sendMessage(message: I)
 }
 
-abstract class ClientInternal<I>(private val serverAddress: SocketAddress, config: ClientBootstrapConfig<I>) :
+abstract class ClientInternal<I>(private val serverAddress: SocketAddress, private val config: ClientBootstrapConfig<I>) :
     ChannelReceiver<I>,Client<I> {
 
     private val logger = logger(javaClass)
@@ -47,7 +46,7 @@ abstract class ClientInternal<I>(private val serverAddress: SocketAddress, confi
     internal val clientScope: CoroutineScope = config.scope
 
     private var retryListener: ClientConnectionListener<I>? = null
-    private var closedListener: ClientClosedConnectionListener<I>? = null
+//    private var closedListener: ClientClosedConnectionListener<I>? = null
 
     private val connectionListeners: MutableList<ConnectListener> = ArrayList()
     private val disconnectionListeners: MutableList<DisconnectListener> = ArrayList()
@@ -74,24 +73,22 @@ abstract class ClientInternal<I>(private val serverAddress: SocketAddress, confi
         }
         if (retryListener == null) {
             logger.info("creating new connection listener")
-            retryListener = ClientConnectionListener(this)
+            retryListener = ClientConnectionListener(this,config.retryInfo) { channelFuture ->
+                logger.info("Client connected to {} ", serverAddress.toString())
+                isDisconnectInitiated = false
+                channel = channelFuture.channel()
+                transceiver.registerChannelReceiver(serverAddress, this)
+                //   closedListener = ClientClosedConnectionListener(this) { handleDisconnection() }
+                //    channel!!.closeFuture().addListener(closedListener)
+                handleConnection()
+            }
         }
 
         val channelFuture = bootstrap.connect(serverAddress)
-        retryListener!!.setAttemptingConnection()
+        //retryListener!!.isAttemptingConnection
         channelFuture.addListener(retryListener)
     }
 
-    internal fun connectionEstablished(future: ChannelFuture) {
-        logger.info("Client connected to {} ", serverAddress.toString())
-
-        isDisconnectInitiated = false
-        channel = future.channel()
-        transceiver.registerChannelReceiver(serverAddress, this)
-        closedListener = ClientClosedConnectionListener(this) { handleDisconnection() }
-        channel!!.closeFuture().addListener(closedListener)
-        handleConnection()
-    }
 
     @Throws(IOException::class)
     override fun disconnect() {
@@ -101,7 +98,7 @@ abstract class ClientInternal<I>(private val serverAddress: SocketAddress, confi
             logger.info("disconnect called when connection not active or channel null")
             return
         }
-        channel!!.closeFuture().removeListener(closedListener)
+       // channel!!.closeFuture().removeListener(closedListener)
         channel!!.close().awaitUninterruptibly(1, TimeUnit.SECONDS)
         handleDisconnection()
     }

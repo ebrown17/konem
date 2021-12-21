@@ -53,9 +53,11 @@ abstract class ClientFactory<I> constructor(val config: ClientFactoryConfig) {
             transceiver,
             createBootStrap(),
             clientScope,
-            config.RETRY_TIME,
-            config.MAX_RETRY_TIME,
-            config.MAX_RETRY_UNTIL_INCR,
+            RetryInfo(
+                config.RETRY_TIME,
+                config.MAX_RETRY_TIME,
+                config.MAX_RETRY_UNTIL_INCR,
+            ),
             config.USE_SSL,
         )
     }

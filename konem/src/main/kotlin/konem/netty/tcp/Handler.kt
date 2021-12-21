@@ -14,9 +14,9 @@ interface HandlerListener<I> {
 abstract class Handler<I>(val handlerId: Long, private val transceiver: Transceiver<I>) :
     SimpleChannelInboundHandler<I>() {
 
-    private val logger: Logger = LoggerFactory.getLogger(javaClass)
+    internal val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    private lateinit var context: ChannelHandlerContext
+    internal lateinit var context: ChannelHandlerContext
     internal lateinit var remoteAddress: SocketAddress
 
    open fun sendMessage(message: I) {
@@ -32,13 +32,11 @@ abstract class Handler<I>(val handlerId: Long, private val transceiver: Transcei
         logger.info("remote peer: {} connected", ctx.channel().remoteAddress())
         context = ctx
         remoteAddress = ctx.channel().remoteAddress()
-        transceiver.handlerActive(remoteAddress, this)
         ctx.fireChannelActive()
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
         logger.info("remote peer: {} disconnected", ctx.channel().remoteAddress())
-        transceiver.handlerInActive(remoteAddress)
         ctx.fireChannelInactive()
     }
 
@@ -49,4 +47,24 @@ abstract class Handler<I>(val handlerId: Long, private val transceiver: Transcei
         }
         return false
     }
+}
+
+abstract class ServerHandler<I>(handlerId: Long, private val transceiver: ServerTransceiver<I>) :
+    Handler<I>(handlerId,transceiver) {
+
+    override fun channelActive(ctx: ChannelHandlerContext) {
+        logger.info("remote peer: {} connected", ctx.channel().remoteAddress())
+        context = ctx
+        remoteAddress = ctx.channel().remoteAddress()
+        transceiver.handlerActive(remoteAddress, this)
+        ctx.fireChannelActive()
+    }
+
+    override fun channelInactive(ctx: ChannelHandlerContext) {
+        logger.info("remote peer: {} disconnected", ctx.channel().remoteAddress())
+        transceiver.handlerInActive(remoteAddress)
+        ctx.fireChannelInactive()
+    }
+
+
 }
