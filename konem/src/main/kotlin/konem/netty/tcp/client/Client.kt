@@ -19,7 +19,6 @@ data class ClientBootstrapConfig<I> constructor(
     val scope: CoroutineScope,
     val retryInfo: RetryInfo,
     val useSSL: Boolean,
-
 )
 
 interface Client<I> {
@@ -46,7 +45,7 @@ abstract class ClientInternal<I>(private val serverAddress: SocketAddress, priva
     internal val clientScope: CoroutineScope = config.scope
 
     private var retryListener: ClientConnectionListener<I>? = null
-//    private var closedListener: ClientClosedConnectionListener<I>? = null
+    private var closedListener: ClientClosedConnectionListener<I>? = null
 
     private val connectionListeners: MutableList<ConnectListener> = ArrayList()
     private val disconnectionListeners: MutableList<DisconnectListener> = ArrayList()
@@ -73,13 +72,16 @@ abstract class ClientInternal<I>(private val serverAddress: SocketAddress, priva
         }
         if (retryListener == null) {
             logger.info("creating new connection listener")
-            retryListener = ClientConnectionListener(this,config.retryInfo) { channelFuture ->
+            retryListener = ClientConnectionListener(this, config.retryInfo) { channelFuture ->
                 logger.info("Client connected to {} ", serverAddress.toString())
                 isDisconnectInitiated = false
                 channel = channelFuture.channel()
                 transceiver.registerChannelReceiver(serverAddress, this)
-                //   closedListener = ClientClosedConnectionListener(this) { handleDisconnection() }
-                //    channel!!.closeFuture().addListener(closedListener)
+                closedListener = ClientClosedConnectionListener(this) {
+                    handleDisconnection()
+                    connect()
+                }
+                channel!!.closeFuture().addListener(closedListener)
                 handleConnection()
             }
         }
@@ -98,7 +100,7 @@ abstract class ClientInternal<I>(private val serverAddress: SocketAddress, priva
             logger.info("disconnect called when connection not active or channel null")
             return
         }
-       // channel!!.closeFuture().removeListener(closedListener)
+        channel!!.closeFuture().removeListener(closedListener)
         channel!!.close().awaitUninterruptibly(1, TimeUnit.SECONDS)
         handleDisconnection()
     }

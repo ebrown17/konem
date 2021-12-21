@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit
 data class RetryInfo(val retry_period : Long, val max_retry_period: Long, var retries_until_period_increase : Int)
 
 class ClientConnectionListener<I> internal constructor(
-    private val client: Client<I>,
+    private val client: ClientInternal<I>,
     private val retryInfo: RetryInfo,
     private val connectAction: ( future: ChannelFuture) -> Unit
 ) : ChannelFutureListener {
