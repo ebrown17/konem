@@ -37,7 +37,7 @@ interface Client<I> {
 }
 
 abstract class ClientInternal<I>(private val serverAddress: SocketAddress, private val config: ClientBootstrapConfig<I>) :
-    ChannelReceiver<I>,Client<I> {
+    ChannelReceiver<I>,Client<I>{
 
     private val logger = logger(javaClass)
     private val transceiver: Transceiver<I> = config.transceiver

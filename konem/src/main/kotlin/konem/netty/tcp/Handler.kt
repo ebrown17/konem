@@ -2,6 +2,7 @@ package konem.netty.tcp
 
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
+import konem.logger
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.SocketAddress
@@ -14,7 +15,7 @@ interface HandlerListener<I> {
 abstract class Handler<I>(val handlerId: Long, private val transceiver: Transceiver<I>) :
     SimpleChannelInboundHandler<I>() {
 
-    internal val logger: Logger = LoggerFactory.getLogger(javaClass)
+    internal val logger = logger(javaClass)
 
     internal lateinit var context: ChannelHandlerContext
     internal lateinit var remoteAddress: SocketAddress
