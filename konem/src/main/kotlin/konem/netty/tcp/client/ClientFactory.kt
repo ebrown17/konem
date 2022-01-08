@@ -9,10 +9,12 @@ import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.util.concurrent.DefaultThreadFactory
 import konem.netty.tcp.Transceiver
+import konem.protocol.socket.json.JsonClient
 
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import java.net.InetSocketAddress
+import java.util.ArrayList
 
 class ClientFactoryConfig {
     var DEFAULT_NUM_THREADS = 0
@@ -28,6 +30,7 @@ abstract class ClientFactory<I> constructor(val config: ClientFactoryConfig) {
     private val channelClass: Class<out Channel>
     private val allocator: PooledByteBufAllocator
     private val clientScope: CoroutineScope
+    internal val clientArrayList = ArrayList<Client<I>>()
 
     init {
         this.workerGroup = NioEventLoopGroup(config.DEFAULT_NUM_THREADS, DefaultThreadFactory("client", true))

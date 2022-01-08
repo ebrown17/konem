@@ -10,47 +10,47 @@ import konem.protocol.socket.json.JsonServer
 import konem.protocol.socket.json.KonemMessageReceiver
 
 fun main(){
-  val server = JsonServer()
-  server.addChannel(6069)
+    val server = JsonServer()
+    server.addChannel(6069)
 
-  var count = 0
-  server.registerChannelReadListener(KonemMessageReceiver{from, msg ->
-    println("SERVER Msg: $msg from $from")
-    Thread.sleep(500)
+    var count = 0
+    server.registerChannelReadListener(KonemMessageReceiver{from, msg ->
+        println("SERVER Msg: $msg from $from")
+        Thread.sleep(500)
 
-    server.sendMessage(from,
-      KonemMessage(message = Data("Send message ${count++}")
-    ))
-  })
-
-
-  server.startServer()
-
-  val clientFactory = JsonClientFactory()
-
-  val client = clientFactory.createClient("localhost", 6069)
-  client.connect()
-
-  client.registerConnectionListener(ConnectionListener {
-    client.sendMessage(KonemMessage(message = Data("Send message ${count++}") ))
-  })
-
-  client.registerChannelReadListener(KonemMessageReceiver{from, msg ->
-    println("CLIENT Msg: $msg from $from")
+        server.sendMessage(from,
+            KonemMessage(message = Data("Send message ${count++}")
+            ))
+    })
 
 
-    if(count < 10) {
-        client.sendMessage( KonemMessage(message = Data("Send message ${count++}")))
-    }
-  })
+    server.startServer()
 
-  Thread.sleep(8000)
+    val clientFactory = JsonClientFactory()
 
-  client.disconnect()
+    val client = clientFactory.createClient("localhost", 6069)
+    client.connect()
 
-  Thread.sleep(1000)
+    client.registerConnectionListener(ConnectionListener {
+        client.sendMessage(KonemMessage(message = Data("Send message ${count++}") ))
+    })
+
+    client.registerChannelReadListener(KonemMessageReceiver{from, msg ->
+        println("CLIENT Msg: $msg from $from")
+
+
+        if(count < 10) {
+            client.sendMessage( KonemMessage(message = Data("Send message ${count++}")))
+        }
+    })
+
+    Thread.sleep(8000)
+
+    client.disconnect()
+
+    Thread.sleep(1000)
 
     println(client.toString())
 
-  server.shutdownServer()
+    server.shutdownServer()
 }

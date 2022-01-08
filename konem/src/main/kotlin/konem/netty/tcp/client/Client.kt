@@ -21,7 +21,7 @@ data class ClientBootstrapConfig<I> constructor(
     val useSSL: Boolean,
 )
 
-interface Client<I> {
+interface Client<I>:  ChannelReceiver<I> {
     fun connect()
     fun disconnect()
     fun shutdown()
@@ -37,7 +37,7 @@ interface Client<I> {
 }
 
 abstract class ClientInternal<I>(private val serverAddress: SocketAddress, private val config: ClientBootstrapConfig<I>) :
-    ChannelReceiver<I>,Client<I>{
+   Client<I>{
 
     private val logger = logger(javaClass)
     private val transceiver: Transceiver<I> = config.transceiver

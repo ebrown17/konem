@@ -8,7 +8,7 @@ import kotlinx.coroutines.launch
 import java.net.SocketAddress
 
 class StringClient(private val serverAddress: SocketAddress, private val config: ClientBootstrapConfig<String>):
-    ClientInternal<String>(serverAddress,config),StringChannelReceiver<String> {
+    ClientInternal<String>(serverAddress,config), StringChannelReceiver {
 
     private val logger = logger(javaClass)
     private val transceiver = config.transceiver
@@ -27,7 +27,7 @@ class StringClient(private val serverAddress: SocketAddress, private val config:
         receiveListeners.add(receiver)
     }
 
-    override fun handleChannelRead(addr: SocketAddress, port: Int, message: String) {
+    override fun handleReceivedMessage(addr: SocketAddress, port: Int, message: String) {
         clientScope.launch {
             receiveMessage(addr, port, message)
         }

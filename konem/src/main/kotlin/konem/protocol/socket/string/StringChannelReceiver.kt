@@ -5,12 +5,9 @@ import konem.netty.tcp.ChannelReceiver
 import konem.netty.tcp.ServerChannelReceiver
 import java.net.SocketAddress
 
-interface StringChannelReceiver<I> {
-    fun handleChannelRead(addr: SocketAddress, port: Int, message: I)
+interface StringChannelReceiver {
+    fun handleReceivedMessage(addr: SocketAddress, port: Int, message: String)
 
-    suspend fun receiveMessage(addr: SocketAddress, port: Int, message: I)
+    suspend fun receiveMessage(addr: SocketAddress, port: Int, message: String)
 }
 
-interface StringClientChannelReceiver<I> : ChannelReceiver<I>, StringChannelReceiver<I>
-
-interface JsonServerChannelReader<I> : ServerChannelReceiver<I>, StringChannelReceiver<I>

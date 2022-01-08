@@ -7,32 +7,16 @@ import konem.logger
 
 abstract class Transceiver<I>(protected val channelPort: Int) {
 
-    protected val channelReceiver: ConcurrentHashMap<SocketAddress, ChannelReceiver<I>> =
-        ConcurrentHashMap()
-
-    fun registerChannelReceiver(addr: SocketAddress, reader: ChannelReceiver<I>) {
-        channelReceiver.putIfAbsent(addr, reader)
-    }
-
-    abstract fun transmit(addr: SocketAddress, message: I, vararg extra: String)
-
-    abstract fun receive(addr: SocketAddress, message: I, vararg extra: String)
-
-    override fun toString(): String {
-        return (
-            "Transceiver{" + " channelReaders=" + channelReceiver.size + ", channelPort=" + channelPort + '}'.toString()
-            )
-    }
-}
-
-abstract class ServerTransceiver<I>( channelPort: Int):Transceiver<I>(channelPort) {
-
     private val logger = logger(javaClass)
 
     protected val activeHandlers: ConcurrentHashMap<SocketAddress, Handler<I>> =
         ConcurrentHashMap()
-    protected val handlerListeners: MutableList<HandlerListener<I>> = ArrayList()
     protected val activeLock = Any()
+
+    protected val channelReceiver: ConcurrentHashMap<SocketAddress, ChannelReceiver<I>> =
+        ConcurrentHashMap()
+
+    protected val handlerListeners: MutableList<HandlerListener<I>> = ArrayList()
 
     fun handlerActive(addr: SocketAddress, handler: Handler<I>) {
         logger.info("remote: {}", addr)
@@ -54,6 +38,23 @@ abstract class ServerTransceiver<I>( channelPort: Int):Transceiver<I>(channelPor
             }
         }
     }
+
+    fun registerChannelReceiver(addr: SocketAddress, reader: ChannelReceiver<I>) {
+        channelReceiver.putIfAbsent(addr, reader)
+    }
+
+    abstract fun transmit(addr: SocketAddress, message: I, vararg extra: String)
+
+    abstract fun receive(addr: SocketAddress, message: I, vararg extra: String)
+
+    override fun toString(): String {
+        return (
+            "Transceiver{" + " channelReaders=" + channelReceiver.size + ", channelPort=" + channelPort + '}'.toString()
+            )
+    }
+}
+
+abstract class ServerTransceiver<I>( channelPort: Int):Transceiver<I>(channelPort) {
 
     fun registerHandlerListener(listener: HandlerListener<I>) {
         if (!handlerListeners.contains(listener)) {
