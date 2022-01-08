@@ -7,7 +7,7 @@ import konem.netty.tcp.client.ClientInternal
 import kotlinx.coroutines.launch
 import java.net.SocketAddress
 
-class StringClient(private val serverAddress: SocketAddress, private val config: ClientBootstrapConfig<String>):
+class StringClient(private val serverAddress: SocketAddress, config: ClientBootstrapConfig<String>):
     ClientInternal<String>(serverAddress,config), StringChannelReceiver {
 
     private val logger = logger(javaClass)

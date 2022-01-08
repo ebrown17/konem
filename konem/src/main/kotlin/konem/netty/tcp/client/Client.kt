@@ -2,7 +2,6 @@ package konem.netty.tcp.client
 
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.Channel
-import io.netty.channel.ChannelFuture
 import konem.logger
 import konem.netty.tcp.*
 import kotlinx.coroutines.CoroutineScope
@@ -12,14 +11,6 @@ import java.net.SocketAddress
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-
-data class ClientBootstrapConfig<I> constructor(
-    val transceiver: Transceiver<I>,
-    val bootstrap: Bootstrap,
-    val scope: CoroutineScope,
-    val retryInfo: RetryInfo,
-    val useSSL: Boolean,
-)
 
 interface Client<I>:  ChannelReceiver<I> {
     fun connect()

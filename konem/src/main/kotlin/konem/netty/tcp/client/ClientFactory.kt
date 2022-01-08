@@ -3,6 +3,7 @@ package konem.netty.tcp.client
 import io.netty.bootstrap.Bootstrap
 import io.netty.buffer.PooledByteBufAllocator
 import io.netty.channel.Channel
+import io.netty.channel.ChannelInitializer
 import io.netty.channel.ChannelOption
 import io.netty.channel.EventLoopGroup
 import io.netty.channel.nio.NioEventLoopGroup
@@ -15,6 +16,7 @@ import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import java.net.InetSocketAddress
 import java.util.ArrayList
+import java.util.concurrent.atomic.AtomicLong
 
 class ClientFactoryConfig {
     var DEFAULT_NUM_THREADS = 0
@@ -22,7 +24,23 @@ class ClientFactoryConfig {
     var MAX_RETRY_TIME = 60L
     var MAX_RETRY_UNTIL_INCR = 30
     var USE_SSL = true
+    val READ_IDLE_TIME = 10
+    val HEARTBEAT_MISS_LIMIT = 2
+    var channelIds = AtomicLong(0L)
+
 }
+
+data class ClientBootstrapConfig<I> constructor(
+    val transceiver: Transceiver<I>,
+    val bootstrap: Bootstrap,
+    val scope: CoroutineScope,
+    val retryInfo: RetryInfo,
+    val clientChannelInfo: ClientChannelInfo,
+)
+
+data class ClientChannelInfo(val useSSL:Boolean, val channelId : Long, val read_idle_time : Int, val heartbeat_miss_limit: Int)
+data class RetryInfo(val retry_period : Long, val max_retry_period: Long, var retries_until_period_increase : Int)
+
 
 abstract class ClientFactory<I> constructor(val config: ClientFactoryConfig) {
 
@@ -61,7 +79,12 @@ abstract class ClientFactory<I> constructor(val config: ClientFactoryConfig) {
                 config.MAX_RETRY_TIME,
                 config.MAX_RETRY_UNTIL_INCR,
             ),
-            config.USE_SSL,
+            ClientChannelInfo(
+                config.USE_SSL,
+                config.channelIds.incrementAndGet(),
+                config.READ_IDLE_TIME,
+                config.HEARTBEAT_MISS_LIMIT
+            )
         )
     }
 

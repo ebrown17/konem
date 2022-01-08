@@ -1,8 +1,5 @@
 package konem.protocol.socket.string
 
-
-import konem.netty.tcp.ChannelReceiver
-import konem.netty.tcp.ServerChannelReceiver
 import java.net.SocketAddress
 
 interface StringChannelReceiver {

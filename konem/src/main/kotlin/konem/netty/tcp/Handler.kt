@@ -17,7 +17,7 @@ abstract class Handler<I>(val handlerId: Long, private val transceiver: Transcei
 
     internal val logger = logger(javaClass)
 
-    internal lateinit var context: ChannelHandlerContext
+    private lateinit var context: ChannelHandlerContext
     internal lateinit var remoteAddress: SocketAddress
 
    open fun sendMessage(message: I) {

@@ -22,7 +22,7 @@ class StringClientFactory(config: ClientFactoryConfig) : ClientFactory<String>(c
     ): Client<String> {
         val transceiver = config.transceiver as StringTransceiver
         val bootstrap = config.bootstrap
-        val clientChannel = StringClientChannel(transceiver)
+        val clientChannel = StringClientChannel(transceiver,config.clientChannelInfo)
         bootstrap.handler(clientChannel)
         val client = StringClient(address, config)
         clientArrayList.add(client)

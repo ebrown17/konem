@@ -5,8 +5,6 @@ import io.netty.channel.ChannelFutureListener
 import konem.logger
 import java.util.concurrent.TimeUnit
 
-data class RetryInfo(val retry_period : Long, val max_retry_period: Long, var retries_until_period_increase : Int)
-
 class ClientConnectionListener<I> internal constructor(
     private val client: ClientInternal<I>,
     private val retryInfo: RetryInfo,
