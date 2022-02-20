@@ -19,8 +19,8 @@ abstract class Transceiver<I>(protected val channelPort: Int) {
     protected val handlerListeners: MutableList<HandlerListener<I>> = ArrayList()
 
     fun handlerActive(addr: SocketAddress, handler: Handler<I>) {
-        logger.info("remote: {}", addr)
         synchronized(activeLock) {
+            logger.trace("remote: {}", addr)
             val activeHandler = activeHandlers[addr]
             if (activeHandler == null) {
                 activeHandlers.putIfAbsent(addr, handler)
@@ -30,8 +30,8 @@ abstract class Transceiver<I>(protected val channelPort: Int) {
     }
 
     fun handlerInActive(addr: SocketAddress) {
-        logger.info("handler inactive for remote: {}", addr)
         synchronized(activeLock) {
+            logger.trace("remote: {}", addr)
             val handler = activeHandlers.remove(addr)
             if (handler != null) {
                 handlerListeners.forEach { listener -> listener.registerInActiveHandler(handler, channelPort, addr) }

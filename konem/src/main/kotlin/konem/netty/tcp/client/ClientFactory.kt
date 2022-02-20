@@ -24,7 +24,7 @@ class ClientFactoryConfig {
     var MAX_RETRY_TIME = 60L
     var MAX_RETRY_UNTIL_INCR = 30
     var USE_SSL = true
-    val READ_IDLE_TIME = 10
+    val READ_IDLE_TIME = 5
     val HEARTBEAT_MISS_LIMIT = 2
     var channelIds = AtomicLong(0L)
 
@@ -42,7 +42,7 @@ data class ClientChannelInfo(val useSSL:Boolean, val channelId : Long, val read_
 data class RetryInfo(val retry_period : Long, val max_retry_period: Long, var retries_until_period_increase : Int)
 
 
-abstract class ClientFactory<I> constructor(val config: ClientFactoryConfig) {
+abstract class ClientFactory<I> constructor(val config: ClientFactoryConfig = ClientFactoryConfig()) {
 
     protected val workerGroup: EventLoopGroup
     private val channelClass: Class<out Channel>

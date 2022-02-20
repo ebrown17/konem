@@ -2,13 +2,14 @@ package konem.protocol.socket.string
 
 import io.netty.channel.ChannelHandlerContext
 import konem.netty.tcp.Handler
+import konem.netty.tcp.Transceiver
 
 /*
     Passes messages read from channel to transceiver
  */
 class StringMessageHandler(
     handlerId: Long,
-    val transceiver: StringTransceiver
+    val transceiver: Transceiver<String>
 ) : Handler<String>(handlerId, transceiver) {
 
     override fun channelRead0(ctx: ChannelHandlerContext, message: String) {

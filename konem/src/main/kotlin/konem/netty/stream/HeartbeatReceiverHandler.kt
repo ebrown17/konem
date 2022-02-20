@@ -32,9 +32,8 @@ abstract class HeartbeatReceiverHandler<I>(
 
     @Throws(Exception::class)
     override fun userEventTriggered(ctx: ChannelHandlerContext, evt: Any) {
-        logger.trace("userEventTriggered")
         if (evt is IdleStateEvent) {
-            logger.trace("userEventTriggered {} miss count {}", evt.state(), missCount)
+            logger.info("userEventTriggered {} miss count {}", evt.state(), missCount)
 
             if (evt.state() == IdleState.READER_IDLE) {
                 if (missCount >= missedLimit) {

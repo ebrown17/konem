@@ -9,7 +9,7 @@ import konem.data.protobuf.KonemMessage
 
 class WireDecoder : MessageToMessageDecoder<ByteBuf>() {
 
-    val adapter: ProtoAdapter<KonemMessage> = KonemMessage.ADAPTER
+    private val adapter: ProtoAdapter<KonemMessage> = KonemMessage.ADAPTER
 
     override fun decode(ctx: ChannelHandlerContext, msg: ByteBuf, out: MutableList<Any>) {
         val array: ByteArray

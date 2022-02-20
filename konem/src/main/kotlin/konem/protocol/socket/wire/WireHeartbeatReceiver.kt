@@ -17,7 +17,7 @@ class WireHeartbeatReceiver(expectedInterval: Int, missLimit: Int) :
             is KonemMessage -> {
                 when (message.messageType) {
                     MessageType.HEARTBEAT -> {
-                        logger.trace(
+                        logger.info(
                             "received {} from {}",
                             message.messageType,
                             ctx.channel().remoteAddress()

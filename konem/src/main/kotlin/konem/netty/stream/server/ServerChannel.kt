@@ -7,6 +7,6 @@ import java.util.concurrent.atomic.AtomicLong
 abstract class ServerChannel : ChannelInitializer<SocketChannel>() {
     companion object {
         val channelIds = AtomicLong(0L)
-        const val WRITE_IDLE_TIME = 15
+        const val WRITE_IDLE_TIME = 10
     }
 }

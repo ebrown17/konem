@@ -52,5 +52,5 @@ abstract class Handler<I>(val handlerId: Long, private val transceiver: Transcei
     }
 }
 
-abstract class ServerHandler<I>(handlerId: Long, private val transceiver: ServerTransceiver<I>) :
-    Handler<I>(handlerId,transceiver)
+/*abstract class ServerHandler<I>(handlerId: Long, transceiver: ServerTransceiver<I>) :
+    Handler<I>(handlerId,transceiver)*/
