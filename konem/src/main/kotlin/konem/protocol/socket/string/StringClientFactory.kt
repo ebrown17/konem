@@ -7,7 +7,21 @@ import konem.netty.tcp.client.ClientFactoryConfig
 
 import java.net.InetSocketAddress
 
-class StringClientFactory(config: ClientFactoryConfig) : ClientFactory<String>(config) {
+class StringClientFactory private constructor(config: ClientFactoryConfig) : ClientFactory<String>(config) {
+
+    companion object {
+
+        fun createDefault(): StringClientFactory{
+            return StringClientFactory(ClientFactoryConfig())
+        }
+
+        fun create(config: (ClientFactoryConfig) -> Unit): StringClientFactory {
+            val userConfig = ClientFactoryConfig()
+            config(userConfig)
+            return StringClientFactory(userConfig)
+        }
+    }
+
 
     override fun createClient(host: String, port: Int, vararg args: String): Client<String> {
         val address = InetSocketAddress(host, port)

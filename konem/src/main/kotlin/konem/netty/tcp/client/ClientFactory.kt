@@ -42,9 +42,9 @@ data class ClientChannelInfo(val useSSL:Boolean, val channelId : Long, val read_
 data class RetryInfo(val retry_period : Long, val max_retry_period: Long, var retries_until_period_increase : Int)
 
 
-abstract class ClientFactory<I> constructor(val config: ClientFactoryConfig = ClientFactoryConfig()) {
+abstract class ClientFactory<I> constructor(private val config: ClientFactoryConfig) {
 
-    protected val workerGroup: EventLoopGroup
+    private val workerGroup: EventLoopGroup
     private val channelClass: Class<out Channel>
     private val allocator: PooledByteBufAllocator
     private val clientScope: CoroutineScope

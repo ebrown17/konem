@@ -4,6 +4,7 @@ import io.netty.bootstrap.ServerBootstrap
 import konem.logger
 import konem.netty.tcp.Handler
 import konem.netty.tcp.Receiver
+import konem.netty.tcp.server.Server
 import konem.netty.tcp.server.ServerChannelInfo
 import konem.netty.tcp.server.ServerConfig
 import konem.netty.tcp.server.ServerInternal
@@ -12,8 +13,20 @@ import java.net.SocketAddress
 import java.util.concurrent.ConcurrentHashMap
 
 
-class StringServer(serverConfig: ServerConfig): ServerInternal<String>(serverConfig),StringChannelReceiver {
+class StringServer private constructor(serverConfig: ServerConfig): ServerInternal<String>(serverConfig),StringChannelReceiver {
 
+    companion object {
+
+        fun create(config: (ServerConfig) -> Unit): Server<String> {
+            val userConfig = ServerConfig()
+            config(userConfig)
+            val server = StringServer(userConfig)
+            for(port in userConfig.portSet){
+                server.addChannel(port)
+            }
+            return server
+        }
+    }
 
     private val receiveListeners: ConcurrentHashMap<Int, ArrayList<Receiver<String>>> =
         ConcurrentHashMap()

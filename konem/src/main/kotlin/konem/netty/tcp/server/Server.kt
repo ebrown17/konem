@@ -15,6 +15,48 @@ import java.net.InetSocketAddress
 import java.net.SocketAddress
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicLong
+
+
+open class BaseConfig {
+    var BOSSGROUP_NUM_THREADS: Int = 1
+    var WORKGROUP_NUM_THREADS: Int = 0
+    var USE_SSL: Boolean = true
+    var WRITE_IDLE_TIME: Int = 10
+    var CHANNEL_IDS: AtomicLong = AtomicLong(0L)
+    var SO_BACKLOG: Int = 25
+    var SO_KEEPALIVE: Boolean = true
+    var TCP_NODELAY: Boolean = true
+}
+
+class ServerConfig: BaseConfig(){
+    private val portSet = mutableSetOf<Int>()
+
+    /**
+     *
+     * @param port The port to be used for this channel
+     */
+    fun addChannel(port: Int){
+        portSet.add(port)
+    }
+}
+
+class WebsocketConfig: BaseConfig(){
+    private val portToWsMap: HashMap<Int, Array<String>> = HashMap()
+
+    /**
+     *
+     * @param port The port to be used for this channel
+     * @param websocketPaths vararg list of websocket paths to add to this port
+     */
+    fun addChannel(port: Int, vararg websocketPaths: String){
+        portToWsMap.putIfAbsent(port,hashSetOf(*websocketPaths).toTypedArray())
+    }
+
+}
+
+data class ServerChannelInfo(val useSSL:Boolean, val channelId : Long, val write_idle_time : Int)
+
 
 interface Server<I> : ServerChannelReceiver<I> {
     /**
@@ -41,14 +83,6 @@ interface Server<I> : ServerChannelReceiver<I> {
      * @param message
      */
     fun sendMessage(addr: SocketAddress, message: I)
-
-    /**
-     *
-     * @param port The port to be used for this channel
-     * @param args Any extra arguments you may wish to use for channel configuration
-     * @return true if channel successfully added
-     */
-    fun addChannel(port: Int, vararg args: String): Boolean
 
     fun registerConnectionListener(listener: ConnectionListener)
     fun registerDisconnectionListener(listener: DisconnectionListener)
@@ -95,10 +129,19 @@ abstract class ServerInternal<I>(val serverConfig : ServerConfig) : HandlerListe
         bootstrap.option(ChannelOption.SO_BACKLOG, serverConfig.SO_BACKLOG )
         bootstrap.childOption(ChannelOption.SO_KEEPALIVE, serverConfig.SO_KEEPALIVE)
         bootstrap.childOption(ChannelOption.TCP_NODELAY, serverConfig.TCP_NODELAY)
-        bootstrap.childOption(ChannelOption.ALLOCATOR, serverConfig.ALLOCATOR)
+        bootstrap.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
         bootstrap.childHandler(channel)
         return bootstrap
     }
+
+
+    /**
+     *
+     * @param port The port to be used for this channel
+     * @param args Any extra arguments you may wish to use for channel configuration
+     * @return true if channel successfully added
+     */
+   abstract fun addChannel(port: Int, vararg args: String): Boolean
 
     protected fun addChannel(port: Int, transceiver: ServerTransceiver<I>): Boolean {
         if (!isPortConfigured(port)) {
@@ -184,7 +227,7 @@ abstract class ServerInternal<I>(val serverConfig : ServerConfig) : HandlerListe
     }
 
     override fun shutdownServer() {
-        logger.info("explicitly called; shutting down server")
+        logger.info("shut down server explicitly called")
 
         for (port in channelMap.keys) {
             closeChannel(port)
@@ -192,7 +235,6 @@ abstract class ServerInternal<I>(val serverConfig : ServerConfig) : HandlerListe
 
         bossGroup.shutdownGracefully()
         workerGroup.shutdownGracefully()
-        logger.info("server fully shutdown")
     }
 
     fun getChannelConnections(channelPort: Int): List<SocketAddress> {
