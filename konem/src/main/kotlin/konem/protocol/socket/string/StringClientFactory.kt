@@ -29,11 +29,4 @@ class StringClientFactory(config: ClientFactoryConfig) : ClientFactory<String>(c
         return client
     }
 
-    override fun shutdown() {
-        for (client in clientArrayList) {
-            client.shutdown()
-        }
-        clientArrayList.clear()
-        workerGroup.shutdownGracefully()
-    }
 }

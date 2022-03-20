@@ -94,6 +94,12 @@ abstract class ClientFactory<I> constructor(val config: ClientFactoryConfig = Cl
         vararg args: String
     ): Client<I>
 
-    abstract fun shutdown()
+    fun shutdown() {
+        for (client in clientArrayList) {
+            client.shutdown()
+        }
+        clientArrayList.clear()
+        workerGroup.shutdownGracefully()
+    }
 
 }
