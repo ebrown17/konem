@@ -20,7 +20,7 @@ abstract class Transceiver<I>(protected val channelPort: Int) {
 
     fun handlerActive(addr: SocketAddress, handler: Handler<I>) {
         synchronized(activeLock) {
-            logger.trace("remote: {}", addr)
+            logger.trace("handlerActive remote: {}", addr)
             val activeHandler = activeHandlers[addr]
             if (activeHandler == null) {
                 activeHandlers.putIfAbsent(addr, handler)
@@ -49,7 +49,7 @@ abstract class Transceiver<I>(protected val channelPort: Int) {
 
     override fun toString(): String {
         return (
-            "Transceiver{" + " channelReaders=" + channelReceiver.size + ", channelPort=" + channelPort + '}'.toString()
+            "Transceiver{" + " receivers=" + channelReceiver.size + ", channelPort=" + channelPort + '}'.toString()
             )
     }
 }
@@ -66,8 +66,8 @@ abstract class ServerTransceiver<I>( channelPort: Int):Transceiver<I>(channelPor
 
     override fun toString(): String {
         return (
-            "ServerTransceiver{" + "activeHandlers=" + activeHandlers.size + ", channelReaders=" + channelReceiver.size +
-                ", handlerListeners=" + handlerListeners.size + ", channelPort=" + channelPort + '}'.toString()
+            "{" + "activeHandlers=" + activeHandlers.size + ", receivers=" + channelReceiver.size +
+                ", listeners=" + handlerListeners.size + ", channelPort=" + channelPort + '}'.toString()
             )
     }
 }

@@ -16,4 +16,8 @@ class StringMessageHandler(
         logger.trace("from: {} received: {}", remoteAddress, message)
         transceiver.receive(remoteAddress, message)
     }
+
+    override fun toString(): String {
+        return "Handler(handlerId=$handlerId,transceiver=$transceiver)"
+    }
 }

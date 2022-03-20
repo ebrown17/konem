@@ -58,10 +58,7 @@ interface Server<I> : ServerChannelReceiver<I> {
     fun shutdownServer()
 }
 
-data class ServerChannelInfo(val useSSL:Boolean, val channelId : Long, val write_idle_time : Int)
-
-
-abstract class ServerInternal<I> : HandlerListener<I>,Server<I> {
+abstract class ServerInternal<I>(val serverConfig : ServerConfig) : HandlerListener<I>,Server<I> {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -85,8 +82,8 @@ abstract class ServerInternal<I> : HandlerListener<I>,Server<I> {
 
     init {
         val threadFactory = DefaultThreadFactory("server")
-        bossGroup = NioEventLoopGroup(1, threadFactory)
-        workerGroup = NioEventLoopGroup(0, threadFactory)
+        bossGroup = NioEventLoopGroup(serverConfig.BOSSGROUP_NUM_THREADS , threadFactory)
+        workerGroup = NioEventLoopGroup(serverConfig.WORKGROUP_NUM_THREADS, threadFactory)
     }
 
     protected abstract fun createServerBootstrap(port: Int): ServerBootstrap
@@ -95,10 +92,10 @@ abstract class ServerInternal<I> : HandlerListener<I>,Server<I> {
         val bootstrap = ServerBootstrap()
         bootstrap.group(bossGroup, workerGroup)
         bootstrap.channel(NioServerSocketChannel::class.java)
-        bootstrap.option(ChannelOption.SO_BACKLOG, soBacklog)
-        bootstrap.childOption(ChannelOption.SO_KEEPALIVE, true)
-        bootstrap.childOption(ChannelOption.TCP_NODELAY, true)
-        bootstrap.childOption<ByteBufAllocator>(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+        bootstrap.option(ChannelOption.SO_BACKLOG, serverConfig.SO_BACKLOG )
+        bootstrap.childOption(ChannelOption.SO_KEEPALIVE, serverConfig.SO_KEEPALIVE)
+        bootstrap.childOption(ChannelOption.TCP_NODELAY, serverConfig.TCP_NODELAY)
+        bootstrap.childOption(ChannelOption.ALLOCATOR, serverConfig.ALLOCATOR)
         bootstrap.childHandler(channel)
         return bootstrap
     }
@@ -122,7 +119,7 @@ abstract class ServerInternal<I> : HandlerListener<I>,Server<I> {
     private fun startChannel(port: Int) {
         val socketAddress = portAddressMap[port]
         if (socketAddress == null) {
-            logger.error("called with unconfigured port: {}", port)
+            logger.error("called with non-configured port: {}", port)
             return
         }
         if (isActive(port)) {
@@ -290,7 +287,4 @@ abstract class ServerInternal<I> : HandlerListener<I>,Server<I> {
     protected abstract fun connectionActive(handler: Handler<I>)
     protected abstract fun connectionInActive(handler: Handler<I>)
 
-    companion object {
-        private const val soBacklog = 25
-    }
 }

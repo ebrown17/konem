@@ -12,7 +12,6 @@ class WireHeartbeatReceiver(expectedInterval: Int, missLimit: Int) :
     private val logger = LoggerFactory.getLogger(WireHeartbeatReceiver::class.java)
 
     override fun channelRead(ctx: ChannelHandlerContext, message: Any) {
-
         when (message) {
             is KonemMessage -> {
                 when (message.messageType) {

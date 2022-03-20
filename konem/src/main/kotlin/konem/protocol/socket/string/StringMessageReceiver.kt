@@ -1,17 +1,15 @@
 package konem.protocol.socket.string
 
 
-import konem.logger
 import konem.netty.tcp.Receiver
 import java.net.SocketAddress
 
-class StringMessageReceiver(private val receive: (SocketAddress, String) -> Unit):
+class StringMessageReceiver(private val received: (SocketAddress, String) -> Unit):
     Receiver<String>() {
-    private val logger = logger(this)
 
     override fun receive(addr: SocketAddress, message: String) {
         synchronized(this) {
-            receive(addr, message)
+            received(addr, message)
         }
     }
 }

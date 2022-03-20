@@ -1,29 +1,24 @@
 package konem.protocol.socket.string
 
 import io.netty.bootstrap.ServerBootstrap
+import konem.logger
 import konem.netty.tcp.Handler
 import konem.netty.tcp.Receiver
 import konem.netty.tcp.server.ServerChannelInfo
+import konem.netty.tcp.server.ServerConfig
 import konem.netty.tcp.server.ServerInternal
 import kotlinx.coroutines.launch
-import org.slf4j.LoggerFactory
 import java.net.SocketAddress
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicLong
 
 
-class StringServer(): ServerInternal<String>(),StringChannelReceiver {
+class StringServer(serverConfig: ServerConfig): ServerInternal<String>(serverConfig),StringChannelReceiver {
 
-    companion object {
-        val channelIds = AtomicLong(0L)
-        val useSsl=true
-        const val WRITE_IDLE_TIME = 10
-    }
 
     private val receiveListeners: ConcurrentHashMap<Int, ArrayList<Receiver<String>>> =
         ConcurrentHashMap()
 
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = logger(this)
 
     override fun registerChannelReceiverListener(receiver: Receiver<String>) {
         for (list in receiveListeners.values) {
@@ -82,8 +77,11 @@ class StringServer(): ServerInternal<String>(),StringChannelReceiver {
 
     override fun createServerBootstrap(port: Int): ServerBootstrap {
         val transceiver = getTransceiverMap()[port] as StringServerTransceiver
-        val channel = StringServerChannel(transceiver, ServerChannelInfo(useSsl,channelIds.incrementAndGet(),
-            WRITE_IDLE_TIME))
+        val channel = StringServerChannel(transceiver,
+            ServerChannelInfo(
+                serverConfig.USE_SSL,
+                serverConfig.CHANNEL_IDS.incrementAndGet(),
+                serverConfig.WRITE_IDLE_TIME))
         return createServerBootstrap(channel)
     }
 

@@ -19,7 +19,7 @@ class StringClient(private val serverAddress: SocketAddress, config: ClientBoots
             logger.warn("attempted to send data on null or closed channel")
             return
         }
-        logger.trace("remote: {} message: {}", channel?.remoteAddress(), message)
+        logger.info("remote: {} message: {}", channel?.remoteAddress(), message)
         transceiver.transmit(serverAddress, message)
     }
 

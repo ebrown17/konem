@@ -12,8 +12,8 @@ class StringTransceiver(channelPort: Int):Transceiver<String>(channelPort) {
 
     override fun transmit(addr: SocketAddress, message: String, vararg extra: String) {
         synchronized(activeLock) {
-            logger.trace("to addr: {} with {}", addr, message)
             val handler = activeHandlers[addr]
+            logger.trace("{} to addr: {} with: {}",handler, addr, message)
             handler?.sendMessage(message)
         }
     }
@@ -30,8 +30,8 @@ class StringServerTransceiver(channelPort: Int): ServerTransceiver<String>(chann
 
     override fun transmit(addr: SocketAddress, message: String, vararg extra: String) {
         synchronized(activeLock) {
-            logger.trace("to addr: {} with {}", addr, message)
             val handler = activeHandlers[addr]
+            logger.trace("{} to addr: {} with: {}",handler, addr, message)
             handler?.sendMessage(message)
         }
     }
