@@ -6,8 +6,8 @@ import io.netty.handler.codec.string.StringDecoder
 import io.netty.handler.codec.string.StringEncoder
 import io.netty.handler.timeout.IdleStateHandler
 import io.netty.util.CharsetUtil
-import konem.netty.stream.ExceptionHandler
-import konem.netty.stream.SslContextManager
+import konem.netty.tcp.ExceptionHandler
+import konem.netty.tcp.SslContextManager
 import konem.netty.tcp.client.ClientChannelInfo
 
 
@@ -17,7 +17,13 @@ class StringClientChannel(private val transceiver: StringTransceiver, private va
     override fun initChannel(channel: Channel) {
         val pipeline = channel.pipeline()
         if(clientChannelInfo.useSSL){
-            pipeline.addLast("clientSslHandler", SslContextManager.getClientContext().newHandler(channel.alloc()))
+            SslContextManager.getClientContext()?.let { context ->
+                pipeline.addLast("clientSslHandler", context.newHandler(channel.alloc()))
+                println("HERE 1")
+            }?: run {
+                println("HERE 2")
+                throw Exception("SslContextManager.getClientContext() failed to initialize... closing channel")
+            }
         }
 
         pipeline.addLast("stringDecoder", StringDecoder(CharsetUtil.UTF_8))

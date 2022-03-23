@@ -30,7 +30,7 @@ open class BaseConfig {
 }
 
 class ServerConfig: BaseConfig(){
-    private val portSet = mutableSetOf<Int>()
+    val portSet = mutableSetOf<Int>()
 
     /**
      *

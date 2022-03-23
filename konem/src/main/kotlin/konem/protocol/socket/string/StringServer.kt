@@ -16,7 +16,6 @@ import java.util.concurrent.ConcurrentHashMap
 class StringServer private constructor(serverConfig: ServerConfig): ServerInternal<String>(serverConfig),StringChannelReceiver {
 
     companion object {
-
         fun create(config: (ServerConfig) -> Unit): Server<String> {
             val userConfig = ServerConfig()
             config(userConfig)

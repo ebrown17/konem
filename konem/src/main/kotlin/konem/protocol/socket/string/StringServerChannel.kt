@@ -6,8 +6,8 @@ import io.netty.handler.codec.string.StringDecoder
 import io.netty.handler.codec.string.StringEncoder
 import io.netty.handler.timeout.IdleStateHandler
 import io.netty.util.CharsetUtil
-import konem.netty.stream.ExceptionHandler
-import konem.netty.stream.SslContextManager
+import konem.netty.tcp.ExceptionHandler
+import konem.netty.tcp.SslContextManager
 import konem.netty.tcp.server.ServerChannelInfo
 
 class StringServerChannel(
@@ -19,7 +19,11 @@ class StringServerChannel(
 
         val pipeline = channel.pipeline()
         if (serverChannelInfo.useSSL) {
-            pipeline.addLast("serverSslHandler", SslContextManager.getServerContext().newHandler(channel.alloc()))
+            SslContextManager.getServerContext()?.let { context ->
+                pipeline.addLast("serverSslHandler", context.newHandler(channel.alloc()))
+            }?: run {
+                throw Exception("SslContextManager.getServerContext() failed to initialize... closing channel")
+            }
         }
         pipeline.addLast("stringDecoder", StringDecoder(CharsetUtil.UTF_8))
         pipeline.addLast("stringEncoder", StringEncoder(CharsetUtil.UTF_8))
@@ -28,10 +32,9 @@ class StringServerChannel(
       //  pipeline.addLast("heartBeatHandler", WireHeartbeatProducer(transceiver))
 
 
+        /// add enable heartbeat boolean to channel config
 
         pipeline.addLast("messageHandler", StringMessageHandler(serverChannelInfo.channelId, transceiver))
-
-
         pipeline.addLast("exceptionHandler", ExceptionHandler())
 
     }

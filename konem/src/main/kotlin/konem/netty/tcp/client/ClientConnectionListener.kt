@@ -31,7 +31,6 @@ class ClientConnectionListener<I> internal constructor(
                         isAttemptingConnection = true
                         client.connect()
                     } catch (e: InterruptedException) {
-                        // TODO test to see what happens if this is reached
                         throw InterruptedException("ClientConnectionListener interrupted while trying to connect")
                     }
                 },

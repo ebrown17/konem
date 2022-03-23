@@ -36,9 +36,9 @@ class StringClientFactory private constructor(config: ClientFactoryConfig) : Cli
     ): Client<String> {
         val transceiver = config.transceiver as StringTransceiver
         val bootstrap = config.bootstrap
+        val client = StringClient(address, config)
         val clientChannel = StringClientChannel(transceiver,config.clientChannelInfo)
         bootstrap.handler(clientChannel)
-        val client = StringClient(address, config)
         clientArrayList.add(client)
         return client
     }

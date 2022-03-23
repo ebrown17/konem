@@ -109,6 +109,8 @@ abstract class ClientInternal<I>(private val serverAddress: SocketAddress, priva
     }
 
     override fun shutdown() {
+
+        channel?.closeFuture()?.removeListener(closedListener)
         channel?.close()
     }
 

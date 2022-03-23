@@ -10,6 +10,12 @@ import konem.protocol.socket.string.StringServer
 
 fun main() {
 
+    System.setProperty("konem.secure.keyStoreLocation","konem/config/keystore/konem.jks")
+    System.setProperty("konem.secure.keyStoreType","JKS")
+    System.setProperty("konem.secure.keyStorePassword","test123")
+
+    println(System.getProperty("user.dir"))
+
     val server = StringServer.create { config->
         config.addChannel(6060)
     }
@@ -33,9 +39,9 @@ fun main() {
 
     })
 
-    Thread.sleep(10_000)
+    Thread.sleep(30_000)
 
-    client.disconnect()
+   // client.disconnect()
 
     clientFactory.shutdown()
 
