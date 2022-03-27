@@ -3,9 +3,9 @@ package konem.example
 
 import konem.netty.tcp.ConnectionListener
 
-import konem.protocol.socket.string.StringClientFactory
-import konem.protocol.socket.string.StringMessageReceiver
-import konem.protocol.socket.string.StringServer
+import konem.protocol.string.StringClientFactory
+import konem.protocol.string.StringMessageReceiver
+import konem.protocol.string.StringServer
 
 
 fun main() {
@@ -17,6 +17,7 @@ fun main() {
     println(System.getProperty("user.dir"))
 
     val server = StringServer.create { config->
+
         config.addChannel(6060)
     }
     server.startServer()

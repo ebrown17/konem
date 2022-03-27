@@ -1,4 +1,4 @@
-package konem.protocol.socket.string
+package konem.protocol.string
 
 import java.net.SocketAddress
 

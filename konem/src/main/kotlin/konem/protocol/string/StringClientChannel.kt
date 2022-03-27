@@ -1,4 +1,4 @@
-package konem.protocol.socket.string
+package konem.protocol.string
 
 import io.netty.channel.Channel
 import io.netty.channel.ChannelInitializer
@@ -19,9 +19,7 @@ class StringClientChannel(private val transceiver: StringTransceiver, private va
         if(clientChannelInfo.useSSL){
             SslContextManager.getClientContext()?.let { context ->
                 pipeline.addLast("clientSslHandler", context.newHandler(channel.alloc()))
-                println("HERE 1")
             }?: run {
-                println("HERE 2")
                 throw Exception("SslContextManager.getClientContext() failed to initialize... closing channel")
             }
         }
@@ -30,12 +28,9 @@ class StringClientChannel(private val transceiver: StringTransceiver, private va
         pipeline.addLast("stringEncoder", StringEncoder(CharsetUtil.UTF_8))
 
         pipeline.addLast("idleStateHandler", IdleStateHandler(clientChannelInfo.read_idle_time, 0, 0))
-      //  pipeline.addLast("heartBeatHandler", WireHeartbeatReceiver(clientChannelInfo.read_idle_time, clientChannelInfo.heartbeat_miss_limit))
-
-
+        pipeline.addLast("heartBeatHandler", StringHeartbeatReceiver(clientChannelInfo.read_idle_time, clientChannelInfo.heartbeat_miss_limit))
 
         pipeline.addLast("messageHandler", StringMessageHandler(clientChannelInfo.channelId, transceiver))
-
 
         pipeline.addLast("exceptionHandler", ExceptionHandler())
     }

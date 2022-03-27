@@ -42,9 +42,6 @@ class KonemMessageSerializer {
         }
     }
 
-    private val serializer: KSerializer<KonemMessage>
-        get() = KonemMessage.serializer()
-
     private val format: StringFormat
         get() = Json { serializersModule = module }
 

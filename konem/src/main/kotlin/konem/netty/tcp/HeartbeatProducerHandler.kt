@@ -7,7 +7,7 @@ import io.netty.handler.timeout.IdleStateEvent
 import konem.logger
 import java.net.InetSocketAddress
 
-abstract class HeartbeatProducerHandler<I>(private val transceiver: Transceiver<I>) :
+abstract class HeartbeatProducerHandler<I>(private val transceiver: ServerTransceiver<I>) :
     ChannelDuplexHandler() {
 
     private val logger = logger(javaClass)

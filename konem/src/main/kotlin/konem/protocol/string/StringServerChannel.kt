@@ -1,4 +1,4 @@
-package konem.protocol.socket.string
+package konem.protocol.string
 
 import io.netty.channel.ChannelInitializer
 import io.netty.channel.socket.SocketChannel
@@ -27,9 +27,8 @@ class StringServerChannel(
         }
         pipeline.addLast("stringDecoder", StringDecoder(CharsetUtil.UTF_8))
         pipeline.addLast("stringEncoder", StringEncoder(CharsetUtil.UTF_8))
-        // internal konem heartbeat protocol
         pipeline.addLast("idleStateHandler", IdleStateHandler(0, serverChannelInfo.write_idle_time, 0))
-      //  pipeline.addLast("heartBeatHandler", WireHeartbeatProducer(transceiver))
+        pipeline.addLast("heartBeatHandler", StringHeartbeatProducer(transceiver))
 
 
         /// add enable heartbeat boolean to channel config

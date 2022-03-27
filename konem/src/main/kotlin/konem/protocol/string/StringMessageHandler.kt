@@ -1,4 +1,4 @@
-package konem.protocol.socket.string
+package konem.protocol.string
 
 import io.netty.channel.ChannelHandlerContext
 import konem.netty.tcp.Handler

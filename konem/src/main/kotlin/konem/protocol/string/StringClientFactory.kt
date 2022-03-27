@@ -1,4 +1,4 @@
-package konem.protocol.socket.string
+package konem.protocol.string
 
 import konem.netty.tcp.client.Client
 import konem.netty.tcp.client.ClientBootstrapConfig

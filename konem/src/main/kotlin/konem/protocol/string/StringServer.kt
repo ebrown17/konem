@@ -1,4 +1,4 @@
-package konem.protocol.socket.string
+package konem.protocol.string
 
 import io.netty.bootstrap.ServerBootstrap
 import konem.logger

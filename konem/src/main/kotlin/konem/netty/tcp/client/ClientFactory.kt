@@ -24,7 +24,7 @@ class ClientFactoryConfig {
     var MAX_RETRY_TIME = 60L
     var MAX_RETRY_UNTIL_INCR = 30
     var USE_SSL = true
-    val READ_IDLE_TIME = 5
+    val READ_IDLE_TIME = 12
     val HEARTBEAT_MISS_LIMIT = 2
     var channelIds = AtomicLong(0L)
 
