@@ -14,14 +14,18 @@ class StringTransceiver(channelPort: Int):Transceiver<String>(channelPort) {
         synchronized(activeLock) {
             val handler = activeHandlers[addr]
             logger.trace("{} to addr: {} with: {}",handler, addr, message)
-            handler?.sendMessage(message)
+            handler?.sendMessage(message)?: run {
+                logger.trace("handler for {} is null", addr)
+            }
         }
     }
 
     override fun receive(addr: SocketAddress, message: String, vararg extra: String) {
         logger.trace("from {} with {}", addr, message)
-        val receiver = channelReceiver[addr] as StringChannelReceiver
-        receiver.handleReceivedMessage(addr, channelPort, message)
+        val receiver = channelReceiver[addr]
+        receiver?.handleReceivedMessage(addr, channelPort, message)?: run {
+            logger.trace("receiver for {} is null", addr)
+        }
     }
 }
 
@@ -32,14 +36,18 @@ class StringServerTransceiver(channelPort: Int): ServerTransceiver<String>(chann
         synchronized(activeLock) {
             val handler = activeHandlers[addr]
             logger.trace("{} to addr: {} with: {}",handler, addr, message)
-            handler?.sendMessage(message)
+            handler?.sendMessage(message)?: run {
+                logger.trace("handler for {} is null", addr)
+            }
         }
     }
 
     override fun receive(addr: SocketAddress, message: String, vararg extra: String) {
         logger.trace("from {} with {}", addr, message)
-        val receiver = channelReceiver[addr] as StringChannelReceiver
-        receiver.handleReceivedMessage(addr, channelPort, message)
+        val receiver = channelReceiver[addr]
+        receiver?.handleReceivedMessage(addr, channelPort, message)?: run {
+            logger.trace("receiver for {} is null", addr)
+        }
     }
 
     override fun broadcast(message: String, vararg extra: String) {

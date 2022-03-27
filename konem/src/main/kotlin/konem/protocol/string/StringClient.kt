@@ -8,7 +8,7 @@ import kotlinx.coroutines.launch
 import java.net.SocketAddress
 
 class StringClient(private val serverAddress: SocketAddress, config: ClientBootstrapConfig<String>):
-    ClientInternal<String>(serverAddress,config), StringChannelReceiver {
+    ClientInternal<String>(serverAddress,config) {
 
     private val logger = logger(javaClass)
     private val transceiver = config.transceiver

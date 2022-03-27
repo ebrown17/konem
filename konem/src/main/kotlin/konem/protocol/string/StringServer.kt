@@ -13,7 +13,7 @@ import java.net.SocketAddress
 import java.util.concurrent.ConcurrentHashMap
 
 
-class StringServer private constructor(serverConfig: ServerConfig): ServerInternal<String>(serverConfig),StringChannelReceiver {
+class StringServer private constructor(serverConfig: ServerConfig): ServerInternal<String>(serverConfig) {
 
     companion object {
         fun create(config: (ServerConfig) -> Unit): Server<String> {

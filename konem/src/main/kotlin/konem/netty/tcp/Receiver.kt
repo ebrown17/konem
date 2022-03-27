@@ -17,7 +17,13 @@ abstract class Receiver<I> {
     abstract fun receive(addr: SocketAddress, message: I)
 }
 
-interface ChannelReceiver<I>{
+
+interface ChannelReceiver<I> {
+
+    fun handleReceivedMessage(addr: SocketAddress, port: Int, message: I)
+
+    suspend fun receiveMessage(addr: SocketAddress, port: Int, message: I)
+
     /**
      *
      * Registers a Receiver on all active ports

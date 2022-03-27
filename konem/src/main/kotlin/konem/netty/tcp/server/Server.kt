@@ -41,7 +41,7 @@ class ServerConfig: BaseConfig(){
     }
 }
 
-class WebsocketConfig: BaseConfig(){
+class WebsocketServerConfig: BaseConfig(){
     private val portToWsMap: HashMap<Int, Array<String>> = HashMap()
 
     /**
