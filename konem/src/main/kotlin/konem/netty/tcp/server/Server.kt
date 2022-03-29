@@ -90,6 +90,9 @@ interface Server<I> : ServerChannelReceiver<I> {
     @Throws(InterruptedException::class)
     fun startServer()
     fun shutdownServer()
+    fun allActive(): Boolean
+    fun isActive(port: Int): Boolean
+
 }
 
 abstract class ServerInternal<I>(val serverConfig : ServerConfig) : HandlerListener<I>,Server<I> {
@@ -267,7 +270,7 @@ abstract class ServerInternal<I>(val serverConfig : ServerConfig) : HandlerListe
         return Collections.unmodifiableMap(transceiverMap)
     }
 
-    fun isActive(port: Int): Boolean {
+    override fun isActive(port: Int): Boolean {
         val channel = channelMap[port]
         return isActive(channel)
     }
@@ -276,7 +279,7 @@ abstract class ServerInternal<I>(val serverConfig : ServerConfig) : HandlerListe
         return channel != null && (channel.isOpen || channel.isActive)
     }
 
-    fun allActive(): Boolean {
+    override fun allActive(): Boolean {
         for (channel in channelMap.values) {
             if (!isActive(channel)) {
                 return false

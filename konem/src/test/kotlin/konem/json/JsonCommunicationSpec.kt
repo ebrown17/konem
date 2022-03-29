@@ -3,8 +3,11 @@ package konem.json
 import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.datatest.withData
-import konem.protocol.konem.json.KonemClientFactory
-import konem.protocol.konem.json.KonemServer
+import konem.data.json.KonemMessage
+import konem.netty.tcp.client.Client
+import konem.protocol.konem.json.JsonClient
+import konem.protocol.konem.json.JsonClientFactory
+import konem.protocol.konem.json.JsonServer
 
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
@@ -15,14 +18,14 @@ import kotlin.time.ExperimentalTime
 class JsonCommunicationSpec : ShouldSpec({
 
     beforeContainer {
-        server = KonemServer.create { config ->
+        server = JsonServer.create { config ->
             config.addChannel(6060)
             config.addChannel(6061)
             config.addChannel(6062)
             config.addChannel(6063)
         }
 
-        clientFactory = KonemClientFactory.createDefault()
+        clientFactory = JsonClientFactory.createDefault()
     }
 
     afterContainer {
@@ -49,7 +52,7 @@ class JsonCommunicationSpec : ShouldSpec({
         ) { (msgCount, clientConfigs ) ->
             lateinit var serverReceiver: JsonTestServerReceiver
             var totalMessagesSent = 0
-            val clientList = mutableListOf<JsonClient>()
+            val clientList = mutableListOf<Client<KonemMessage>>()
             val serverReceiverList = mutableListOf<JsonTestServerReceiver>()
 
             serverReceiver = JsonTestServerReceiver { from, msg ->
@@ -58,16 +61,16 @@ class JsonCommunicationSpec : ShouldSpec({
             serverReceiverList.add(serverReceiver)
 
             clientConfigs.forEach { config ->
-                server?.registerChannelReadListener(config.port, serverReceiver)
+                server?.registerChannelReceiveListener(config.port, serverReceiver)
                 for (i in 1..config.totalClients) {
                     clientFactory?.createClient("localhost",config.port)?.let {
                         lateinit var clientReceiver: JsonTestClientReceiver
-                        clientReceiver = JsonTestClientReceiver(it) { _, msg ->
+                        clientReceiver = JsonTestClientReceiver(it){ _, msg ->
                             clientReceiver.messageCount++
                             clientReceiver.messageList.add(msg)
                         }
                         clientReceiver.clientId = "client-$i-${config.port}"
-                        it.registerChannelReadListener(clientReceiver)
+                        it.registerChannelReceiveListener(clientReceiver)
                         clientList.add(it)
                     }
                 }
@@ -100,7 +103,7 @@ class JsonCommunicationSpec : ShouldSpec({
             ) { (msgCount, clientConfigs ) ->
             lateinit var serverReceiver: JsonTestServerReceiver
             var totalMessagesSent = 0
-            val clientList = mutableListOf<JsonClient>()
+            val clientList = mutableListOf<Client<KonemMessage>>()
             val serverReceiverList = mutableListOf<JsonTestServerReceiver>()
             val clientReceiverList = mutableListOf<JsonTestClientReceiver>()
 
@@ -111,7 +114,7 @@ class JsonCommunicationSpec : ShouldSpec({
             serverReceiverList.add(serverReceiver)
 
             clientConfigs.forEach { config ->
-                server?.registerChannelReadListener(config.port, serverReceiver)
+                server?.registerChannelReceiveListener(config.port, serverReceiver)
 
                 for (i in 1..config.totalClients) {
                     clientFactory?.createClient("localhost",config.port)?.let {
@@ -122,7 +125,7 @@ class JsonCommunicationSpec : ShouldSpec({
                         }
                         clientReceiver.clientId = "client-$i-${config.port}"
                         clientReceiverList.add(clientReceiver)
-                        it.registerChannelReadListener(clientReceiver)
+                        it.registerChannelReceiveListener(clientReceiver)
                         clientList.add(it)
                     }
                 }
@@ -157,7 +160,7 @@ class JsonCommunicationSpec : ShouldSpec({
 
             lateinit var serverReceiver : JsonTestServerReceiver
             var totalMessagesSent = 0
-            val clientList = mutableListOf<JsonClient>()
+            val clientList = mutableListOf<Client<KonemMessage>>()
             val serverReceiverList = mutableListOf<JsonTestServerReceiver>()
             val clientReceiverList = mutableListOf<JsonTestClientReceiver>()
 
@@ -168,7 +171,7 @@ class JsonCommunicationSpec : ShouldSpec({
             serverReceiverList.add(serverReceiver)
 
             clientConfigs.forEach { config  ->
-                server?.registerChannelReadListener(config.port, serverReceiver)
+                server?.registerChannelReceiveListener(config.port, serverReceiver)
 
                 for(i in 1..config.totalClients){
                     clientFactory?.createClient("localhost",config.port)?.let {
@@ -179,7 +182,7 @@ class JsonCommunicationSpec : ShouldSpec({
                         }
                         clientReceiver.clientId = "client-$i-${config.port}"
                         clientReceiverList.add(clientReceiver)
-                        it.registerChannelReadListener(clientReceiver)
+                        it.registerChannelReceiveListener(clientReceiver)
                         clientList.add(it)
                     }
                 }
@@ -220,7 +223,7 @@ class JsonCommunicationSpec : ShouldSpec({
 
            lateinit var serverReceiver: JsonTestServerReceiver
            var totalMessagesSent = 0
-           val clientList = mutableListOf<JsonClient>()
+           val clientList = mutableListOf<Client<KonemMessage>>()
            val serverReceiverList = mutableListOf<JsonTestServerReceiver>()
            val clientReceiverList = mutableListOf<JsonTestClientReceiver>()
            serverReceiver = JsonTestServerReceiver { from, msg ->
@@ -229,7 +232,7 @@ class JsonCommunicationSpec : ShouldSpec({
            serverReceiverList.add(serverReceiver)
 
            clientConfigs.forEach { config ->
-               server?.registerChannelReadListener(config.port, serverReceiver)
+               server?.registerChannelReceiveListener(config.port, serverReceiver)
                if (config.port in broadcastPorts) {
                    totalMessagesSent += (config.totalClients * (msgCount))
                }
@@ -242,7 +245,7 @@ class JsonCommunicationSpec : ShouldSpec({
                        }
                        clientReceiver.clientId = "client-$i-${config.port}"
                        clientReceiverList.add(clientReceiver)
-                       it.registerChannelReadListener(clientReceiver)
+                       it.registerChannelReceiveListener(clientReceiver)
                        clientList.add(it)
                    }
                }
@@ -258,24 +261,23 @@ class JsonCommunicationSpec : ShouldSpec({
 
    should(": Server's broadcastOnAllChannels sends to all clients on all ports: ") {
        withData(
-           nameFn = { data: ClientCommConfigsV2 -> "${this.testCase.displayName} ${data.msgCount} ${data.broadcastPorts} ${data.clientConfigs}" },
-           ClientCommConfigsV2(1, mutableListOf(6060), mutableListOf(ClientConfig(6060, 1))),
-           ClientCommConfigsV2(5,  mutableListOf(6061),  mutableListOf(ClientConfig(6060, 10))),
-           ClientCommConfigsV2(5, mutableListOf(6060), mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
-           ClientCommConfigsV2(35, mutableListOf(6060,6061),mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
-           ClientCommConfigsV2(49,mutableListOf(6060,6061), mutableListOf(
-               ClientConfig(6060, 1), ClientConfig(6061, 10),
+           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.displayName} ${data.msgCount} ${data.clientConfigs}" },
+           ClientCommConfigsV1(1,  mutableListOf(ClientConfig(6060, 1))),
+           ClientCommConfigsV1(5,  mutableListOf(ClientConfig(6060, 10))),
+           ClientCommConfigsV1(5,  mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+           ClientCommConfigsV1(35, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
+           ClientCommConfigsV1(49, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10),
                ClientConfig(6062, 21)
            )),
-           ClientCommConfigsV2(66, mutableListOf(6060,6061,6062,6063), mutableListOf(
+           ClientCommConfigsV1(66, mutableListOf(
                ClientConfig(6060, 1), ClientConfig(6061, 10),
                ClientConfig(6062, 21), ClientConfig(6063, 43)
            )),
-       ) { (msgCount,broadcastPorts, clientConfigs ) ->
+       ) { (msgCount, clientConfigs ) ->
 
            lateinit var serverReceiver: JsonTestServerReceiver
            var totalMessagesSent = 0
-           val clientList = mutableListOf<JsonClient>()
+           val clientList = mutableListOf<Client<KonemMessage>>()
            val serverReceiverList = mutableListOf<JsonTestServerReceiver>()
            val clientReceiverList = mutableListOf<JsonTestClientReceiver>()
            serverReceiver = JsonTestServerReceiver { _, _ ->
@@ -284,7 +286,7 @@ class JsonCommunicationSpec : ShouldSpec({
            serverReceiverList.add(serverReceiver)
 
            clientConfigs.forEach { config ->
-               server?.registerChannelReadListener(config.port, serverReceiver)
+               server?.registerChannelReceiveListener(config.port, serverReceiver)
 
                totalMessagesSent += (config.totalClients * (msgCount))
 
@@ -297,7 +299,7 @@ class JsonCommunicationSpec : ShouldSpec({
                        }
                        clientReceiver.clientId = "client-$i-${config.port}"
                        clientReceiverList.add(clientReceiver)
-                       it.registerChannelReadListener(clientReceiver)
+                       it.registerChannelReceiveListener(clientReceiver)
                        clientList.add(it)
                    }
                }
@@ -329,7 +331,7 @@ class JsonCommunicationSpec : ShouldSpec({
        ) { (msgCount, clientConfigs ) ->
            lateinit var serverReceiver : JsonTestServerReceiver
            var totalMessagesSent = 0
-           val clientList = mutableListOf<JsonClient>()
+           val clientList = mutableListOf<Client<KonemMessage>>()
            val serverReceiverList = mutableListOf<JsonTestServerReceiver>()
            val clientReceiverList = mutableListOf<JsonTestClientReceiver>()
 
@@ -340,7 +342,7 @@ class JsonCommunicationSpec : ShouldSpec({
            serverReceiverList.add(serverReceiver)
 
            clientConfigs.forEach { config  ->
-               server?.registerChannelReadListener(config.port, serverReceiver)
+               server?.registerChannelReceiveListener(config.port, serverReceiver)
 
                for(i in 1..config.totalClients){
                    clientFactory?.createClient("localhost",config.port)?.let {
@@ -351,7 +353,7 @@ class JsonCommunicationSpec : ShouldSpec({
                        }
                        clientReceiver.clientId = "client-$i-${config.port}"
                        clientReceiverList.add(clientReceiver)
-                       it.registerChannelReadListener(clientReceiver)
+                       it.registerChannelReceiveListener(clientReceiver)
                        clientList.add(it)
                    }
                }
@@ -386,7 +388,7 @@ class JsonCommunicationSpec : ShouldSpec({
            )),
        ) { (_, clientConfigs ) ->
 
-           val clientList = mutableListOf<JsonClient>()
+           val clientList = mutableListOf<Client<KonemMessage>>()
            val clientDiscList = mutableListOf<TestConnectionListener>()
            var totalClientConnections = 0
 
@@ -439,7 +441,7 @@ class JsonCommunicationSpec : ShouldSpec({
            )),
        ) { (_, clientConfigs ) ->
 
-           val clientList = mutableListOf<JsonClient>()
+           val clientList = mutableListOf<Client<KonemMessage>>()
            val serverConList = mutableListOf<TestConnectionListener>()
            var totalServerConnections = 0
            lateinit var serverConnectionListener: TestConnectionListener
@@ -488,7 +490,7 @@ class JsonCommunicationSpec : ShouldSpec({
            )),
        ) { (_, clientConfigs ) ->
 
-           val clientList = mutableListOf<JsonClient>()
+           val clientList = mutableListOf<Client<KonemMessage>>()
            val serverConList = mutableListOf<TestConnectionListener>()
            val clientDiscList = mutableListOf<TestDisconnectionListener>()
            var totalServerConnections = 0
@@ -549,7 +551,7 @@ class JsonCommunicationSpec : ShouldSpec({
            )),
        ) { (_, clientConfigs ) ->
 
-           val clientList = mutableListOf<JsonClient>()
+           val clientList = mutableListOf<Client<KonemMessage>>()
            var totalServerDisconnections = 0
            lateinit var serverDisconnectionListener: TestDisconnectionListener
 
@@ -597,7 +599,7 @@ class JsonCommunicationSpec : ShouldSpec({
            )),
        ) { (_, clientConfigs ) ->
 
-           val clientList = mutableListOf<JsonClient>()
+           val clientList = mutableListOf<Client<KonemMessage>>()
            val clientStatusList = mutableListOf<TestConnectionStatusListener>()
            val serverStatusList = mutableListOf<TestConnectionStatusListener>()
            var totalConnections = 0

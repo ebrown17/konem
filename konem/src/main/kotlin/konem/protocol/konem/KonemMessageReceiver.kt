@@ -3,7 +3,7 @@ package konem.protocol.konem
 import konem.netty.tcp.Receiver
 import java.net.SocketAddress
 
-class KonemJsonMessageReceiver (private val received: (SocketAddress, konem.data.json.KonemMessage) -> Unit):
+open class KonemJsonMessageReceiver (private val received: (SocketAddress, konem.data.json.KonemMessage) -> Unit):
     Receiver<konem.data.json.KonemMessage>() {
 
     override fun receive(addr: SocketAddress, message: konem.data.json.KonemMessage) {

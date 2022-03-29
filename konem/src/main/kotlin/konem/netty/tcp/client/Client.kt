@@ -19,6 +19,7 @@ interface Client<I>:  ChannelReceiver<I> {
     fun registerConnectionListener(listener: ConnectionListener)
     fun registerDisconnectionListener(listener: DisconnectionListener)
     fun registerConnectionStatusListener(listener: ConnectionStatusListener)
+    fun isActive(): Boolean
     /**
      * Sends a message to connected server
      *
@@ -47,7 +48,7 @@ abstract class ClientInternal<I>(private val serverAddress: SocketAddress, priva
     internal var isDisconnectInitiated = true
         private set
 
-    fun isActive(): Boolean {
+    override fun isActive(): Boolean {
         return channel != null && (channel!!.isOpen || channel!!.isActive)
     }
 

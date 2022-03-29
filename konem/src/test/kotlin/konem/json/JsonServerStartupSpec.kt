@@ -4,10 +4,8 @@ import io.kotest.assertions.until.fixed
 import io.kotest.assertions.until.until
 import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.ShouldSpec
-import io.kotest.data.forAll
-import io.kotest.data.row
 import io.kotest.datatest.withData
-import konem.protocol.socket.json.JsonServer
+import konem.protocol.konem.json.JsonServer
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
@@ -24,19 +22,18 @@ class JsonServerStartupSpec : ShouldSpec({
 
     should(": Server starts with expected ports and values: ") {
         withData(
-            nameFn = { data: ServerStartup -> "${this.testCase.displayName} ${data.totalConfigured} ${data.portsToConfigure}" },
-            ServerStartup(1, mutableListOf(6060)),
-            ServerStartup(3, mutableListOf(6060,6061,6062)),
-            ServerStartup(6, mutableListOf(6060,6061,6062,6063,6064,6065)),
-            ServerStartup(3, mutableListOf(6060,6061,6062,6060,6061,6062)),
-            ServerStartup(4, mutableListOf(6060,6061,6062,6061,6062,6065)),
+            nameFn = { data: ServerStartup -> "${this.testCase.displayName} ${data.portsToConfigure}" },
+            ServerStartup( mutableListOf(6060)),
+            ServerStartup( mutableListOf(6060,6061,6062)),
+            ServerStartup( mutableListOf(6060,6061,6062,6063,6064,6065)),
+            ServerStartup( mutableListOf(6060,6061,6062,6060,6061,6062)),
+            ServerStartup( mutableListOf(6060,6061,6062,6061,6062,6065)),
 
-        ) { (totalConfigured, portsToConfigure) ->
+        ) { ( portsToConfigure) ->
 
-            server = JsonServer()
-            server?.let { srv ->
+            server = JsonServer.create { serverConfig ->
                 portsToConfigure.forEach { port ->
-                    srv.addChannel(port)
+                    serverConfig.addChannel(port)
                 }
             }
 
@@ -47,26 +44,14 @@ class JsonServerStartupSpec : ShouldSpec({
                     var allPortsConfigured = true
 
                     portsToConfigure.forEach { port ->
-                        if (!server!!.isPortConfigured(port)) {
+                        if (!server!!.isActive(port)) {
                             allPortsConfigured = false
                         }
                     }
 
-                    val transceiverMap = server!!.getTransceiverMap()
-                    var allTransceiversConfigured = true
+                    println("Ports Configured: $allPortsConfigured | ")
 
-                    transceiverMap.forEach { (port, _) ->
-                        if (!portsToConfigure.contains(port)) {
-                            allTransceiversConfigured = false
-                        }
-                    }
-
-                    print("Ports Configured: $allPortsConfigured | ")
-                    print("Transceivers Configured: $allTransceiversConfigured | ")
-                    println("TransceiverMap Size: ${transceiverMap.size} Expected:  $totalConfigured")
-
-                    allPortsConfigured  && allTransceiversConfigured && (transceiverMap.size == totalConfigured)
-
+                    allPortsConfigured
                 } else {
                     false
                 }

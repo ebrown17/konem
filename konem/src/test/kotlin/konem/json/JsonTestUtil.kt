@@ -4,19 +4,24 @@ import io.kotest.assertions.until.fixed
 import io.kotest.assertions.until.until
 import konem.data.json.Data
 import konem.data.json.KonemMessage
-import konem.netty.stream.ConnectionListener
-import konem.netty.stream.ConnectionStatusListener
-import konem.netty.stream.DisconnectionListener
-import konem.netty.stream.StatusListener
-import konem.protocol.socket.json.JsonClient
-import konem.protocol.socket.json.JsonClientFactory
-import konem.protocol.socket.json.JsonServer
-import konem.protocol.socket.json.KonemMessageReceiver
+import konem.netty.tcp.ConnectionListener
+import konem.netty.tcp.ConnectionStatusListener
+import konem.netty.tcp.DisconnectionListener
+import konem.netty.tcp.StatusListener
+import konem.netty.tcp.client.Client
+import konem.netty.tcp.server.Server
+import konem.protocol.konem.KonemJsonMessageReceiver
+import konem.protocol.konem.json.JsonClient
+
+import konem.protocol.konem.json.JsonClientFactory
+import konem.protocol.konem.json.JsonServer
+
+
 import java.net.SocketAddress
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
-var server: JsonServer? = null
+var server: Server<KonemMessage>? = null
 var clientFactory:  JsonClientFactory? = null
 
 const val DEBUG = true
@@ -28,28 +33,28 @@ val testSetup = {
     clientFactory?.shutdown()
     server?.shutdownServer()
 
-    server = JsonServer()
-    server?.let {
+    server = JsonServer.create {
         it.addChannel(6060)
         it.addChannel(6061)
         it.addChannel(6062)
         it.addChannel(6063)
+
     }
 
-    clientFactory = JsonClientFactory()
+    clientFactory = JsonClientFactory.createDefault()
 }
 
 data class ClientConfig(val port: Int,val totalClients: Int)
 data class ClientCommConfigsV1(val msgCount:Int, val clientConfigs: MutableList<ClientConfig>)
 data class ClientCommConfigsV2(val msgCount:Int, val broadcastPorts: MutableList<Int>, val clientConfigs: MutableList<ClientConfig>)
-data class ServerStartup(val totalConfigured: Int ,val portsToConfigure: MutableList<Int>)
+data class ServerStartup(val portsToConfigure: MutableList<Int>)
 
-class JsonTestServerReceiver(receive: (SocketAddress, KonemMessage) -> Unit) : KonemMessageReceiver(receive) {
+class JsonTestServerReceiver(receive: (SocketAddress, KonemMessage) -> Unit) : KonemJsonMessageReceiver(receive) {
     var messageCount = 0
     var messageList = mutableListOf<KonemMessage>()
 }
 
-class JsonTestClientReceiver(var client: JsonClient, receive: (SocketAddress, KonemMessage) -> Unit) : KonemMessageReceiver(receive) {
+class JsonTestClientReceiver(val client: Client<KonemMessage>,receive: (SocketAddress, KonemMessage) -> Unit) : KonemJsonMessageReceiver(receive) {
     var messageCount = 0
     var messageList = mutableListOf<KonemMessage>()
     var clientId = ""
@@ -70,7 +75,7 @@ class TestConnectionStatusListener(connected: (SocketAddress) -> Unit,
     var disconnections = 0
 }
 
-fun areClientsActive(clientList: MutableList<JsonClient>):Boolean{
+fun areClientsActive(clientList: MutableList<Client<KonemMessage>>):Boolean{
     if(clientList.isEmpty()) return false
     var allActive = true
     clientList.forEach { client ->
@@ -81,7 +86,7 @@ fun areClientsActive(clientList: MutableList<JsonClient>):Boolean{
     return allActive
 }
 
-fun areClientsInactive(clientList: MutableList<JsonClient>):Boolean{
+fun areClientsInactive(clientList: MutableList<Client<KonemMessage>>):Boolean{
     if(clientList.isEmpty()) return true
     var allInactive = true
     clientList.forEach { client ->
@@ -92,7 +97,7 @@ fun areClientsInactive(clientList: MutableList<JsonClient>):Boolean{
     return allInactive
 }
 
-fun sendClientMessages(messageSendCount: Int, clientList: MutableList<JsonClient>):Int{
+fun sendClientMessages(messageSendCount: Int, clientList: MutableList<Client<KonemMessage>>):Int{
     var totalMessagesSent = 0
     clientList.forEachIndexed { index, client ->
         for(i in 1..messageSendCount){
@@ -138,7 +143,7 @@ suspend fun startServer() : Boolean{
 }
 
 @ExperimentalTime
-suspend fun connectClients(clientList : MutableList<JsonClient>) : Boolean{
+suspend fun connectClients(clientList : MutableList<Client<KonemMessage>>) : Boolean{
     clientList.forEach { client -> client.connect() }
 
     return until(Duration.seconds(activeTime), Duration.milliseconds(250).fixed()) {
@@ -147,7 +152,7 @@ suspend fun connectClients(clientList : MutableList<JsonClient>) : Boolean{
 }
 
 @ExperimentalTime
-suspend fun disconnectClients(clientList : MutableList<JsonClient>) : Boolean{
+suspend fun disconnectClients(clientList : MutableList<Client<KonemMessage>>) : Boolean{
     clientList.forEach { client -> client.disconnect() }
 
     return until(Duration.seconds(activeTime), Duration.milliseconds(250).fixed()) {
