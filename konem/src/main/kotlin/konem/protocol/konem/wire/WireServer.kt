@@ -33,7 +33,7 @@ class WireServer private constructor(serverConfig: ServerConfig): ServerInternal
 
     private val logger = logger(this)
 
-    override fun registerChannelReceiverListener(receiver: Receiver<KonemMessage>) {
+    override fun registerChannelReceiveListener(receiver: Receiver<KonemMessage>) {
         for (list in receiveListeners.values) {
             list.add(receiver)
         }

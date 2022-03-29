@@ -28,7 +28,7 @@ fun main() {
 
     client.connect()
 
-    client.registerChannelReceiverListener(StringMessageReceiver {  from, message ->
+    client.registerChannelReceiveListener(StringMessageReceiver {  from, message ->
         println("Got $message from $from")
 
     })

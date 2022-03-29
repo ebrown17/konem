@@ -5,11 +5,9 @@ import konem.data.json.Data
 import konem.data.json.Heartbeat
 import konem.data.json.KonemMessage
 import konem.netty.tcp.ConnectionListener
-import konem.protocol.konem.json.KonemClientFactory
-import konem.protocol.konem.json.KonemMessageReceiver
-import konem.protocol.konem.json.KonemServer
-import konem.protocol.string.StringClientFactory
-import konem.protocol.string.StringMessageReceiver
+import konem.protocol.konem.KonemJsonMessageReceiver
+import konem.protocol.konem.json.JsonClientFactory
+import konem.protocol.konem.json.JsonServer
 
 
 fun main() {
@@ -21,19 +19,19 @@ fun main() {
     println(KonemMessage(Heartbeat()))
 
 
-    val server = KonemServer.create { config->
+    val server = JsonServer.create { config->
 
         config.addChannel(6060)
     }
     server.startServer()
 
-    val clientFactory = KonemClientFactory.createDefault()
+    val clientFactory = JsonClientFactory.createDefault()
 
     val client = clientFactory.createClient("localhost", 6060)
 
     client.connect()
 
-    client.registerChannelReceiverListener(KonemMessageReceiver { from, message ->
+    client.registerChannelReceiveListener(KonemJsonMessageReceiver { from, message ->
         println("Got $message from $from")
 
     })

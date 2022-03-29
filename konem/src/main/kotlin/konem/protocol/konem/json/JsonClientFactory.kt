@@ -8,25 +8,25 @@ import konem.netty.tcp.client.ClientFactoryConfig
 
 import java.net.InetSocketAddress
 
-class KonemClientFactory private constructor(config: ClientFactoryConfig) : ClientFactory<KonemMessage>(config) {
+class JsonClientFactory private constructor(config: ClientFactoryConfig) : ClientFactory<KonemMessage>(config) {
 
     companion object {
 
-        fun createDefault(): KonemClientFactory{
-            return KonemClientFactory(ClientFactoryConfig())
+        fun createDefault(): JsonClientFactory{
+            return JsonClientFactory(ClientFactoryConfig())
         }
 
-        fun create(config: (ClientFactoryConfig) -> Unit): KonemClientFactory {
+        fun create(config: (ClientFactoryConfig) -> Unit): JsonClientFactory {
             val userConfig = ClientFactoryConfig()
             config(userConfig)
-            return KonemClientFactory(userConfig)
+            return JsonClientFactory(userConfig)
         }
     }
 
 
     override fun createClient(host: String, port: Int, vararg args: String): Client<KonemMessage> {
         val address = InetSocketAddress(host, port)
-        val transceiver = KonemTransceiver(port)
+        val transceiver = JsonTransceiver(port)
         return createClient(address, createClientConfig(transceiver))
     }
 
@@ -37,8 +37,8 @@ class KonemClientFactory private constructor(config: ClientFactoryConfig) : Clie
     ): Client<KonemMessage> {
         val transceiver = config.transceiver
         val bootstrap = config.bootstrap
-        val client = KonemClient(address, config)
-        val clientChannel = KonemClientChannel(transceiver as KonemTransceiver,config.clientChannelInfo)
+        val client = JsonClient(address, config)
+        val clientChannel = JsonClientChannel(transceiver as JsonTransceiver,config.clientChannelInfo)
         bootstrap.handler(clientChannel)
         clientArrayList.add(client)
         return client

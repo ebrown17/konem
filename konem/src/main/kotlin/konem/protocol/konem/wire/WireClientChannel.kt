@@ -8,6 +8,7 @@ import io.netty.handler.timeout.IdleStateHandler
 import konem.netty.tcp.ExceptionHandler
 import konem.netty.tcp.SslContextManager
 import konem.netty.tcp.client.ClientChannelInfo
+import konem.protocol.konem.KonemWireMessageHandler
 
 
 class WireClientChannel(private val transceiver: WireTransceiver, private val clientChannelInfo: ClientChannelInfo) :
@@ -29,7 +30,7 @@ class WireClientChannel(private val transceiver: WireTransceiver, private val cl
         pipeline.addLast("idleStateHandler", IdleStateHandler(clientChannelInfo.read_idle_time, 0, 0))
         pipeline.addLast("heartBeatHandler", WireHeartbeatReceiver(clientChannelInfo.read_idle_time, clientChannelInfo.heartbeat_miss_limit))
 
-        pipeline.addLast("messageHandler", WireMessageHandler(clientChannelInfo.channelId, transceiver))
+        pipeline.addLast("messageHandler", KonemWireMessageHandler(clientChannelInfo.channelId, transceiver))
 
         pipeline.addLast("exceptionHandler", ExceptionHandler())
     }

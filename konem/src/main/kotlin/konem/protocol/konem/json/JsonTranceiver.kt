@@ -8,7 +8,7 @@ import konem.netty.tcp.Transceiver
 import java.net.SocketAddress
 
 
-class KonemTransceiver(channelPort: Int):Transceiver<KonemMessage>(channelPort) {
+class JsonTransceiver(channelPort: Int):Transceiver<KonemMessage>(channelPort) {
     private val logger = logger(this)
 
     override fun transmit(addr: SocketAddress, message: KonemMessage, vararg extra: String) {
@@ -30,7 +30,7 @@ class KonemTransceiver(channelPort: Int):Transceiver<KonemMessage>(channelPort) 
     }
 }
 
-class KonemServerTransceiver(channelPort: Int): ServerTransceiver<KonemMessage>(channelPort) {
+class JsonServerTransceiver(channelPort: Int): ServerTransceiver<KonemMessage>(channelPort) {
     private val logger = logger(this)
 
     override fun transmit(addr: SocketAddress, message: KonemMessage, vararg extra: String) {

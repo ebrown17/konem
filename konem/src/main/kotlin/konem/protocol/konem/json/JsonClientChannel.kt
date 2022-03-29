@@ -10,9 +10,10 @@ import io.netty.util.CharsetUtil
 import konem.netty.tcp.ExceptionHandler
 import konem.netty.tcp.SslContextManager
 import konem.netty.tcp.client.ClientChannelInfo
+import konem.protocol.konem.KonemJsonMessageHandler
 
 
-class KonemClientChannel(private val transceiver: KonemTransceiver, private val clientChannelInfo: ClientChannelInfo) :
+class JsonClientChannel(private val transceiver: JsonTransceiver, private val clientChannelInfo: ClientChannelInfo) :
     ChannelInitializer<Channel>() {
 
     override fun initChannel(channel: Channel) {
@@ -30,9 +31,9 @@ class KonemClientChannel(private val transceiver: KonemTransceiver, private val 
         pipeline.addLast("konemCodec", KonemJsonCodec())
 
         pipeline.addLast("idleStateHandler", IdleStateHandler(clientChannelInfo.read_idle_time, 0, 0))
-        pipeline.addLast("heartBeatHandler", KonemHeartbeatReceiver(clientChannelInfo.read_idle_time, clientChannelInfo.heartbeat_miss_limit))
+        pipeline.addLast("heartBeatHandler", JsonHeartbeatReceiver(clientChannelInfo.read_idle_time, clientChannelInfo.heartbeat_miss_limit))
 
-        pipeline.addLast("messageHandler", KonemMessageHandler(clientChannelInfo.channelId, transceiver))
+        pipeline.addLast("messageHandler", KonemJsonMessageHandler(clientChannelInfo.channelId, transceiver))
 
         pipeline.addLast("exceptionHandler", ExceptionHandler())
     }

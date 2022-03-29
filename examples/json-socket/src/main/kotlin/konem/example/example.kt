@@ -2,19 +2,23 @@ package konem.example
 
 import konem.data.json.Data
 import konem.data.json.KonemMessage
-import konem.data.json.Message
+import konem.netty.tcp.ConnectionListener
 
-import konem.netty.stream.ConnectionListener
-import konem.protocol.socket.json.JsonClientFactory
-import konem.protocol.socket.json.JsonServer
-import konem.protocol.socket.json.KonemMessageReceiver
+
+import konem.protocol.konem.KonemJsonMessageReceiver
+import konem.protocol.konem.json.JsonClientFactory
+import konem.protocol.konem.json.JsonServer
+import konem.protocol.websocket.json.KonemMessageReceiver
+
 
 fun main(){
-    val server = JsonServer()
-    server.addChannel(6069)
+    val server = JsonServer.create { config ->
+        config.addChannel(6069)
+    }
+
 
     var count = 0
-    server.registerChannelReadListener(KonemMessageReceiver{from, msg ->
+    server.registerChannelReceiveListener(KonemJsonMessageReceiver{ from, msg ->
         println("SERVER Msg: $msg from $from")
         Thread.sleep(500)
 
@@ -26,7 +30,7 @@ fun main(){
 
     server.startServer()
 
-    val clientFactory = JsonClientFactory()
+    val clientFactory = JsonClientFactory.createDefault()
 
     val client = clientFactory.createClient("localhost", 6069)
     client.connect()
@@ -35,7 +39,7 @@ fun main(){
         client.sendMessage(KonemMessage(message = Data("Send message ${count++}") ))
     })
 
-    client.registerChannelReadListener(KonemMessageReceiver{from, msg ->
+    client.registerChannelReceiveListener(KonemJsonMessageReceiver{from, msg ->
         println("CLIENT Msg: $msg from $from")
 
 

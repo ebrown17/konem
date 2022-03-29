@@ -23,7 +23,7 @@ class StringClient(private val serverAddress: SocketAddress, config: ClientBoots
         transceiver.transmit(serverAddress, message)
     }
 
-    override fun registerChannelReceiverListener(receiver: Receiver<String>) {
+    override fun registerChannelReceiveListener(receiver: Receiver<String>) {
         receiveListeners.add(receiver)
     }
 

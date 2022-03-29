@@ -7,14 +7,14 @@ import konem.netty.tcp.HeartbeatProducerHandler
 import konem.netty.tcp.HeartbeatReceiverHandler
 
 
-class KonemHeartbeatProducer(transceiver: KonemServerTransceiver) :
+class JsonHeartbeatProducer(transceiver: JsonServerTransceiver) :
     HeartbeatProducerHandler<KonemMessage>(transceiver) {
     override fun generateHeartBeat(): KonemMessage {
         return KonemMessage(Heartbeat())
     }
 }
 
-class KonemHeartbeatReceiver(expectedInterval: Int, missLimit: Int) :
+class JsonHeartbeatReceiver(expectedInterval: Int, missLimit: Int) :
     HeartbeatReceiverHandler<String>(expectedInterval, missLimit) {
 
     override fun channelRead(ctx: ChannelHandlerContext, message: Any) {

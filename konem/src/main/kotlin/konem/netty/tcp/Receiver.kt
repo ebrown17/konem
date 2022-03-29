@@ -34,7 +34,7 @@ interface ChannelReceiver<I> {
      *
      * @param receiver receiver to handle read data
      */
-    fun registerChannelReceiverListener(receiver: Receiver<I>)
+    fun registerChannelReceiveListener(receiver: Receiver<I>)
 }
 
 interface ServerChannelReceiver<I> : ChannelReceiver<I> {

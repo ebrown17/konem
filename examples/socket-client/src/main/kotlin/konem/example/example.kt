@@ -3,21 +3,22 @@ package konem.example
 import konem.data.protobuf.Data
 import konem.data.protobuf.KonemMessage
 import konem.data.protobuf.MessageType
-import konem.netty.stream.ConnectionListener
-import konem.protocol.socket.wire.WireClientFactory
-import konem.protocol.socket.wire.WireMessageReceiver
-import konem.protocol.socket.wire.WireServer
+import konem.netty.tcp.ConnectionListener
+import konem.protocol.konem.KonemWireMessageReceiver
+import konem.protocol.konem.wire.WireClientFactory
+import konem.protocol.konem.wire.WireServer
 
 
 fun main() {
 
-  val server = WireServer()
-  server.addChannel(6060)
+  val server = WireServer.create {
+      it.addChannel(6060)
+  }
   server.startServer()
 
-  server.registerChannelReadListener(WireMessageReceiver { from, message -> println("Got $message from $from") })
+  server.registerChannelReceiveListener(KonemWireMessageReceiver { from, message -> println("Got $message from $from") })
 
-  val clientFactory = WireClientFactory()
+  val clientFactory = WireClientFactory.createDefault()
 
   val client = clientFactory.createClient("localhost", 6060)
 

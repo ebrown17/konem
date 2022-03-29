@@ -3,10 +3,10 @@ package konem.example
 import konem.data.protobuf.Data
 import konem.data.protobuf.KonemMessage
 import konem.data.protobuf.MessageType
-import konem.netty.stream.ConnectionListener
-import konem.protocol.socket.wire.WireClientFactory
-import konem.protocol.socket.wire.WireMessageReceiver
-import konem.protocol.socket.wire.WireServer
+import konem.netty.tcp.ConnectionListener
+import konem.protocol.konem.KonemWireMessageReceiver
+import konem.protocol.konem.wire.WireClientFactory
+import konem.protocol.konem.wire.WireServer
 import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger("wireServerExamples")
@@ -15,17 +15,18 @@ fun main(){
   wireServerExamples()
 }
 
-
 fun wireServerExamples() {
-  val server = WireServer()
-  server.addChannel(8085)
+  val server = WireServer.create { serverConfig ->
+      serverConfig.addChannel(8085)
+  }
   server.startServer()
 
-  server.registerChannelReadListener(WireMessageReceiver { _, konemMessage ->
+  server.registerChannelReceiveListener(KonemWireMessageReceiver { _, konemMessage ->
     logger.info("KoneMessageReceiver: {} ", konemMessage.toString())
   })
 
-  val client = WireClientFactory().createClient("localhost", 8085)
+  val client = WireClientFactory.createDefault().createClient("localhost", 8085)
+
   client.connect()
 
   client.registerConnectionListener(ConnectionListener {

@@ -8,6 +8,7 @@ import io.netty.handler.timeout.IdleStateHandler
 import konem.netty.tcp.ExceptionHandler
 import konem.netty.tcp.SslContextManager
 import konem.netty.tcp.server.ServerChannelInfo
+import konem.protocol.konem.KonemWireMessageHandler
 
 class WireServerChannel(
     private val transceiver: WireServerTransceiver,
@@ -33,7 +34,7 @@ class WireServerChannel(
 
         /// add enable heartbeat boolean to channel config
 
-        pipeline.addLast("messageHandler", WireMessageHandler(serverChannelInfo.channelId, transceiver))
+        pipeline.addLast("messageHandler", KonemWireMessageHandler(serverChannelInfo.channelId, transceiver))
         pipeline.addLast("exceptionHandler", ExceptionHandler())
 
     }

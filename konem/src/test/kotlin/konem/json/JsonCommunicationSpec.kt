@@ -3,9 +3,9 @@ package konem.json
 import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.datatest.withData
-import konem.protocol.socket.json.JsonClient
-import konem.protocol.socket.json.JsonClientFactory
-import konem.protocol.socket.json.JsonServer
+import konem.protocol.konem.json.KonemClientFactory
+import konem.protocol.konem.json.KonemServer
+
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
@@ -15,15 +15,14 @@ import kotlin.time.ExperimentalTime
 class JsonCommunicationSpec : ShouldSpec({
 
     beforeContainer {
-        server = JsonServer()
-        server?.let {
-            it.addChannel(6060)
-            it.addChannel(6061)
-            it.addChannel(6062)
-            it.addChannel(6063)
+        server = KonemServer.create { config ->
+            config.addChannel(6060)
+            config.addChannel(6061)
+            config.addChannel(6062)
+            config.addChannel(6063)
         }
 
-        clientFactory = JsonClientFactory()
+        clientFactory = KonemClientFactory.createDefault()
     }
 
     afterContainer {

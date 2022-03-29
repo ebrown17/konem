@@ -10,9 +10,10 @@ import io.netty.util.CharsetUtil
 import konem.netty.tcp.ExceptionHandler
 import konem.netty.tcp.SslContextManager
 import konem.netty.tcp.server.ServerChannelInfo
+import konem.protocol.konem.KonemJsonMessageHandler
 
-class KonemServerChannel(
-    private val transceiver: KonemServerTransceiver,
+class JsonServerChannel(
+    private val transceiver: JsonServerTransceiver,
     private val serverChannelInfo: ServerChannelInfo
 ) : ChannelInitializer<SocketChannel>() {
 
@@ -31,12 +32,12 @@ class KonemServerChannel(
         pipeline.addLast("stringEncoder", StringEncoder(CharsetUtil.UTF_8))
         pipeline.addLast("konemCodec", KonemJsonCodec())
         pipeline.addLast("idleStateHandler", IdleStateHandler(0, serverChannelInfo.write_idle_time, 0))
-        pipeline.addLast("heartBeatHandler", KonemHeartbeatProducer(transceiver))
+        pipeline.addLast("heartBeatHandler", JsonHeartbeatProducer(transceiver))
 
 
         /// add enable heartbeat boolean to channel config
 
-        pipeline.addLast("messageHandler", KonemMessageHandler(serverChannelInfo.channelId, transceiver))
+        pipeline.addLast("messageHandler", KonemJsonMessageHandler(serverChannelInfo.channelId, transceiver))
         pipeline.addLast("exceptionHandler", ExceptionHandler())
 
     }

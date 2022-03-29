@@ -24,7 +24,7 @@ class WireClient(private val serverAddress: SocketAddress, config: ClientBootstr
         transceiver.transmit(serverAddress, message)
     }
 
-    override fun registerChannelReceiverListener(receiver: Receiver<KonemMessage>) {
+    override fun registerChannelReceiveListener(receiver: Receiver<KonemMessage>) {
         receiveListeners.add(receiver)
     }
 

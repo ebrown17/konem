@@ -6,8 +6,8 @@ import konem.data.protobuf.HeartBeat
 import konem.data.protobuf.KonemMessage
 import konem.data.protobuf.MessageType
 import konem.netty.tcp.ConnectionListener
+import konem.protocol.konem.KonemWireMessageReceiver
 import konem.protocol.konem.wire.WireClientFactory
-import konem.protocol.konem.wire.WireMessageReceiver
 import konem.protocol.konem.wire.WireServer
 import java.util.*
 
@@ -38,7 +38,7 @@ fun main() {
 
     client.connect()
 
-    client.registerChannelReceiverListener(WireMessageReceiver { from, message ->
+    client.registerChannelReceiveListener(KonemWireMessageReceiver { from, message ->
         println("Got $message from $from")
 
     })

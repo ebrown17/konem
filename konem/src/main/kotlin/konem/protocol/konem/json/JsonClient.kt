@@ -8,7 +8,7 @@ import konem.netty.tcp.client.ClientInternal
 import kotlinx.coroutines.launch
 import java.net.SocketAddress
 
-class KonemClient(private val serverAddress: SocketAddress, config: ClientBootstrapConfig<KonemMessage>):
+class JsonClient(private val serverAddress: SocketAddress, config: ClientBootstrapConfig<KonemMessage>):
     ClientInternal<KonemMessage>(serverAddress,config) {
 
     private val logger = logger(javaClass)
@@ -24,7 +24,7 @@ class KonemClient(private val serverAddress: SocketAddress, config: ClientBootst
         transceiver.transmit(serverAddress, message)
     }
 
-    override fun registerChannelReceiverListener(receiver: Receiver<KonemMessage>) {
+    override fun registerChannelReceiveListener(receiver: Receiver<KonemMessage>) {
         receiveListeners.add(receiver)
     }
 

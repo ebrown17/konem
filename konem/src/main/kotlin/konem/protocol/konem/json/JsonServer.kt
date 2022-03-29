@@ -14,13 +14,13 @@ import java.net.SocketAddress
 import java.util.concurrent.ConcurrentHashMap
 
 
-class KonemServer private constructor(serverConfig: ServerConfig): ServerInternal<KonemMessage>(serverConfig) {
+class JsonServer private constructor(serverConfig: ServerConfig): ServerInternal<KonemMessage>(serverConfig) {
 
     companion object {
         fun create(config: (ServerConfig) -> Unit): Server<KonemMessage> {
             val userConfig = ServerConfig()
             config(userConfig)
-            val server = KonemServer(userConfig)
+            val server = JsonServer(userConfig)
             for(port in userConfig.portSet){
                 server.addChannel(port)
             }
@@ -33,7 +33,7 @@ class KonemServer private constructor(serverConfig: ServerConfig): ServerInterna
 
     private val logger = logger(this)
 
-    override fun registerChannelReceiverListener(receiver: Receiver<KonemMessage>) {
+    override fun registerChannelReceiveListener(receiver: Receiver<KonemMessage>) {
         for (list in receiveListeners.values) {
             list.add(receiver)
         }
@@ -78,7 +78,7 @@ class KonemServer private constructor(serverConfig: ServerConfig): ServerInterna
             return false
         }
 
-        val transceiver = KonemServerTransceiver(port)
+        val transceiver = JsonServerTransceiver(port)
 
         return if (addChannel(port, transceiver)) {
             receiveListeners[port] = ArrayList()
@@ -89,8 +89,8 @@ class KonemServer private constructor(serverConfig: ServerConfig): ServerInterna
     }
 
     override fun createServerBootstrap(port: Int): ServerBootstrap {
-        val transceiver = getTransceiverMap()[port] as KonemServerTransceiver
-        val channel = KonemServerChannel(transceiver,
+        val transceiver = getTransceiverMap()[port] as JsonServerTransceiver
+        val channel = JsonServerChannel(transceiver,
             ServerChannelInfo(
                 serverConfig.USE_SSL,
                 serverConfig.CHANNEL_IDS.incrementAndGet(),

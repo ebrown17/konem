@@ -32,7 +32,7 @@ class StringServer private constructor(serverConfig: ServerConfig): ServerIntern
 
     private val logger = logger(this)
 
-    override fun registerChannelReceiverListener(receiver: Receiver<String>) {
+    override fun registerChannelReceiveListener(receiver: Receiver<String>) {
         for (list in receiveListeners.values) {
             list.add(receiver)
         }
