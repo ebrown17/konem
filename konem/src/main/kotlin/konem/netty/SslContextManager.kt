@@ -1,4 +1,4 @@
-package konem.netty.tcp
+package konem.netty
 
 import io.netty.handler.ssl.SslContext
 import io.netty.handler.ssl.SslContextBuilder
@@ -54,7 +54,7 @@ object SslContextManager {
         if (serverContext == null || clientContext == null) {
             keyStore = KeyStore.getInstance(keyStoreType)
             trustFactory = TrustManagerFactory.getInstance(algorithm)
-            logger.info("keyStoreLocation is set to {}",keyStoreLocation)
+            logger.info("keyStoreLocation is set to {}", keyStoreLocation)
             if (!keyStoreLocation.isNullOrEmpty()) {
                 val certificate = loadCertificate()
                 return if(certificate != null){
@@ -68,7 +68,7 @@ object SslContextManager {
                     certificate.close()
                     true
                 } else {
-                    logger.error("failed to load 'konem.secure.keyStoreLocation={}'",keyStoreLocation)
+                    logger.error("failed to load 'konem.secure.keyStoreLocation={}'", keyStoreLocation)
                     false
                 }
 

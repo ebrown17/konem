@@ -7,9 +7,9 @@ import io.netty.handler.codec.string.StringDecoder
 import io.netty.handler.codec.string.StringEncoder
 import io.netty.handler.timeout.IdleStateHandler
 import io.netty.util.CharsetUtil
-import konem.netty.tcp.ExceptionHandler
-import konem.netty.tcp.SslContextManager
-import konem.netty.tcp.client.ClientChannelInfo
+import konem.netty.ExceptionHandler
+import konem.netty.SslContextManager
+import konem.netty.client.ClientChannelInfo
 import konem.protocol.konem.KonemJsonMessageHandler
 
 
@@ -31,9 +31,9 @@ class JsonClientChannel(private val transceiver: JsonTransceiver, private val cl
         pipeline.addLast("konemCodec", KonemJsonCodec())
 
         pipeline.addLast("idleStateHandler", IdleStateHandler(clientChannelInfo.read_idle_time, 0, 0))
-        pipeline.addLast("heartBeatHandler", JsonHeartbeatReceiver(clientChannelInfo.read_idle_time, clientChannelInfo.heartbeat_miss_limit))
+       // pipeline.addLast("heartBeatHandler", JsonHeartbeatReceiver(clientChannelInfo.read_idle_time, clientChannelInfo.heartbeat_miss_limit))
 
-        pipeline.addLast("messageHandler", KonemJsonMessageHandler(clientChannelInfo.channelId, transceiver))
+     //   pipeline.addLast("messageHandler", KonemJsonMessageHandler(clientChannelInfo.channelId, transceiver))
 
         pipeline.addLast("exceptionHandler", ExceptionHandler())
     }

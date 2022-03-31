@@ -1,4 +1,4 @@
-package konem.netty.tcp.client
+package konem.netty.client
 
 import io.netty.channel.ChannelFuture
 import io.netty.channel.ChannelFutureListener

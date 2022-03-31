@@ -4,8 +4,7 @@ import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.datatest.withData
 import konem.data.json.KonemMessage
-import konem.netty.tcp.client.Client
-import konem.protocol.konem.json.JsonClient
+import konem.netty.client.Client
 import konem.protocol.konem.json.JsonClientFactory
 import konem.protocol.konem.json.JsonServer
 

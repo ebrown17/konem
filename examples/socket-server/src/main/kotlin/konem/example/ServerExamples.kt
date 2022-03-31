@@ -3,7 +3,7 @@ package konem.example
 import konem.data.protobuf.Data
 import konem.data.protobuf.KonemMessage
 import konem.data.protobuf.MessageType
-import konem.netty.tcp.ConnectionListener
+import konem.netty.ConnectionListener
 import konem.protocol.konem.KonemWireMessageReceiver
 import konem.protocol.konem.wire.WireClientFactory
 import konem.protocol.konem.wire.WireServer

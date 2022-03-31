@@ -1,8 +1,8 @@
 package konem.protocol.string
 
 import io.netty.channel.ChannelHandlerContext
-import konem.netty.tcp.Handler
-import konem.netty.tcp.Transceiver
+import konem.netty.Handler
+import konem.netty.Transceiver
 
 /*
     Passes messages read from channel to transceiver

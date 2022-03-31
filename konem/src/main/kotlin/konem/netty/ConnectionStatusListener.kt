@@ -1,4 +1,4 @@
-package konem.netty.tcp
+package konem.netty
 
 import java.net.SocketAddress
 

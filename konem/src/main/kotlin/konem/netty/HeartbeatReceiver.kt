@@ -1,34 +1,43 @@
-package konem.netty.tcp
+package konem.netty
 
 import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
+import io.netty.channel.SimpleChannelInboundHandler
 import io.netty.handler.timeout.IdleState
 import io.netty.handler.timeout.IdleStateEvent
 import konem.logger
 
 /**
- * HeartbeatReceiverHandler expects to be receiving a heartbeat message.
+ * HeartbeatReceiver receives a heartbeat message.
  *
  * If the heartbeat miss limit is reached the channel is closed and the client's reconnect logic is
  * started.
  *
- * By default every channel read will reset the miss count. To only reset on a heartbeat, you must override the
- * channelRead method and add appropriate logic. The method
- *
- * [resetMissCounter ][HeartbeatReceiverHandler.resetMissCounter] can be called to reset the miss count.
+ * Resets only happen on a heartbeat
  *
  * @param expectedInterval The expected heartbeat interval in seconds. This will be used to determine if server
  * is no longer alive.
  * @param missedLimit The max amount of heartbeats allowed until handler closes channel.
+ * @param isHeartbeat Function to determine if message of type I is a heartbeat; Should return true if heartbeat else false
  */
 
-abstract class HeartbeatReceiverHandler<I>(
+class HeartbeatReceiver<I>(
     private val expectedInterval: Int,
-    private val missedLimit: Int
-) : ChannelDuplexHandler() {
+    private val missedLimit: Int,
+    private val isHeartbeat: (message:I) -> Boolean
+) : SimpleChannelInboundHandler<I>() {
 
     private val logger = logger(javaClass)
     private var missCount = 0
+
+    override fun channelRead0(ctx: ChannelHandlerContext, message: I) {
+        if(isHeartbeat(message)){
+            missCount = 0
+        }
+        else{
+            ctx.fireChannelRead(message)
+        }
+    }
 
     @Throws(Exception::class)
     override fun userEventTriggered(ctx: ChannelHandlerContext, evt: Any) {
@@ -46,12 +55,5 @@ abstract class HeartbeatReceiverHandler<I>(
                 missCount++
             }
         }
-    }
-
-    /**
-     * Sets the heartbeat miss counter to zero.
-     */
-    protected fun resetMissCounter() {
-        missCount = 0
     }
 }

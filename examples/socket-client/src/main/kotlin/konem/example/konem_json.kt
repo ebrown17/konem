@@ -4,7 +4,7 @@ package konem.example
 import konem.data.json.Data
 import konem.data.json.Heartbeat
 import konem.data.json.KonemMessage
-import konem.netty.tcp.ConnectionListener
+import konem.netty.ConnectionListener
 import konem.protocol.konem.KonemJsonMessageReceiver
 import konem.protocol.konem.json.JsonClientFactory
 import konem.protocol.konem.json.JsonServer

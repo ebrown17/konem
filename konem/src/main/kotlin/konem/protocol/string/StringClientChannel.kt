@@ -6,9 +6,9 @@ import io.netty.handler.codec.string.StringDecoder
 import io.netty.handler.codec.string.StringEncoder
 import io.netty.handler.timeout.IdleStateHandler
 import io.netty.util.CharsetUtil
-import konem.netty.tcp.ExceptionHandler
-import konem.netty.tcp.SslContextManager
-import konem.netty.tcp.client.ClientChannelInfo
+import konem.netty.ExceptionHandler
+import konem.netty.SslContextManager
+import konem.netty.client.ClientChannelInfo
 
 
 class StringClientChannel(private val transceiver: StringTransceiver, private val clientChannelInfo: ClientChannelInfo) :
@@ -28,7 +28,7 @@ class StringClientChannel(private val transceiver: StringTransceiver, private va
         pipeline.addLast("stringEncoder", StringEncoder(CharsetUtil.UTF_8))
 
         pipeline.addLast("idleStateHandler", IdleStateHandler(clientChannelInfo.read_idle_time, 0, 0))
-        pipeline.addLast("heartBeatHandler", StringHeartbeatReceiver(clientChannelInfo.read_idle_time, clientChannelInfo.heartbeat_miss_limit))
+      //  pipeline.addLast("heartBeatHandler", StringHeartbeatReceiver(clientChannelInfo.read_idle_time, clientChannelInfo.heartbeat_miss_limit))
 
         pipeline.addLast("messageHandler", StringMessageHandler(clientChannelInfo.channelId, transceiver))
 

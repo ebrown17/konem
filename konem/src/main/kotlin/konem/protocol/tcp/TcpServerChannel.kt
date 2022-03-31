@@ -1,18 +1,14 @@
-package konem.protocol.string
+package konem.protocol.tcp
 
 import io.netty.channel.ChannelInitializer
 import io.netty.channel.socket.SocketChannel
-import io.netty.handler.codec.string.StringDecoder
-import io.netty.handler.codec.string.StringEncoder
 import io.netty.handler.timeout.IdleStateHandler
-import io.netty.util.CharsetUtil
-import konem.netty.ExceptionHandler
-import konem.netty.SslContextManager
+import konem.netty.*
 import konem.netty.server.ServerChannelInfo
 
-class StringServerChannel(
-    private val transceiver: StringServerTransceiver,
-    private val serverChannelInfo: ServerChannelInfo<String>
+class TcpServerChannel<I>(
+    private val transceiver: ServerTransceiver<I>,
+    private val serverChannelInfo: ServerChannelInfo<I>
 ) : ChannelInitializer<SocketChannel>() {
 
     override fun initChannel(channel: SocketChannel) {
@@ -25,15 +21,21 @@ class StringServerChannel(
                 throw Exception("SslContextManager.getServerContext() failed to initialize... closing channel")
             }
         }
+
+        serverChannelInfo.protocolPipeline?.getProtocolPipelineCodecs()?.forEach { entry ->
+            pipeline.addLast(entry.key,entry.value)
+        }
+
+  /*      pipeline.addLast("jsonDecoder", JsonObjectDecoder())
         pipeline.addLast("stringDecoder", StringDecoder(CharsetUtil.UTF_8))
         pipeline.addLast("stringEncoder", StringEncoder(CharsetUtil.UTF_8))
+        pipeline.addLast("konemCodec", KonemJsonCodec())*/
+
+        //
         pipeline.addLast("idleStateHandler", IdleStateHandler(0, serverChannelInfo.write_idle_time, 0))
-        //pipeline.addLast("heartBeatHandler", StringHeartbeatProducer(transceiver))
+        pipeline.addLast("heartBeatHandler", HeartbeatProducer(transceiver,serverChannelInfo.protocolPipeline!!.getHeartbeat()))
 
-
-        /// add enable heartbeat boolean to channel config
-
-        pipeline.addLast("messageHandler", StringMessageHandler(serverChannelInfo.channel_id, transceiver))
+        pipeline.addLast("messageHandler", MessageHandler(serverChannelInfo.channel_id, transceiver))
         pipeline.addLast("exceptionHandler", ExceptionHandler())
 
     }

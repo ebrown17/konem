@@ -1,10 +1,8 @@
-package konem.netty.tcp
+package konem.netty
 
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import konem.logger
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.net.SocketAddress
 
 interface HandlerListener<I> {
@@ -51,6 +49,3 @@ abstract class Handler<I>(val handlerId: Long, private val transceiver: Transcei
         return false
     }
 }
-
-/*abstract class ServerHandler<I>(handlerId: Long, transceiver: ServerTransceiver<I>) :
-    Handler<I>(handlerId,transceiver)*/

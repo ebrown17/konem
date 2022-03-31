@@ -1,15 +1,7 @@
 package konem.protocol.konem.wire
 
-import io.netty.channel.ChannelHandlerContext
-import konem.data.protobuf.HeartBeat
-import konem.data.protobuf.KonemMessage
-import konem.data.protobuf.MessageType
-import konem.netty.tcp.HeartbeatProducerHandler
-import konem.netty.tcp.HeartbeatReceiverHandler
-import java.util.*
 
-
-class WireHeartbeatProducer(transceiver: WireServerTransceiver) :
+/*class WireHeartbeatProducer(transceiver: WireServerTransceiver) :
     HeartbeatProducerHandler<KonemMessage>(transceiver) {
     override fun generateHeartBeat(): KonemMessage {
         return KonemMessage(
@@ -38,4 +30,4 @@ class WireHeartbeatReceiver(expectedInterval: Int, missLimit: Int) :
             }
         }
     }
-}
+}*/

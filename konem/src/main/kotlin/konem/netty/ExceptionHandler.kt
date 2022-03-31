@@ -1,4 +1,4 @@
-package konem.netty.tcp
+package konem.netty
 
 import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext

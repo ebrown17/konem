@@ -1,7 +1,7 @@
 package konem.protocol.string
 
 
-import konem.netty.tcp.Receiver
+import konem.netty.Receiver
 import java.net.SocketAddress
 
 class StringMessageReceiver(private val received: (SocketAddress, String) -> Unit):

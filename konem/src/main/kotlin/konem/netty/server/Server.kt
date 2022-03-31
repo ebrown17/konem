@@ -1,14 +1,13 @@
-package konem.netty.tcp.server
+package konem.netty.server
 
 import io.netty.bootstrap.ServerBootstrap
-import io.netty.buffer.ByteBufAllocator
 import io.netty.buffer.PooledByteBufAllocator
 import io.netty.channel.*
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.util.concurrent.DefaultThreadFactory
-import konem.netty.tcp.*
+import konem.netty.*
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
@@ -55,7 +54,8 @@ class WebsocketServerConfig: BaseConfig(){
 
 }
 
-data class ServerChannelInfo(val useSSL:Boolean, val channelId : Long, val write_idle_time : Int)
+//TODO remove null
+data class ServerChannelInfo<I>(val use_ssl:Boolean, val channel_id : Long, val write_idle_time : Int, val protocolPipeline: ProtocolPipeline<I>? = null)
 
 
 interface Server<I> : ServerChannelReceiver<I> {
@@ -95,7 +95,7 @@ interface Server<I> : ServerChannelReceiver<I> {
 
 }
 
-abstract class ServerInternal<I>(val serverConfig : ServerConfig) : HandlerListener<I>,Server<I> {
+abstract class ServerInternal<I>(val serverConfig : ServerConfig) : HandlerListener<I>, Server<I> {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 

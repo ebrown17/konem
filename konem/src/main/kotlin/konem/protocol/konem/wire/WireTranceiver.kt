@@ -3,12 +3,12 @@ package konem.protocol.konem.wire
 
 import konem.data.protobuf.KonemMessage
 import konem.logger
-import konem.netty.tcp.ServerTransceiver
-import konem.netty.tcp.Transceiver
+import konem.netty.ServerTransceiver
+import konem.netty.Transceiver
 import java.net.SocketAddress
 
 
-class WireTransceiver(channelPort: Int):Transceiver<KonemMessage>(channelPort) {
+class WireTransceiver(channelPort: Int): Transceiver<KonemMessage>(channelPort) {
     private val logger = logger(this)
 
     override fun transmit(addr: SocketAddress, message: KonemMessage, vararg extra: String) {

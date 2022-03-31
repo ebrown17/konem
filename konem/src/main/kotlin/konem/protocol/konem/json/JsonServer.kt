@@ -3,12 +3,12 @@ package konem.protocol.konem.json
 import io.netty.bootstrap.ServerBootstrap
 import konem.data.json.KonemMessage
 import konem.logger
-import konem.netty.tcp.Handler
-import konem.netty.tcp.Receiver
-import konem.netty.tcp.server.Server
-import konem.netty.tcp.server.ServerChannelInfo
-import konem.netty.tcp.server.ServerConfig
-import konem.netty.tcp.server.ServerInternal
+import konem.netty.Handler
+import konem.netty.Receiver
+import konem.netty.server.Server
+import konem.netty.server.ServerChannelInfo
+import konem.netty.server.ServerConfig
+import konem.netty.server.ServerInternal
 import kotlinx.coroutines.launch
 import java.net.SocketAddress
 import java.util.concurrent.ConcurrentHashMap
@@ -91,10 +91,11 @@ class JsonServer private constructor(serverConfig: ServerConfig): ServerInternal
     override fun createServerBootstrap(port: Int): ServerBootstrap {
         val transceiver = getTransceiverMap()[port] as JsonServerTransceiver
         val channel = JsonServerChannel(transceiver,
-            ServerChannelInfo(
+            ServerChannelInfo<KonemMessage>(
                 serverConfig.USE_SSL,
                 serverConfig.CHANNEL_IDS.incrementAndGet(),
-                serverConfig.WRITE_IDLE_TIME))
+                serverConfig.WRITE_IDLE_TIME)
+        )
         return createServerBootstrap(channel)
     }
 

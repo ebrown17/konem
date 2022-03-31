@@ -1,4 +1,4 @@
-package konem.netty.tcp
+package konem.netty
 
 import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
@@ -7,7 +7,7 @@ import io.netty.handler.timeout.IdleStateEvent
 import konem.logger
 import java.net.InetSocketAddress
 
-abstract class HeartbeatProducerHandler<I>(private val transceiver: ServerTransceiver<I>) :
+class HeartbeatProducer<I>(private val transceiver: ServerTransceiver<I>, val generateHeartBeat: () -> I) :
     ChannelDuplexHandler() {
 
     private val logger = logger(javaClass)
@@ -24,6 +24,4 @@ abstract class HeartbeatProducerHandler<I>(private val transceiver: ServerTransc
             }
         }
     }
-
-    abstract fun generateHeartBeat(): I
 }

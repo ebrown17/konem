@@ -1,10 +1,10 @@
 package konem.protocol.konem.wire
 
 import konem.data.protobuf.KonemMessage
-import konem.netty.tcp.client.Client
-import konem.netty.tcp.client.ClientBootstrapConfig
-import konem.netty.tcp.client.ClientFactory
-import konem.netty.tcp.client.ClientFactoryConfig
+import konem.netty.client.Client
+import konem.netty.client.ClientBootstrapConfig
+import konem.netty.client.ClientFactory
+import konem.netty.client.ClientFactoryConfig
 
 import java.net.InetSocketAddress
 

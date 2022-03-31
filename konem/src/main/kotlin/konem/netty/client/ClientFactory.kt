@@ -1,4 +1,4 @@
-package konem.netty.tcp.client
+package konem.netty.client
 
 import io.netty.bootstrap.Bootstrap
 import io.netty.buffer.PooledByteBufAllocator
@@ -8,7 +8,7 @@ import io.netty.channel.EventLoopGroup
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.util.concurrent.DefaultThreadFactory
-import konem.netty.tcp.Transceiver
+import konem.netty.Transceiver
 
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope

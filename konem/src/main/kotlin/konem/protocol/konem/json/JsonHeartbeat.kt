@@ -1,12 +1,7 @@
 package konem.protocol.konem.json
 
-import io.netty.channel.ChannelHandlerContext
-import konem.data.json.Heartbeat
-import konem.data.json.KonemMessage
-import konem.netty.tcp.HeartbeatProducerHandler
-import konem.netty.tcp.HeartbeatReceiverHandler
 
-
+/*
 class JsonHeartbeatProducer(transceiver: JsonServerTransceiver) :
     HeartbeatProducerHandler<KonemMessage>(transceiver) {
     override fun generateHeartBeat(): KonemMessage {
@@ -34,3 +29,4 @@ class JsonHeartbeatReceiver(expectedInterval: Int, missLimit: Int) :
         }
     }
 }
+*/

@@ -1,17 +1,19 @@
-package konem.protocol.konem.wire
+package konem.protocol.tcp
 
 import io.netty.channel.Channel
 import io.netty.channel.ChannelInitializer
-import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder
-import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender
+import io.netty.handler.codec.json.JsonObjectDecoder
+import io.netty.handler.codec.string.StringDecoder
+import io.netty.handler.codec.string.StringEncoder
 import io.netty.handler.timeout.IdleStateHandler
+import io.netty.util.CharsetUtil
 import konem.netty.ExceptionHandler
 import konem.netty.SslContextManager
 import konem.netty.client.ClientChannelInfo
-import konem.protocol.konem.KonemWireMessageHandler
+import konem.protocol.konem.KonemJsonMessageHandler
 
 
-class WireClientChannel(private val transceiver: WireTransceiver, private val clientChannelInfo: ClientChannelInfo) :
+class TcpClientChannel<I>(private val transceiver: TcpTransceiver<I>, private val clientChannelInfo: ClientChannelInfo) :
     ChannelInitializer<Channel>() {
 
     override fun initChannel(channel: Channel) {
@@ -23,14 +25,16 @@ class WireClientChannel(private val transceiver: WireTransceiver, private val cl
                 throw Exception("SslContextManager.getClientContext() failed to initialize... closing channel")
             }
         }
-        pipeline.addLast("frameDecoder", ProtobufVarint32FrameDecoder())
-        pipeline.addLast("frameEncoder", ProtobufVarint32LengthFieldPrepender())
-        pipeline.addLast("konemCodec", KonemWireCodec())
+        pipeline.addLast("jsonDecoder", JsonObjectDecoder())
+        pipeline.addLast("stringDecoder", StringDecoder(CharsetUtil.UTF_8))
+        pipeline.addLast("stringEncoder", StringEncoder(CharsetUtil.UTF_8))
+        pipeline.addLast("konemCodec", KonemJsonCodec())
 
         pipeline.addLast("idleStateHandler", IdleStateHandler(clientChannelInfo.read_idle_time, 0, 0))
-        //pipeline.addLast("heartBeatHandler", WireHeartbeatReceiver(clientChannelInfo.read_idle_time, clientChannelInfo.heartbeat_miss_limit))
+       // pipeline.addLast("heartBeatHandler", JsonHeartbeatReceiver(clientChannelInfo.read_idle_time, clientChannelInfo.heartbeat_miss_limit))
 
-      //  pipeline.addLast("messageHandler", KonemWireMessageHandler(clientChannelInfo.channelId, transceiver))
+
+     //   pipeline.addLast("messageHandler", KonemJsonMessageHandler(clientChannelInfo.channelId))
 
         pipeline.addLast("exceptionHandler", ExceptionHandler())
     }

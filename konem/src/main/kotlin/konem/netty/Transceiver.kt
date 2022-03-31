@@ -1,4 +1,4 @@
-package konem.netty.tcp
+package konem.netty
 
 import java.net.SocketAddress
 import java.util.ArrayList
@@ -54,7 +54,7 @@ abstract class Transceiver<I>(protected val channelPort: Int) {
     }
 }
 
-abstract class ServerTransceiver<I>( channelPort: Int):Transceiver<I>(channelPort) {
+abstract class ServerTransceiver<I>( channelPort: Int): Transceiver<I>(channelPort) {
 
     fun registerHandlerListener(listener: HandlerListener<I>) {
         if (!handlerListeners.contains(listener)) {

@@ -4,14 +4,13 @@ import io.kotest.assertions.until.fixed
 import io.kotest.assertions.until.until
 import konem.data.json.Data
 import konem.data.json.KonemMessage
-import konem.netty.tcp.ConnectionListener
-import konem.netty.tcp.ConnectionStatusListener
-import konem.netty.tcp.DisconnectionListener
-import konem.netty.tcp.StatusListener
-import konem.netty.tcp.client.Client
-import konem.netty.tcp.server.Server
+import konem.netty.ConnectionListener
+import konem.netty.ConnectionStatusListener
+import konem.netty.DisconnectionListener
+import konem.netty.StatusListener
+import konem.netty.client.Client
+import konem.netty.server.Server
 import konem.protocol.konem.KonemJsonMessageReceiver
-import konem.protocol.konem.json.JsonClient
 
 import konem.protocol.konem.json.JsonClientFactory
 import konem.protocol.konem.json.JsonServer
@@ -54,7 +53,7 @@ class JsonTestServerReceiver(receive: (SocketAddress, KonemMessage) -> Unit) : K
     var messageList = mutableListOf<KonemMessage>()
 }
 
-class JsonTestClientReceiver(val client: Client<KonemMessage>,receive: (SocketAddress, KonemMessage) -> Unit) : KonemJsonMessageReceiver(receive) {
+class JsonTestClientReceiver(val client: Client<KonemMessage>, receive: (SocketAddress, KonemMessage) -> Unit) : KonemJsonMessageReceiver(receive) {
     var messageCount = 0
     var messageList = mutableListOf<KonemMessage>()
     var clientId = ""
@@ -209,7 +208,7 @@ suspend fun waitForClientStatusChange(totalChanges:Int, list : MutableList<out S
 }
 
 @ExperimentalTime
-suspend fun waitForServerStatusChange(totalChanges:Int ,list : MutableList<out StatusListener>,debug: Boolean = false,checkConnect:Boolean = false) : Boolean{
+suspend fun waitForServerStatusChange(totalChanges:Int, list : MutableList<out StatusListener>, debug: Boolean = false, checkConnect:Boolean = false) : Boolean{
     return until(Duration.seconds(waitForMsgTime), Duration.milliseconds(250).fixed()) {
         var type = ""
         val received: Int = list.sumOf { statusChange ->

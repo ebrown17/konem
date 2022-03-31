@@ -2,9 +2,9 @@ package konem.protocol.konem.wire
 
 import konem.data.protobuf.KonemMessage
 import konem.logger
-import konem.netty.tcp.Receiver
-import konem.netty.tcp.client.ClientBootstrapConfig
-import konem.netty.tcp.client.ClientInternal
+import konem.netty.Receiver
+import konem.netty.client.ClientBootstrapConfig
+import konem.netty.client.ClientInternal
 import kotlinx.coroutines.launch
 import java.net.SocketAddress
 

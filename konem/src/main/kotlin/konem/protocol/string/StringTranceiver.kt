@@ -2,12 +2,12 @@ package konem.protocol.string
 
 
 import konem.logger
-import konem.netty.tcp.ServerTransceiver
-import konem.netty.tcp.Transceiver
+import konem.netty.ServerTransceiver
+import konem.netty.Transceiver
 import java.net.SocketAddress
 
 
-class StringTransceiver(channelPort: Int):Transceiver<String>(channelPort) {
+class StringTransceiver(channelPort: Int): Transceiver<String>(channelPort) {
     private val logger = logger(this)
 
     override fun transmit(addr: SocketAddress, message: String, vararg extra: String) {

@@ -1,10 +1,8 @@
 package konem.protocol.string
 
-import io.netty.channel.ChannelHandlerContext
-import konem.netty.tcp.HeartbeatProducerHandler
-import konem.netty.tcp.HeartbeatReceiverHandler
 
 
+/*
 class StringHeartbeatProducer(transceiver: StringServerTransceiver) :
     HeartbeatProducerHandler<String>(transceiver) {
     val heartbeat = "::heartbeat::"
@@ -33,3 +31,4 @@ class StringHeartbeatReceiver(expectedInterval: Int, missLimit: Int) :
         }
     }
 }
+*/

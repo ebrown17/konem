@@ -1,10 +1,11 @@
 package konem.protocol.konem
 
-import konem.netty.tcp.Receiver
+import konem.data.json.KonemMessage
+import konem.netty.Receiver
 import java.net.SocketAddress
 
 open class KonemJsonMessageReceiver (private val received: (SocketAddress, konem.data.json.KonemMessage) -> Unit):
-    Receiver<konem.data.json.KonemMessage>() {
+    Receiver<KonemMessage>() {
 
     override fun receive(addr: SocketAddress, message: konem.data.json.KonemMessage) {
         synchronized(this) {

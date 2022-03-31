@@ -1,9 +1,9 @@
-package konem.netty.tcp.client
+package konem.netty.client
 
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.Channel
 import konem.logger
-import konem.netty.tcp.*
+import konem.netty.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -12,7 +12,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 
-interface Client<I>:  ChannelReceiver<I> {
+interface Client<I>: ChannelReceiver<I> {
     fun connect()
     fun disconnect()
     fun shutdown()
@@ -29,7 +29,7 @@ interface Client<I>:  ChannelReceiver<I> {
 }
 
 abstract class ClientInternal<I>(private val serverAddress: SocketAddress, private val config: ClientBootstrapConfig<I>) :
-   Client<I>{
+    Client<I> {
 
     private val logger = logger(javaClass)
     private val transceiver: Transceiver<I> = config.transceiver

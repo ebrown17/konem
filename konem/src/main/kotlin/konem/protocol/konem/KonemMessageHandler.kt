@@ -1,16 +1,17 @@
 package konem.protocol.konem
 
 import io.netty.channel.ChannelHandlerContext
-import konem.netty.tcp.Handler
-import konem.netty.tcp.Transceiver
+import konem.data.json.KonemMessage
+import konem.netty.Handler
+import konem.netty.Transceiver
 
 /*
     Passes messages read from channel to transceiver
  */
 class KonemJsonMessageHandler(
     handlerId: Long,
-    val transceiver: Transceiver<konem.data.json.KonemMessage>
-) : Handler<konem.data.json.KonemMessage>(handlerId, transceiver) {
+    val transceiver: Transceiver<KonemMessage>
+) : Handler<KonemMessage>(handlerId, transceiver) {
 
     override fun channelRead0(ctx: ChannelHandlerContext, message: konem.data.json.KonemMessage) {
         logger.info("from: {} received: {}", remoteAddress, message)
