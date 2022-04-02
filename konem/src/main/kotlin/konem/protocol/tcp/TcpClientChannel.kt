@@ -7,7 +7,6 @@ import konem.netty.ExceptionHandler
 import konem.netty.HeartbeatReceiver
 import konem.netty.SslContextManager
 import konem.netty.client.ClientChannelInfo
-import konem.protocol.konem.json.KonemJsonMessageHandler
 
 
 class TcpClientChannel<T>(
@@ -43,13 +42,15 @@ class TcpClientChannel<T>(
         }
 
 
-        clientChannelInfo.protocol_pipeline.getProtocolMessageHandler().forEach { entry ->
-            val handler = entry.value
-            handler.handlerId = clientChannelInfo.channel_id
-            handler.transceiver=transceiver
+        val handlerPair = clientChannelInfo.protocol_pipeline.getProtocolMessageHandler()
+        val handlerName = handlerPair.first
+        val handler = handlerPair.second
 
-            pipeline.addLast(entry.key,handler)
-        }
+        handler.handlerId = clientChannelInfo.channel_id
+        handler.transceiver = transceiver
+
+        pipeline.addLast(handlerName, handler)
+
 
         pipeline.addLast("exceptionHandler", ExceptionHandler())
     }

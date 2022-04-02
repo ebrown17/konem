@@ -50,15 +50,15 @@ fun main(){
         )
 
     val client = clientFactory.createClient("localhost",6160)
-
+    val client2 = clientFactory.createClient("localhost",6160)
     client.connect()
-
+    client2.connect()
     sleep(15_000L)
 
     client.disconnect()
-
+    client2.disconnect()
     sleep(1000)
     client.connect()
-
+    client2.connect()
 
 }

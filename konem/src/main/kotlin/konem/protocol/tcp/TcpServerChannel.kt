@@ -33,13 +33,14 @@ class TcpServerChannel<T>(
             pipeline.addLast("heartBeatHandler", HeartbeatProducer(transceiver, heartbeatProtocol.generateHeartBeat))
         }
 
-        serverChannelInfo.protocol_pipeline.getProtocolMessageHandler().forEach { entry ->
-            val handler = entry.value
-            handler.handlerId = serverChannelInfo.channel_id
-            handler.transceiver=transceiver
+        val handlerPair = serverChannelInfo.protocol_pipeline.getProtocolMessageHandler()
+        val handlerName = handlerPair.first
+        val handler = handlerPair.second
 
-            pipeline.addLast(entry.key,handler)
-        }
+        handler.handlerId = serverChannelInfo.channel_id
+        handler.transceiver = transceiver
+
+        pipeline.addLast(handlerName, handler)
 
         pipeline.addLast("exceptionHandler", ExceptionHandler())
 
