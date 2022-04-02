@@ -1,11 +1,8 @@
-package konem.protocol.konem.wire
+package konem.protocol.tcp
 
 import io.netty.bootstrap.ServerBootstrap
-import konem.data.protobuf.KonemMessage
 import konem.logger
-import konem.netty.Handler
-import konem.netty.Receiver
-import konem.netty.server.Server
+import konem.netty.*
 import konem.netty.server.ServerChannelInfo
 import konem.netty.server.ServerConfig
 import konem.netty.server.ServerInternal
@@ -14,32 +11,34 @@ import java.net.SocketAddress
 import java.util.concurrent.ConcurrentHashMap
 
 
-class WireServer private constructor(serverConfig: ServerConfig): ServerInternal<KonemMessage>(serverConfig) {
+class TcpServer<T> internal constructor(serverConfig: ServerConfig, heartbeatProtocol: ServerHeartbeatProtocol<T>,
+                                       protocolPipeline: ProtocolPipeline<T>
+): ServerInternal<T>(serverConfig,heartbeatProtocol,protocolPipeline) {
 
-    companion object {
-        fun create(config: (ServerConfig) -> Unit): Server<KonemMessage> {
+/*    companion object {
+        fun create(config: (ServerConfig) -> Unit): Server<T> {
             val userConfig = ServerConfig()
             config(userConfig)
-            val server = WireServer(userConfig)
+            val server = JsonServer(userConfig)
             for(port in userConfig.portSet){
                 server.addChannel(port)
             }
             return server
         }
-    }
+    }*/
 
-    private val receiveListeners: ConcurrentHashMap<Int, ArrayList<Receiver<KonemMessage>>> =
+    private val receiveListeners: ConcurrentHashMap<Int, ArrayList<MessageReceiver<T>>> =
         ConcurrentHashMap()
 
     private val logger = logger(this)
 
-    override fun registerChannelReceiveListener(receiver: Receiver<KonemMessage>) {
+    override fun registerChannelReceiveListener(receiver: MessageReceiver<T>) {
         for (list in receiveListeners.values) {
             list.add(receiver)
         }
     }
 
-    override fun registerChannelReceiveListener(port: Int, receiver: Receiver<KonemMessage>) {
+    override fun registerChannelReceiveListener(port: Int, receiver: MessageReceiver<T>) {
         if (!isPortConfigured(port)) {
             throw IllegalArgumentException("port type can't be null or port is not configured: port $port")
         }
@@ -52,19 +51,19 @@ class WireServer private constructor(serverConfig: ServerConfig): ServerInternal
         receiveListeners[port] = readerListenerList
     }
 
-    override fun broadcastOnChannel(port: Int, message: KonemMessage, vararg args: String) {
+    override fun broadcastOnChannel(port: Int, message: T, vararg args: String) {
         val transceiver = getTransceiverMap()[port]
         transceiver?.broadcast(message)
     }
 
-    override fun broadcastOnAllChannels(message: KonemMessage, vararg args: String) {
+    override fun broadcastOnAllChannels(message: T, vararg args: String) {
         val transceiverMap = getTransceiverMap()
         for (transceiver in transceiverMap.values) {
             transceiver.broadcast(message)
         }
     }
 
-    override fun sendMessage(addr: SocketAddress, message: KonemMessage) {
+    override fun sendMessage(addr: SocketAddress, message: T) {
         val channelPort = getRemoteHostToChannelMap()[addr]
         if (channelPort != null) {
             val transceiver = getTransceiverMap()[channelPort]
@@ -78,7 +77,7 @@ class WireServer private constructor(serverConfig: ServerConfig): ServerInternal
             return false
         }
 
-        val transceiver = WireServerTransceiver(port)
+        val transceiver = TcpServerTransceiver<T>(port)
 
         return if (addChannel(port, transceiver)) {
             receiveListeners[port] = ArrayList()
@@ -89,35 +88,37 @@ class WireServer private constructor(serverConfig: ServerConfig): ServerInternal
     }
 
     override fun createServerBootstrap(port: Int): ServerBootstrap {
-        val transceiver = getTransceiverMap()[port] as WireServerTransceiver
-        val channel = WireServerChannel(transceiver,
-            ServerChannelInfo<KonemMessage>(
+        val transceiver = getTransceiverMap()[port]!!
+        val channel = TcpServerChannel(transceiver,
+            ServerChannelInfo(
                 serverConfig.USE_SSL,
                 serverConfig.CHANNEL_IDS.incrementAndGet(),
-                serverConfig.WRITE_IDLE_TIME)
+                heartbeatProtocol,
+                protocolPipeline
+            )
         )
         return createServerBootstrap(channel)
     }
 
-    override fun connectionActive(handler: Handler<KonemMessage>) {
+    override fun connectionActive(handler: Handler<T>) {
         for (listener in connectionListeners) {
             listener.onConnection(handler.remoteAddress)
         }
     }
 
-    override fun connectionInActive(handler: Handler<KonemMessage>) {
+    override fun connectionInActive(handler: Handler<T>) {
         for (listener in disconnectionListeners) {
             listener.onDisconnection(handler.remoteAddress)
         }
     }
 
-    override fun handleReceivedMessage(addr: SocketAddress, port: Int, message: KonemMessage) {
+    override fun handleReceivedMessage(addr: SocketAddress, port: Int, message: T) {
         serverScope.launch {
             receiveMessage(addr, port, message)
         }
     }
 
-    override suspend fun receiveMessage(addr: SocketAddress, port: Int, message: KonemMessage) {
+    override suspend fun receiveMessage(addr: SocketAddress, port: Int, message: T) {
         logger.trace("{}", message)
         val receiveListenerList = receiveListeners[port]
         if (receiveListenerList != null) {

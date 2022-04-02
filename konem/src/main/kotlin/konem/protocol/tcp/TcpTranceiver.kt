@@ -1,7 +1,6 @@
 package konem.protocol.tcp
 
 
-import konem.data.json.KonemMessage
 import konem.logger
 import konem.netty.ServerTransceiver
 import konem.netty.Transceiver

@@ -1,24 +1,25 @@
 package konem.netty
 
+import ChannelReceiver
 import java.net.SocketAddress
 import java.util.ArrayList
 import java.util.concurrent.ConcurrentHashMap
 import konem.logger
 
-abstract class Transceiver<I>(protected val channelPort: Int) {
+abstract class Transceiver<T>(protected val channelPort: Int) {
 
     private val logger = logger(javaClass)
 
-    protected val activeHandlers: ConcurrentHashMap<SocketAddress, Handler<I>> =
+    protected val activeHandlers: ConcurrentHashMap<SocketAddress, Handler<T>> =
         ConcurrentHashMap()
     protected val activeLock = Any()
 
-    protected val channelReceiver: ConcurrentHashMap<SocketAddress, ChannelReceiver<I>> =
+    protected val channelReceiver: ConcurrentHashMap<SocketAddress, ChannelReceiver<T>> =
         ConcurrentHashMap()
 
-    protected val handlerListeners: MutableList<HandlerListener<I>> = ArrayList()
+    protected val handlerListeners: MutableList<HandlerListener<T>> = ArrayList()
 
-    fun handlerActive(addr: SocketAddress, handler: Handler<I>) {
+    fun handlerActive(addr: SocketAddress, handler: Handler<T>) {
         synchronized(activeLock) {
             logger.trace("handlerActive remote: {}", addr)
             val activeHandler = activeHandlers[addr]
@@ -39,13 +40,13 @@ abstract class Transceiver<I>(protected val channelPort: Int) {
         }
     }
 
-    fun registerChannelReceiver(addr: SocketAddress, reader: ChannelReceiver<I>) {
+    fun registerChannelReceiver(addr: SocketAddress, reader: ChannelReceiver<T>) {
         channelReceiver.putIfAbsent(addr, reader)
     }
 
-    abstract fun transmit(addr: SocketAddress, message: I, vararg extra: String)
+    abstract fun transmit(addr: SocketAddress, message: T, vararg extra: String)
 
-    abstract fun receive(addr: SocketAddress, message: I, vararg extra: String)
+    abstract fun receive(addr: SocketAddress, message: T, vararg extra: String)
 
     override fun toString(): String {
         return (
@@ -54,15 +55,15 @@ abstract class Transceiver<I>(protected val channelPort: Int) {
     }
 }
 
-abstract class ServerTransceiver<I>( channelPort: Int): Transceiver<I>(channelPort) {
+abstract class ServerTransceiver<T>( channelPort: Int): Transceiver<T>(channelPort) {
 
-    fun registerHandlerListener(listener: HandlerListener<I>) {
+    fun registerHandlerListener(listener: HandlerListener<T>) {
         if (!handlerListeners.contains(listener)) {
             handlerListeners.add(listener)
         }
     }
 
-    abstract fun broadcast(message: I, vararg extra: String)
+    abstract fun broadcast(message: T, vararg extra: String)
 
     override fun toString(): String {
         return (

@@ -1,47 +1,64 @@
 package konem.example
 
-import konem.data.protobuf.Data
-import konem.data.protobuf.KonemMessage
-import konem.data.protobuf.MessageType
-import konem.netty.ConnectionListener
-import konem.protocol.konem.KonemWireMessageReceiver
-import konem.protocol.konem.wire.WireClientFactory
-import konem.protocol.konem.wire.WireServer
+
+import konem.Konem
+import konem.data.json.Data
+import konem.data.json.Heartbeat
+import konem.data.json.KonemMessage
+import konem.netty.ClientHeartbeatProtocol
+import konem.netty.ConnectionStatusListener
+import konem.netty.ServerHeartbeatProtocol
+import konem.netty.client.ClientFactoryConfig
+import konem.protocol.konem.json.KonemJsonPipeline
+import java.lang.Thread.sleep
 
 
-fun main() {
+fun main(){
 
-  val server = WireServer.create {
-      it.addChannel(6060)
-  }
-  server.startServer()
-
-  server.registerChannelReceiveListener(KonemWireMessageReceiver { from, message -> println("Got $message from $from") })
-
-  val clientFactory = WireClientFactory.createDefault()
-
-  val client = clientFactory.createClient("localhost", 6060)
-
-  client.connect()
-  client.registerConnectionListener(ConnectionListener {
-
-    client.sendMessage(
-      KonemMessage(
-        messageType = MessageType.DATA,
-        data = Data("First Message")
-      )
+    val server = Konem.createTcpServer<KonemMessage>(
+        config = { serverConfig ->
+            serverConfig.addChannel(6160)
+        },
+        ServerHeartbeatProtocol { KonemMessage(Heartbeat()) },
+        KonemJsonPipeline.getKonemJsonPipeline()
     )
 
-    Thread.sleep(1000)
+    server.startServer()
+
+    server.registerConnectionStatusListener(
+        ConnectionStatusListener(
+            connected = { addr ->
+                println("Connection from $addr")
+                sleep(1000)
+                server.sendMessage(addr, KonemMessage(Data("You just connected!")))
+            },
+            disconnected = {
+                println("Disconnection from $it")
+            })
+    )
+
+    sleep(1000)
+
+    val clientFactory = Konem.createClientFactoryOfDefaults<KonemMessage> (
+        heartbeatProtocol = ClientHeartbeatProtocol(isHeartbeat = { message ->
+            when(message) {
+                is Heartbeat -> true
+                else -> false
+            }
+         }),
+        protocolPipeline = KonemJsonPipeline.getKonemJsonPipeline()
+        )
+
+    val client = clientFactory.createClient("localhost",6160)
+
+    client.connect()
+
+    sleep(15_000L)
 
     client.disconnect()
 
-    Thread.sleep(1000)
-
-
-    server.shutdownServer()
-
-  })
+    sleep(1000)
+    client.connect()
 
 
 }

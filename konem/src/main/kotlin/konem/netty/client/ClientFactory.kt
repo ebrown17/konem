@@ -8,6 +8,8 @@ import io.netty.channel.EventLoopGroup
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.util.concurrent.DefaultThreadFactory
+import konem.netty.ClientHeartbeatProtocol
+import konem.netty.ProtocolPipeline
 import konem.netty.Transceiver
 
 import kotlinx.coroutines.CoroutineName
@@ -22,10 +24,7 @@ class ClientFactoryConfig {
     var MAX_RETRY_TIME = 60L
     var MAX_RETRY_UNTIL_INCR = 30
     var USE_SSL = true
-    val READ_IDLE_TIME = 12
-    val HEARTBEAT_MISS_LIMIT = 2
     var channelIds = AtomicLong(0L)
-
 }
 
 data class ClientBootstrapConfig<I> constructor(
@@ -33,14 +32,16 @@ data class ClientBootstrapConfig<I> constructor(
     val bootstrap: Bootstrap,
     val scope: CoroutineScope,
     val retryInfo: RetryInfo,
-    val clientChannelInfo: ClientChannelInfo,
+    val clientChannelInfo: ClientChannelInfo<I>,
 )
 
-data class ClientChannelInfo(val useSSL:Boolean, val channelId : Long, val read_idle_time : Int, val heartbeat_miss_limit: Int)
+data class ClientChannelInfo<T>(val use_ssl: Boolean, val channel_id : Long,  val heartbeatProtocol: ClientHeartbeatProtocol<T>,  val protocol_pipeline: ProtocolPipeline<T>)
+
 data class RetryInfo(val retry_period : Long, val max_retry_period: Long, var retries_until_period_increase : Int)
 
 
-abstract class ClientFactory<I> constructor(private val config: ClientFactoryConfig) {
+abstract class ClientFactory<I> constructor(private val config: ClientFactoryConfig, private val heartbeatProtocol: ClientHeartbeatProtocol<I>,
+                                            private val protocolPipeline: ProtocolPipeline<I>) {
 
     private val workerGroup: EventLoopGroup
     private val channelClass: Class<out Channel>
@@ -80,8 +81,8 @@ abstract class ClientFactory<I> constructor(private val config: ClientFactoryCon
             ClientChannelInfo(
                 config.USE_SSL,
                 config.channelIds.incrementAndGet(),
-                config.READ_IDLE_TIME,
-                config.HEARTBEAT_MISS_LIMIT
+                heartbeatProtocol,
+                protocolPipeline
             )
         )
     }

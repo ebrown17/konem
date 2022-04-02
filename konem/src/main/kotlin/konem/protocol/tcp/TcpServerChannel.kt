@@ -5,10 +5,11 @@ import io.netty.channel.socket.SocketChannel
 import io.netty.handler.timeout.IdleStateHandler
 import konem.netty.*
 import konem.netty.server.ServerChannelInfo
+import konem.protocol.konem.json.KonemJsonMessageHandler
 
-class TcpServerChannel<I>(
-    private val transceiver: ServerTransceiver<I>,
-    private val serverChannelInfo: ServerChannelInfo<I>
+class TcpServerChannel<T>(
+    private val transceiver: ServerTransceiver<T>,
+    private val serverChannelInfo: ServerChannelInfo<T>
 ) : ChannelInitializer<SocketChannel>() {
 
     override fun initChannel(channel: SocketChannel) {
@@ -22,20 +23,24 @@ class TcpServerChannel<I>(
             }
         }
 
-        serverChannelInfo.protocolPipeline?.getProtocolPipelineCodecs()?.forEach { entry ->
+        serverChannelInfo.protocol_pipeline.getProtocolPipelineCodecs().forEach { entry ->
             pipeline.addLast(entry.key,entry.value)
         }
 
-  /*      pipeline.addLast("jsonDecoder", JsonObjectDecoder())
-        pipeline.addLast("stringDecoder", StringDecoder(CharsetUtil.UTF_8))
-        pipeline.addLast("stringEncoder", StringEncoder(CharsetUtil.UTF_8))
-        pipeline.addLast("konemCodec", KonemJsonCodec())*/
+        if (serverChannelInfo.heartbeatProtocol.enabled) {
+            val heartbeatProtocol = serverChannelInfo.heartbeatProtocol
+            pipeline.addLast("idleStateHandler", IdleStateHandler(0, heartbeatProtocol.write_idle_time, 0))
+            pipeline.addLast("heartBeatHandler", HeartbeatProducer(transceiver, heartbeatProtocol.generateHeartBeat))
+        }
 
-        //
-        pipeline.addLast("idleStateHandler", IdleStateHandler(0, serverChannelInfo.write_idle_time, 0))
-        pipeline.addLast("heartBeatHandler", HeartbeatProducer(transceiver,serverChannelInfo.protocolPipeline!!.getHeartbeat()))
+        serverChannelInfo.protocol_pipeline.getProtocolMessageHandler().forEach { entry ->
+            val handler = entry.value
+            handler.handlerId = serverChannelInfo.channel_id
+            handler.transceiver=transceiver
 
-        pipeline.addLast("messageHandler", MessageHandler(serverChannelInfo.channel_id, transceiver))
+            pipeline.addLast(entry.key,handler)
+        }
+
         pipeline.addLast("exceptionHandler", ExceptionHandler())
 
     }

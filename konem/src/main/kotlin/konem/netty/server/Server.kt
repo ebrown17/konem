@@ -1,5 +1,6 @@
 package konem.netty.server
 
+import ServerChannelReceiver
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.buffer.PooledByteBufAllocator
 import io.netty.channel.*
@@ -29,7 +30,7 @@ open class BaseConfig {
 }
 
 class ServerConfig: BaseConfig(){
-    val portSet = mutableSetOf<Int>()
+    internal val portSet = mutableSetOf<Int>()
 
     /**
      *
@@ -54,8 +55,7 @@ class WebsocketServerConfig: BaseConfig(){
 
 }
 
-//TODO remove null
-data class ServerChannelInfo<I>(val use_ssl:Boolean, val channel_id : Long, val write_idle_time : Int, val protocolPipeline: ProtocolPipeline<I>? = null)
+data class ServerChannelInfo<T>(val use_ssl:Boolean, val channel_id : Long, val heartbeatProtocol: ServerHeartbeatProtocol<T>,  val protocol_pipeline: ProtocolPipeline<T>)
 
 
 interface Server<I> : ServerChannelReceiver<I> {
@@ -95,7 +95,8 @@ interface Server<I> : ServerChannelReceiver<I> {
 
 }
 
-abstract class ServerInternal<I>(val serverConfig : ServerConfig) : HandlerListener<I>, Server<I> {
+abstract class ServerInternal<I>(val serverConfig : ServerConfig,val heartbeatProtocol: ServerHeartbeatProtocol<I>,
+                                 val protocolPipeline: ProtocolPipeline<I>) : HandlerListener<I>, Server<I> {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
