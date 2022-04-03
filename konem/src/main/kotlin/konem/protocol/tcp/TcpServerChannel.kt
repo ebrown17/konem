@@ -11,36 +11,38 @@ class TcpServerChannel<T>(
     private val serverChannelInfo: ServerChannelInfo<T>
 ) : ChannelInitializer<SocketChannel>() {
 
-    override fun initChannel(channel: SocketChannel) {
 
+
+    override fun initChannel(channel: SocketChannel) {
         val pipeline = channel.pipeline()
+
+        val protocolPipeline = serverChannelInfo.protocol_pipeline.getProtocolPipelineCodecs()
+        val heartbeatProtocol = serverChannelInfo.heartbeatProtocol
+        val handlerPair = serverChannelInfo.protocol_pipeline.getProtocolMessageHandler()
+        val handlerName = handlerPair.first
+        val messageHandler = handlerPair.second
+
+        messageHandler.handlerId = serverChannelInfo.channel_id
+        messageHandler.transceiver = transceiver
+
         if (serverChannelInfo.use_ssl) {
             SslContextManager.getServerContext()?.let { context ->
                 pipeline.addLast("serverSslHandler", context.newHandler(channel.alloc()))
-            }?: run {
+            } ?: run {
                 throw Exception("SslContextManager.getServerContext() failed to initialize... closing channel")
             }
         }
 
-        serverChannelInfo.protocol_pipeline.getProtocolPipelineCodecs().forEach { entry ->
-            pipeline.addLast(entry.key,entry.value)
+        protocolPipeline.forEach { entry ->
+            pipeline.addLast(entry.key, entry.value)
         }
 
-        if (serverChannelInfo.heartbeatProtocol.enabled) {
-            val heartbeatProtocol = serverChannelInfo.heartbeatProtocol
+        if (heartbeatProtocol.enabled) {
             pipeline.addLast("idleStateHandler", IdleStateHandler(0, heartbeatProtocol.write_idle_time, 0))
             pipeline.addLast("heartBeatHandler", HeartbeatProducer(transceiver, heartbeatProtocol.generateHeartBeat))
         }
 
-        val handlerPair = serverChannelInfo.protocol_pipeline.getProtocolMessageHandler()
-        val handlerName = handlerPair.first
-        val handler = handlerPair.second
-
-        handler.handlerId = serverChannelInfo.channel_id
-        handler.transceiver = transceiver
-
-        pipeline.addLast(handlerName, handler)
-
+        pipeline.addLast(handlerName, messageHandler)
         pipeline.addLast("exceptionHandler", ExceptionHandler())
 
     }

@@ -1,8 +1,6 @@
 package konem
 
-import konem.netty.ClientHeartbeatProtocol
-import konem.netty.ProtocolPipeline
-import konem.netty.ServerHeartbeatProtocol
+import konem.netty.*
 import konem.netty.client.ClientFactoryConfig
 import konem.netty.server.Server
 import konem.netty.server.ServerConfig
@@ -32,7 +30,7 @@ class Konem private constructor() {
         ): Server<T> {
             val userConfig = ServerConfig()
             config(userConfig)
-            val heartbeatProtocol =  ServerHeartbeatProtocol(false, generateHeartBeat =  { Any() as T } )
+            val heartbeatProtocol =  DisabledServerHeartbeatProtocol<T>()
             val server = TcpServer(userConfig, heartbeatProtocol, protocolPipeline)
             for (port in userConfig.portSet) {
                 server.addChannel(port)
@@ -40,12 +38,17 @@ class Konem private constructor() {
             return server
         }
 
-
         fun <T> createClientFactoryOfDefaults(
-            heartbeatProtocol: ClientHeartbeatProtocol<T>,
+            heartbeatProtocol: ClientHeartbeatProtocol,
             protocolPipeline: ProtocolPipeline<T>
             ): TcpClientFactory<T> {
             return TcpClientFactory(ClientFactoryConfig(),heartbeatProtocol,protocolPipeline)
+        }
+
+        fun <T> createClientFactoryOfDefaultsNoHeartbeat(
+            protocolPipeline: ProtocolPipeline<T>
+        ): TcpClientFactory<T> {
+            return TcpClientFactory(ClientFactoryConfig(),DisabledClientHeartbeatProtocol(),protocolPipeline)
         }
 
     }

@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit
 class ClientConnectionListener<I> internal constructor(
     private val client: ClientInternal<I>,
     private val retryInfo: RetryInfo,
-    private val connectAction: ( future: ChannelFuture) -> Unit
+    private val connectAction: (future: ChannelFuture) -> Unit
 ) : ChannelFutureListener {
 
     private val logger = logger(javaClass)
@@ -21,9 +21,9 @@ class ClientConnectionListener<I> internal constructor(
     @Throws(Exception::class)
     override fun operationComplete(future: ChannelFuture) {
         if (future.isSuccess) {
-            isAttemptingConnection = false
             future.channel().eventLoop().schedule(
                 {
+                    isAttemptingConnection = false
                     connectAction(future)
                 },
                 0, TimeUnit.MILLISECONDS
@@ -48,8 +48,8 @@ class ClientConnectionListener<I> internal constructor(
         val currentTime = System.currentTimeMillis()
         val timeSinceLastRetry = currentTime - lastRetryTime
 
-        if(connectionAttempts > 0){
-            connectionAttemptStart += (timeSinceLastRetry / 1_000L )
+        if (connectionAttempts > 0) {
+            connectionAttemptStart += (timeSinceLastRetry / 1_000L)
         }
 
         connectionAttempts++

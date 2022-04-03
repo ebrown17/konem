@@ -10,7 +10,7 @@ import java.net.SocketAddress
 class TcpClient<T>(private val serverAddress: SocketAddress, config: ClientBootstrapConfig<T>):
     ClientInternal<T>(serverAddress,config) {
 
-    private val logger = logger(javaClass)
+    private val logger = logger(this)
     private val transceiver = config.transceiver
     private val receiveListeners: ArrayList<MessageReceiver<T>> = ArrayList()
 

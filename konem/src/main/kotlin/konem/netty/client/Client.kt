@@ -80,7 +80,6 @@ abstract class ClientInternal<T>(private val serverAddress: SocketAddress, priva
         }
 
         val channelFuture = bootstrap.connect(serverAddress)
-        //retryListener!!.isAttemptingConnection
         channelFuture.addListener(retryListener)
     }
 
@@ -111,7 +110,6 @@ abstract class ClientInternal<T>(private val serverAddress: SocketAddress, priva
     }
 
     override fun shutdown() {
-
         channel?.closeFuture()?.removeListener(closedListener)
         channel?.close()
     }

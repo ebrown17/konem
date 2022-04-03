@@ -5,13 +5,13 @@ import io.netty.channel.SimpleChannelInboundHandler
 import konem.logger
 import java.net.SocketAddress
 
-interface HandlerListener<I> {
-    fun registerActiveHandler(handler: Handler<I>, channelPort: Int, remoteConnection: SocketAddress)
-    fun registerInActiveHandler(handler: Handler<I>, channelPort: Int, remoteConnection: SocketAddress)
+interface HandlerListener<T> {
+    fun registerActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress)
+    fun registerInActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress)
 }
 
-abstract class Handler<I>() :
-    SimpleChannelInboundHandler<I>() {
+abstract class Handler<T> :
+    SimpleChannelInboundHandler<T>() {
 
     internal val logger = logger(javaClass)
 
@@ -19,9 +19,9 @@ abstract class Handler<I>() :
     internal lateinit var remoteAddress: SocketAddress
 
     internal var handlerId: Long = -1
-    internal lateinit var transceiver: Transceiver<I>
+    internal lateinit var transceiver: Transceiver<T>
 
-   open fun sendMessage(message: I) {
+    open fun sendMessage(message: T) {
         if (isActive()) {
             logger.trace("[write2Wire] dest: {} msg: {} ", remoteAddress, message.toString())
             context.writeAndFlush(message)

@@ -11,21 +11,10 @@ import java.net.SocketAddress
 import java.util.concurrent.ConcurrentHashMap
 
 
-class TcpServer<T> internal constructor(serverConfig: ServerConfig, heartbeatProtocol: ServerHeartbeatProtocol<T>,
-                                       protocolPipeline: ProtocolPipeline<T>
-): ServerInternal<T>(serverConfig,heartbeatProtocol,protocolPipeline) {
-
-/*    companion object {
-        fun create(config: (ServerConfig) -> Unit): Server<T> {
-            val userConfig = ServerConfig()
-            config(userConfig)
-            val server = JsonServer(userConfig)
-            for(port in userConfig.portSet){
-                server.addChannel(port)
-            }
-            return server
-        }
-    }*/
+class TcpServer<T> internal constructor(
+    serverConfig: ServerConfig, heartbeatProtocol: ServerHeartbeatProtocol<T>,
+    protocolPipeline: ProtocolPipeline<T>
+) : ServerInternal<T>(serverConfig, heartbeatProtocol, protocolPipeline) {
 
     private val receiveListeners: ConcurrentHashMap<Int, ArrayList<MessageReceiver<T>>> =
         ConcurrentHashMap()
@@ -89,7 +78,8 @@ class TcpServer<T> internal constructor(serverConfig: ServerConfig, heartbeatPro
 
     override fun createServerBootstrap(port: Int): ServerBootstrap {
         val transceiver = getTransceiverMap()[port]!!
-        val channel = TcpServerChannel(transceiver,
+        val channel = TcpServerChannel(
+            transceiver,
             ServerChannelInfo(
                 serverConfig.USE_SSL,
                 serverConfig.CHANNEL_IDS.incrementAndGet(),
@@ -127,6 +117,5 @@ class TcpServer<T> internal constructor(serverConfig: ServerConfig, heartbeatPro
             }
         }
     }
-
 
 }

@@ -40,7 +40,7 @@ fun main(){
 
     val clientFactory = Konem.createClientFactoryOfDefaults(
         heartbeatProtocol = ClientHeartbeatProtocol(isHeartbeat = { message ->
-            message is Heartbeat
+            message is KonemMessage && (message.message is Heartbeat)
          }),
         protocolPipeline = KonemProtocolPipeline.getKonemJsonPipeline()
         )
@@ -53,6 +53,5 @@ fun main(){
 
     client.disconnect()
     client2.disconnect()
-
 
 }

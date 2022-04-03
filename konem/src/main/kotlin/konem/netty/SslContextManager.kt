@@ -32,9 +32,9 @@ object SslContextManager {
 
     fun getServerContext(): SslContext? {
         synchronized(this) {
-            return if(ensureInitialized()){
+            return if (ensureInitialized()) {
                 serverContext
-            } else{
+            } else {
                 null
             }
         }
@@ -42,22 +42,22 @@ object SslContextManager {
 
     fun getClientContext(): SslContext? {
         synchronized(this) {
-            return if(ensureInitialized()){
+            return if (ensureInitialized()) {
                 clientContext
-            } else{
+            } else {
                 null
             }
         }
     }
 
-    private fun ensureInitialized():Boolean {
+    private fun ensureInitialized(): Boolean {
         if (serverContext == null || clientContext == null) {
             keyStore = KeyStore.getInstance(keyStoreType)
             trustFactory = TrustManagerFactory.getInstance(algorithm)
             logger.info("keyStoreLocation is set to {}", keyStoreLocation)
             if (!keyStoreLocation.isNullOrEmpty()) {
                 val certificate = loadCertificate()
-                return if(certificate != null){
+                return if (certificate != null) {
                     logger.info("loading {}", keyStoreLocation)
                     keyStore.load(certificate, keyStorePassword.toCharArray())
                     val kmf = KeyManagerFactory.getInstance(algorithm)
@@ -72,8 +72,7 @@ object SslContextManager {
                     false
                 }
 
-            }
-            else {
+            } else {
                 logger.info("Loading self signed cert")
                 val ssc = SelfSignedCertificate()
                 serverContext = SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey()).build()

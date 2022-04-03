@@ -1,8 +1,6 @@
 package konem.netty
 
 import io.netty.channel.ChannelHandlerAdapter
-import java.lang.Thread.sleep
-import java.util.*
 import kotlin.collections.LinkedHashMap
 
 class ProtocolPipeline<T>(
@@ -10,7 +8,7 @@ class ProtocolPipeline<T>(
     private val protoPipelineCodecs: (LinkedHashMap<String, ChannelHandlerAdapter>) -> Unit
 ) {
 
-    fun getProtocolMessageHandler():  Pair<String, Handler<T>> {
+    fun getProtocolMessageHandler(): Pair<String, Handler<T>> {
         return protocolMessageHandler()
     }
 

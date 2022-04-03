@@ -7,8 +7,24 @@ import io.netty.handler.timeout.IdleStateEvent
 import konem.logger
 import java.net.InetSocketAddress
 
-data class ClientHeartbeatProtocol<T>(val enabled: Boolean = true, val read_idle_time:Int = 12, val miss_limit: Int  = 2, val isHeartbeat: (message:Any) -> Boolean)
-data class ServerHeartbeatProtocol<T>(val enabled: Boolean = true, val write_idle_time: Int = 10, val generateHeartBeat: () -> T)
+open class ClientHeartbeatProtocol(
+    val enabled: Boolean = true,
+    val read_idle_time: Int = 12,
+    val miss_limit: Int = 2,
+    val isHeartbeat: (message: Any) -> Boolean
+)
+
+class DisabledClientHeartbeatProtocol : ClientHeartbeatProtocol(enabled = false, isHeartbeat = { false })
+
+open class ServerHeartbeatProtocol<T>(
+    val enabled: Boolean = true,
+    val write_idle_time: Int = 10,
+    val generateHeartBeat: () -> T
+)
+
+class DisabledServerHeartbeatProtocol<T> :
+    ServerHeartbeatProtocol<T>(enabled = false, generateHeartBeat = { Any() as T })
+
 
 class HeartbeatProducer<T>(private val transceiver: ServerTransceiver<T>, val generateHeartBeat: () -> T) :
     ChannelDuplexHandler() {
@@ -43,20 +59,20 @@ class HeartbeatProducer<T>(private val transceiver: ServerTransceiver<T>, val ge
  * @param isHeartbeat Function to determine if message of type I is a heartbeat; Should return true if heartbeat else false
  */
 
-class HeartbeatReceiver<T>(
+class HeartbeatReceiver(
     private val expectedInterval: Int,
     private val missedLimit: Int,
-    private val isHeartbeat: (message:Any) -> Boolean
+    private val isHeartbeat: (message: Any) -> Boolean
 ) : ChannelDuplexHandler() {
 
     private val logger = logger(javaClass)
     private var missCount = 0
 
     override fun channelRead(ctx: ChannelHandlerContext, message: Any) {
-        if(isHeartbeat(message)){
+        if (isHeartbeat(message)) {
+            logger.trace("received {} heartbeat", message)
             missCount = 0
-        }
-        else{
+        } else {
             ctx.fireChannelRead(message)
         }
     }
@@ -64,7 +80,7 @@ class HeartbeatReceiver<T>(
     @Throws(Exception::class)
     override fun userEventTriggered(ctx: ChannelHandlerContext, evt: Any) {
         if (evt is IdleStateEvent) {
-            logger.trace("{} miss count {}", evt.state(), missCount)
+            logger.info("{} miss count {}", evt.state(), missCount)
 
             if (evt.state() == IdleState.READER_IDLE) {
                 if (missCount >= missedLimit) {

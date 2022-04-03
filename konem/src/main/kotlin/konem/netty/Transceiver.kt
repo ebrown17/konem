@@ -55,7 +55,7 @@ abstract class Transceiver<T>(protected val channelPort: Int) {
     }
 }
 
-abstract class ServerTransceiver<T>( channelPort: Int): Transceiver<T>(channelPort) {
+abstract class ServerTransceiver<T>(channelPort: Int) : Transceiver<T>(channelPort) {
 
     fun registerHandlerListener(listener: HandlerListener<T>) {
         if (!handlerListeners.contains(listener)) {

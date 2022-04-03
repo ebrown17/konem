@@ -27,27 +27,34 @@ class ClientFactoryConfig {
     var channelIds = AtomicLong(0L)
 }
 
-data class ClientBootstrapConfig<I> constructor(
-    val transceiver: Transceiver<I>,
+data class ClientBootstrapConfig<T> constructor(
+    val transceiver: Transceiver<T>,
     val bootstrap: Bootstrap,
     val scope: CoroutineScope,
     val retryInfo: RetryInfo,
-    val clientChannelInfo: ClientChannelInfo<I>,
+    val clientChannelInfo: ClientChannelInfo<T>,
 )
 
-data class ClientChannelInfo<T>(val use_ssl: Boolean, val channel_id : Long,  val heartbeatProtocol: ClientHeartbeatProtocol<T>,  val protocol_pipeline: ProtocolPipeline<T>)
+data class ClientChannelInfo<T>(
+    val use_ssl: Boolean,
+    val channel_id: Long,
+    val heartbeatProtocol: ClientHeartbeatProtocol,
+    val protocol_pipeline: ProtocolPipeline<T>
+)
 
-data class RetryInfo(val retry_period : Long, val max_retry_period: Long, var retries_until_period_increase : Int)
+data class RetryInfo(val retry_period: Long, val max_retry_period: Long, var retries_until_period_increase: Int)
 
-
-abstract class ClientFactory<I> constructor(private val config: ClientFactoryConfig, private val heartbeatProtocol: ClientHeartbeatProtocol<I>,
-                                            private val protocolPipeline: ProtocolPipeline<I>) {
+abstract class ClientFactory<T> constructor(
+    private val config: ClientFactoryConfig,
+    private val heartbeatProtocol: ClientHeartbeatProtocol,
+    private val protocolPipeline: ProtocolPipeline<T>
+) {
 
     private val workerGroup: EventLoopGroup
     private val channelClass: Class<out Channel>
     private val allocator: PooledByteBufAllocator
     private val clientScope: CoroutineScope
-    internal val clientArrayList = ArrayList<Client<I>>()
+    internal val clientArrayList = ArrayList<Client<T>>()
 
     init {
         this.workerGroup = NioEventLoopGroup(config.DEFAULT_NUM_THREADS, DefaultThreadFactory("client", true))
@@ -56,7 +63,7 @@ abstract class ClientFactory<I> constructor(private val config: ClientFactoryCon
         this.clientScope = CoroutineScope(CoroutineName("ClientScope"))
     }
 
-    abstract fun createClient(host: String, port: Int, vararg args: String): Client<I>
+    abstract fun createClient(host: String, port: Int, vararg args: String): Client<T>
 
     private fun createBootStrap(): Bootstrap {
         val bootstrap = Bootstrap()
@@ -68,7 +75,7 @@ abstract class ClientFactory<I> constructor(private val config: ClientFactoryCon
         return bootstrap
     }
 
-    protected fun createClientConfig(transceiver: Transceiver<I>): ClientBootstrapConfig<I> {
+    protected fun createClientConfig(transceiver: Transceiver<T>): ClientBootstrapConfig<T> {
         return ClientBootstrapConfig(
             transceiver,
             createBootStrap(),
@@ -89,9 +96,9 @@ abstract class ClientFactory<I> constructor(private val config: ClientFactoryCon
 
     protected abstract fun createClient(
         address: InetSocketAddress,
-        config: ClientBootstrapConfig<I>,
+        config: ClientBootstrapConfig<T>,
         vararg args: String
-    ): Client<I>
+    ): Client<T>
 
     fun shutdown() {
         for (client in clientArrayList) {

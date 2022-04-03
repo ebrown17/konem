@@ -29,19 +29,19 @@ open class BaseConfig {
     var TCP_NODELAY: Boolean = true
 }
 
-class ServerConfig: BaseConfig(){
+class ServerConfig : BaseConfig() {
     internal val portSet = mutableSetOf<Int>()
 
     /**
      *
      * @param port The port to be used for this channel
      */
-    fun addChannel(port: Int){
+    fun addChannel(port: Int) {
         portSet.add(port)
     }
 }
 
-class WebsocketServerConfig: BaseConfig(){
+class WebsocketServerConfig : BaseConfig() {
     private val portToWsMap: HashMap<Int, Array<String>> = HashMap()
 
     /**
@@ -49,16 +49,21 @@ class WebsocketServerConfig: BaseConfig(){
      * @param port The port to be used for this channel
      * @param websocketPaths vararg list of websocket paths to add to this port
      */
-    fun addChannel(port: Int, vararg websocketPaths: String){
-        portToWsMap.putIfAbsent(port,hashSetOf(*websocketPaths).toTypedArray())
+    fun addChannel(port: Int, vararg websocketPaths: String) {
+        portToWsMap.putIfAbsent(port, hashSetOf(*websocketPaths).toTypedArray())
     }
 
 }
 
-data class ServerChannelInfo<T>(val use_ssl:Boolean, val channel_id : Long, val heartbeatProtocol: ServerHeartbeatProtocol<T>,  val protocol_pipeline: ProtocolPipeline<T>)
+data class ServerChannelInfo<T>(
+    val use_ssl: Boolean,
+    val channel_id: Long,
+    val heartbeatProtocol: ServerHeartbeatProtocol<T>,
+    val protocol_pipeline: ProtocolPipeline<T>
+)
 
 
-interface Server<I> : ServerChannelReceiver<I> {
+interface Server<T> : ServerChannelReceiver<T> {
     /**
      * Sends a message to all connected clients on specified port
      *
@@ -66,7 +71,7 @@ interface Server<I> : ServerChannelReceiver<I> {
      * @param message to send
      * @param args any extra arguments needed to specify which channels
      */
-    fun broadcastOnChannel(port: Int, message: I, vararg args: String)
+    fun broadcastOnChannel(port: Int, message: T, vararg args: String)
 
     /**
      * Broadcasts a message on all channels.
@@ -74,7 +79,7 @@ interface Server<I> : ServerChannelReceiver<I> {
      * @param message
      * @param args any extra arguments needed to specify which channels
      */
-    fun broadcastOnAllChannels(message: I, vararg args: String)
+    fun broadcastOnAllChannels(message: T, vararg args: String)
 
     /**
      * Sends a message to specified host
@@ -82,11 +87,12 @@ interface Server<I> : ServerChannelReceiver<I> {
      * @param addr
      * @param message
      */
-    fun sendMessage(addr: SocketAddress, message: I)
+    fun sendMessage(addr: SocketAddress, message: T)
 
     fun registerConnectionListener(listener: ConnectionListener)
     fun registerDisconnectionListener(listener: DisconnectionListener)
     fun registerConnectionStatusListener(listener: ConnectionStatusListener)
+
     @Throws(InterruptedException::class)
     fun startServer()
     fun shutdownServer()
@@ -95,8 +101,10 @@ interface Server<I> : ServerChannelReceiver<I> {
 
 }
 
-abstract class ServerInternal<I>(val serverConfig : ServerConfig,val heartbeatProtocol: ServerHeartbeatProtocol<I>,
-                                 val protocolPipeline: ProtocolPipeline<I>) : HandlerListener<I>, Server<I> {
+abstract class ServerInternal<T>(
+    val serverConfig: ServerConfig, val heartbeatProtocol: ServerHeartbeatProtocol<T>,
+    val protocolPipeline: ProtocolPipeline<T>
+) : HandlerListener<T>, Server<T> {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -107,7 +115,7 @@ abstract class ServerInternal<I>(val serverConfig : ServerConfig,val heartbeatPr
     private val channelListenerMap: ConcurrentHashMap<Int, ArrayList<ChannelFutureListener>> =
         ConcurrentHashMap()
     private val portAddressMap: ConcurrentHashMap<Int, SocketAddress> = ConcurrentHashMap()
-    private val transceiverMap: ConcurrentHashMap<Int, ServerTransceiver<I>> = ConcurrentHashMap()
+    private val transceiverMap: ConcurrentHashMap<Int, ServerTransceiver<T>> = ConcurrentHashMap()
     internal val channelConnectionMap: ConcurrentHashMap<Int, ArrayList<SocketAddress>> =
         ConcurrentHashMap()
     internal val remoteHostToChannelMap: ConcurrentHashMap<SocketAddress, Int> =
@@ -120,7 +128,7 @@ abstract class ServerInternal<I>(val serverConfig : ServerConfig,val heartbeatPr
 
     init {
         val threadFactory = DefaultThreadFactory("server")
-        bossGroup = NioEventLoopGroup(serverConfig.BOSSGROUP_NUM_THREADS , threadFactory)
+        bossGroup = NioEventLoopGroup(serverConfig.BOSSGROUP_NUM_THREADS, threadFactory)
         workerGroup = NioEventLoopGroup(serverConfig.WORKGROUP_NUM_THREADS, threadFactory)
     }
 
@@ -130,7 +138,7 @@ abstract class ServerInternal<I>(val serverConfig : ServerConfig,val heartbeatPr
         val bootstrap = ServerBootstrap()
         bootstrap.group(bossGroup, workerGroup)
         bootstrap.channel(NioServerSocketChannel::class.java)
-        bootstrap.option(ChannelOption.SO_BACKLOG, serverConfig.SO_BACKLOG )
+        bootstrap.option(ChannelOption.SO_BACKLOG, serverConfig.SO_BACKLOG)
         bootstrap.childOption(ChannelOption.SO_KEEPALIVE, serverConfig.SO_KEEPALIVE)
         bootstrap.childOption(ChannelOption.TCP_NODELAY, serverConfig.TCP_NODELAY)
         bootstrap.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
@@ -145,9 +153,9 @@ abstract class ServerInternal<I>(val serverConfig : ServerConfig,val heartbeatPr
      * @param args Any extra arguments you may wish to use for channel configuration
      * @return true if channel successfully added
      */
-   abstract fun addChannel(port: Int, vararg args: String): Boolean
+    abstract fun addChannel(port: Int, vararg args: String): Boolean
 
-    protected fun addChannel(port: Int, transceiver: ServerTransceiver<I>): Boolean {
+    protected fun addChannel(port: Int, transceiver: ServerTransceiver<T>): Boolean {
         if (!isPortConfigured(port)) {
             if (!isTransceiverConfigured(port)) {
                 if (!isBootstrapConfigured(port)) {
@@ -254,7 +262,7 @@ abstract class ServerInternal<I>(val serverConfig : ServerConfig,val heartbeatPr
         return Collections.unmodifiableMap(remoteHostToChannelMap)
     }
 
-    override  fun registerConnectionListener(listener: ConnectionListener) {
+    override fun registerConnectionListener(listener: ConnectionListener) {
         connectionListeners.add(listener)
     }
 
@@ -267,7 +275,7 @@ abstract class ServerInternal<I>(val serverConfig : ServerConfig,val heartbeatPr
         disconnectionListeners.add(listener)
     }
 
-    fun getTransceiverMap(): Map<Int, ServerTransceiver<I>> {
+    fun getTransceiverMap(): Map<Int, ServerTransceiver<T>> {
         return Collections.unmodifiableMap(transceiverMap)
     }
 
@@ -301,7 +309,7 @@ abstract class ServerInternal<I>(val serverConfig : ServerConfig,val heartbeatPr
         return transceiverMap[port] != null
     }
 
-    override fun registerActiveHandler(handler: Handler<I>, channelPort: Int, remoteConnection: SocketAddress) {
+    override fun registerActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress) {
         var channelConnections = channelConnectionMap[channelPort]
         if (channelConnections == null) {
             channelConnections = ArrayList()
@@ -318,7 +326,7 @@ abstract class ServerInternal<I>(val serverConfig : ServerConfig,val heartbeatPr
         channelConnectionMap.putIfAbsent(channelPort, channelConnections)
     }
 
-    override fun registerInActiveHandler(handler: Handler<I>, channelPort: Int, remoteConnection: SocketAddress) {
+    override fun registerInActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress) {
         val channelConnections = channelConnectionMap[channelPort]
         if (channelConnections != null) {
             channelConnections.remove(remoteConnection)
@@ -330,7 +338,7 @@ abstract class ServerInternal<I>(val serverConfig : ServerConfig,val heartbeatPr
         }
     }
 
-    protected abstract fun connectionActive(handler: Handler<I>)
-    protected abstract fun connectionInActive(handler: Handler<I>)
+    protected abstract fun connectionActive(handler: Handler<T>)
+    protected abstract fun connectionInActive(handler: Handler<T>)
 
 }

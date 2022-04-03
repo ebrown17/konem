@@ -9,41 +9,27 @@ import konem.netty.client.ClientFactoryConfig
 
 import java.net.InetSocketAddress
 
-class TcpClientFactory<I> internal constructor(
+class TcpClientFactory<T> internal constructor(
     config: ClientFactoryConfig,
-    heartbeatProtocol: ClientHeartbeatProtocol<I>,
-    protocolPipeline: ProtocolPipeline<I>
-) : ClientFactory<I>(config, heartbeatProtocol, protocolPipeline) {
+    heartbeatProtocol: ClientHeartbeatProtocol,
+    protocolPipeline: ProtocolPipeline<T>
+) : ClientFactory<T>(config, heartbeatProtocol, protocolPipeline) {
 
-/*    companion object {
-
-        fun createDefault(): JsonClientFactory{
-            return JsonClientFactory(ClientFactoryConfig())
-        }
-
-        fun create(config: (ClientFactoryConfig) -> Unit): JsonClientFactory {
-            val userConfig = ClientFactoryConfig()
-            config(userConfig)
-            return JsonClientFactory(userConfig)
-        }
-    }*/
-
-
-    override fun createClient(host: String, port: Int, vararg args: String): Client<I> {
+    override fun createClient(host: String, port: Int, vararg args: String): Client<T> {
         val address = InetSocketAddress(host, port)
-        val transceiver = TcpTransceiver<I>(port)
+        val transceiver = TcpTransceiver<T>(port)
         return createClient(address, createClientConfig(transceiver))
     }
 
     override fun createClient(
         address: InetSocketAddress,
-        config: ClientBootstrapConfig<I>,
+        config: ClientBootstrapConfig<T>,
         vararg args: String
-    ): Client<I> {
-        val transceiver = config.transceiver
+    ): Client<T> {
+        val transceiver = config.transceiver as TcpTransceiver<T>
         val bootstrap = config.bootstrap
-        val client = TcpClient<I>(address, config)
-        val clientChannel = TcpClientChannel(transceiver as TcpTransceiver<I>, config.clientChannelInfo)
+        val client = TcpClient(address, config)
+        val clientChannel = TcpClientChannel(transceiver, config.clientChannelInfo)
         bootstrap.handler(clientChannel)
         clientArrayList.add(client)
         return client
