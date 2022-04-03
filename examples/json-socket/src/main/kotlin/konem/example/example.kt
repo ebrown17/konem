@@ -1,44 +1,55 @@
 package konem.example
 
+
+import konem.Konem
 import konem.data.json.Data
+import konem.data.json.Heartbeat
 import konem.data.json.KonemMessage
-import konem.netty.ConnectionListener
-
-
-import konem.protocol.konem.KonemJsonMessageReceiver
-import konem.protocol.konem.json.JsonClientFactory
-import konem.protocol.konem.json.JsonServer
+import konem.netty.*
+import konem.protocol.konem.KonemProtocolPipeline
+import java.lang.Thread.sleep
 
 
 fun main(){
-    val server = JsonServer.create { config ->
-        config.addChannel(6069)
-    }
-
 
     var count = 0
-    server.registerChannelReceiveListener(KonemJsonMessageReceiver{ from, msg ->
-        println("SERVER Msg: $msg from $from")
-        Thread.sleep(500)
 
-        server.sendMessage(from,
-            KonemMessage(message = Data("Send message ${count++}")
-            ))
-    })
-
+    val server = Konem.createTcpServer(
+        config = { serverConfig ->
+            serverConfig.addChannel(6160)
+        },
+        heartbeatProtocol = ServerHeartbeatProtocol { KonemMessage(Heartbeat()) },
+        protocolPipeline = KonemProtocolPipeline.getKonemJsonPipeline()
+    )
 
     server.startServer()
 
-    val clientFactory = JsonClientFactory.createDefault()
+    server.registerChannelReceiveListener(MessageReceiver{ from, msg ->
+        println("SERVER Msg: $msg from $from")
+        sleep(500)
+        server.sendMessage(from,KonemMessage(message = Data("Send message ${count++}")))
 
-    val client = clientFactory.createClient("localhost", 6069)
+    })
+
+
+    sleep(1000)
+
+    val clientFactory = Konem.createClientFactoryOfDefaults(
+        heartbeatProtocol = ClientHeartbeatProtocol(isHeartbeat = { message ->
+            message is Heartbeat
+        }),
+        protocolPipeline = KonemProtocolPipeline.getKonemJsonPipeline()
+    )
+
+    val client = clientFactory.createClient("localhost",6160)
     client.connect()
 
     client.registerConnectionListener(ConnectionListener {
         client.sendMessage(KonemMessage(message = Data("Send message ${count++}") ))
     })
 
-    client.registerChannelReceiveListener(KonemJsonMessageReceiver{from, msg ->
+
+    client.registerChannelReceiveListener(MessageReceiver{ from, msg ->
         println("CLIENT Msg: $msg from $from")
 
 

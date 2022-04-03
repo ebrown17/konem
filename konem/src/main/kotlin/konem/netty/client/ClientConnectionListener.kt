@@ -22,7 +22,12 @@ class ClientConnectionListener<I> internal constructor(
     override fun operationComplete(future: ChannelFuture) {
         if (future.isSuccess) {
             isAttemptingConnection = false
-            connectAction(future)
+            future.channel().eventLoop().schedule(
+                {
+                    connectAction(future)
+                },
+                0, TimeUnit.MILLISECONDS
+            )
         } else {
             future.channel().close()
             future.channel().eventLoop().schedule(
