@@ -1,100 +1,28 @@
 package konem.json
 
+
 import io.kotest.assertions.until.fixed
 import io.kotest.assertions.until.until
+import konem.TestClientReceiver
+import konem.TestServerReceiver
 import konem.data.json.Data
 import konem.data.json.KonemMessage
-import konem.netty.ConnectionListener
-import konem.netty.ConnectionStatusListener
-import konem.netty.DisconnectionListener
-import konem.netty.StatusListener
 import konem.netty.client.Client
 import konem.netty.server.Server
-import konem.protocol.konem.KonemJsonMessageReceiver
-
-import konem.protocol.konem.json.JsonClientFactory
-import konem.protocol.konem.json.JsonServer
-
-
+import konem.protocol.tcp.TcpClientFactory
+import konem.waitForMsgTime
 import java.net.SocketAddress
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
 var server: Server<KonemMessage>? = null
-var clientFactory:  JsonClientFactory? = null
+var clientFactory:  TcpClientFactory<KonemMessage>? = null
 
-const val DEBUG = true
-const val activeTime = 3
-const val waitForMsgTime = 3
-const val delayDurationMs = 1L
 
-val testSetup = {
-    clientFactory?.shutdown()
-    server?.shutdownServer()
+class JsonTestClientReceiver(client: Client<KonemMessage>, receive: (SocketAddress, KonemMessage) -> Unit):
+    TestClientReceiver<KonemMessage>(client,receive)
 
-    server = JsonServer.create {
-        it.addChannel(6060)
-        it.addChannel(6061)
-        it.addChannel(6062)
-        it.addChannel(6063)
-
-    }
-
-    clientFactory = JsonClientFactory.createDefault()
-}
-
-data class ClientConfig(val port: Int,val totalClients: Int)
-data class ClientCommConfigsV1(val msgCount:Int, val clientConfigs: MutableList<ClientConfig>)
-data class ClientCommConfigsV2(val msgCount:Int, val broadcastPorts: MutableList<Int>, val clientConfigs: MutableList<ClientConfig>)
-data class ServerStartup(val portsToConfigure: MutableList<Int>)
-
-class JsonTestServerReceiver(receive: (SocketAddress, KonemMessage) -> Unit) : KonemJsonMessageReceiver(receive) {
-    var messageCount = 0
-    var messageList = mutableListOf<KonemMessage>()
-}
-
-class JsonTestClientReceiver(val client: Client<KonemMessage>, receive: (SocketAddress, KonemMessage) -> Unit) : KonemJsonMessageReceiver(receive) {
-    var messageCount = 0
-    var messageList = mutableListOf<KonemMessage>()
-    var clientId = ""
-}
-
-class TestConnectionListener(connected: (SocketAddress) -> Unit): ConnectionListener(connected){
-    var connections = 0
-}
-
-class TestDisconnectionListener(disconnected: (SocketAddress) -> Unit) : DisconnectionListener(disconnected) {
-    var disconnections = 0
-}
-
-class TestConnectionStatusListener(connected: (SocketAddress) -> Unit,
-                                   disconnected: (SocketAddress) -> Unit
-) : ConnectionStatusListener(connected, disconnected) {
-    var connections = 0
-    var disconnections = 0
-}
-
-fun areClientsActive(clientList: MutableList<Client<KonemMessage>>):Boolean{
-    if(clientList.isEmpty()) return false
-    var allActive = true
-    clientList.forEach { client ->
-        if(!client.isActive()){
-            allActive = false
-        }
-    }
-    return allActive
-}
-
-fun areClientsInactive(clientList: MutableList<Client<KonemMessage>>):Boolean{
-    if(clientList.isEmpty()) return true
-    var allInactive = true
-    clientList.forEach { client ->
-        if(client.isActive()){
-            allInactive = false
-        }
-    }
-    return allInactive
-}
+class JsonTestServerReceiver(receive: (SocketAddress, KonemMessage) -> Unit): TestServerReceiver<KonemMessage>(receive)
 
 fun sendClientMessages(messageSendCount: Int, clientList: MutableList<Client<KonemMessage>>):Int{
     var totalMessagesSent = 0
@@ -129,107 +57,6 @@ fun serverBroadcastOnChannels(messageSendCount: Int, broadcastPorts: MutableList
 fun serverBroadcastOnAllChannels(messageSendCount: Int){
     for(i in 1..messageSendCount){
         server?.broadcastOnAllChannels(KonemMessage(message = Data("Server message $i")))
-    }
-}
-
-@ExperimentalTime
-suspend fun startServer() : Boolean{
-    server?.startServer()!!
-
-    return  until(Duration.seconds(activeTime), Duration.milliseconds(250).fixed()) {
-        server?.allActive()!!
-    }
-}
-
-@ExperimentalTime
-suspend fun connectClients(clientList : MutableList<Client<KonemMessage>>) : Boolean{
-    clientList.forEach { client -> client.connect() }
-
-    return until(Duration.seconds(activeTime), Duration.milliseconds(250).fixed()) {
-        areClientsActive(clientList)
-    }
-}
-
-@ExperimentalTime
-suspend fun disconnectClients(clientList : MutableList<Client<KonemMessage>>) : Boolean{
-    clientList.forEach { client -> client.disconnect() }
-
-    return until(Duration.seconds(activeTime), Duration.milliseconds(250).fixed()) {
-        areClientsInactive(clientList)
-    }
-}
-
-@ExperimentalTime
-suspend fun waitForMessagesServer(totalMessages:Int ,receiverList : MutableList<JsonTestServerReceiver>,debug: Boolean = false) : Boolean{
-    return until(Duration.seconds(waitForMsgTime), Duration.milliseconds(250).fixed()) {
-        val received: Int = receiverList.sumOf { it.messageCount }
-        if(debug){
-            println("Server received: $received out of $totalMessages")
-        }
-        received == totalMessages
-    }
-}
-
-@ExperimentalTime
-suspend fun waitForMessagesClient(totalMessages:Int ,receiverList : MutableList<JsonTestClientReceiver>,debug: Boolean = false) : Boolean{
-    return until(Duration.seconds(waitForMsgTime), Duration.milliseconds(250).fixed()) {
-        val received: Int = receiverList.sumOf { it.messageCount }
-        if(debug){
-            println("Clients received: $received out of $totalMessages")
-        }
-        received == totalMessages
-    }
-}
-
-@ExperimentalTime
-suspend fun waitForClientStatusChange(totalChanges:Int, list : MutableList<out StatusListener>, debug: Boolean = false, checkConnect:Boolean = false) : Boolean{
-    return until(Duration.seconds(waitForMsgTime), Duration.milliseconds(250).fixed()) {
-        var type = ""
-        val received: Int = list.sumOf { statusChange ->
-            when(statusChange){
-                is TestConnectionListener -> { type = "Connections" ; statusChange.connections    }
-                is TestDisconnectionListener -> { type = "Disconnections"; statusChange.disconnections  }
-                is TestConnectionStatusListener -> {
-                    if(checkConnect) {
-                        type = "Connections" ; statusChange.connections
-                    }
-                    else{
-                        type = "Disconnections"; statusChange.disconnections
-                    }
-                }
-                else -> 0
-            }
-        }
-        if(debug){
-            println("Client $type received: $received out of $totalChanges")
-        }
-        received == totalChanges
-    }
-}
-
-@ExperimentalTime
-suspend fun waitForServerStatusChange(totalChanges:Int, list : MutableList<out StatusListener>, debug: Boolean = false, checkConnect:Boolean = false) : Boolean{
-    return until(Duration.seconds(waitForMsgTime), Duration.milliseconds(250).fixed()) {
-        var type = ""
-        val received: Int = list.sumOf { statusChange ->
-            when(statusChange){
-                is TestConnectionListener -> { type = "Connections" ; statusChange.connections    }
-                is TestDisconnectionListener -> { type = "Disconnections"; statusChange.disconnections  }
-                is TestConnectionStatusListener -> {
-                    if(checkConnect) {
-                        type = "Connections" ; statusChange.connections
-                    }
-                    else{
-                        type = "Disconnections"; statusChange.disconnections
-                    }
-                }
-                else -> 0
-            }
-        }
-        if(debug){
-            println("Server $type received: $received out of $totalChanges")
-        }
-        received == totalChanges
     }
 }
 
