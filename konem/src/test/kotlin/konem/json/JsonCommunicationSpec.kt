@@ -3,10 +3,14 @@ package konem.json
 import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.datatest.withData
+import konem.*
+import konem.data.json.Heartbeat
 import konem.data.json.KonemMessage
+import konem.netty.ClientHeartbeatProtocol
+import konem.netty.ServerHeartbeatProtocol
 import konem.netty.client.Client
-import konem.protocol.konem.json.JsonClientFactory
-import konem.protocol.konem.json.JsonServer
+import konem.protocol.konem.KonemProtocolPipeline
+
 
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
@@ -17,14 +21,26 @@ import kotlin.time.ExperimentalTime
 class JsonCommunicationSpec : ShouldSpec({
 
     beforeContainer {
-        server = JsonServer.create { config ->
-            config.addChannel(6060)
-            config.addChannel(6061)
-            config.addChannel(6062)
-            config.addChannel(6063)
-        }
+        clientFactory?.shutdown()
+        server?.shutdownServer()
 
-        clientFactory = JsonClientFactory.createDefault()
+        server = Konem.createTcpServer(
+            config = {
+                it.addChannel(6060)
+                it.addChannel(6061)
+                it.addChannel(6062)
+                it.addChannel(6063)
+            },
+            heartbeatProtocol = ServerHeartbeatProtocol { KonemMessage(Heartbeat()) },
+            protocolPipeline = KonemProtocolPipeline.getKonemJsonPipeline()
+        )
+
+        clientFactory = Konem.createClientFactoryOfDefaults(
+            heartbeatProtocol = ClientHeartbeatProtocol(isHeartbeat = { message ->
+                message is Heartbeat
+            }),
+            protocolPipeline = KonemProtocolPipeline.getKonemJsonPipeline()
+        )
     }
 
     afterContainer {
@@ -75,7 +91,7 @@ class JsonCommunicationSpec : ShouldSpec({
                 }
             }
 
-            startServer()
+            startServer(server!!)
             connectClients(clientList)
             totalMessagesSent += sendClientMessages(msgCount, clientList)
             waitForMessagesServer(totalMessagesSent, serverReceiverList, DEBUG)
@@ -130,7 +146,7 @@ class JsonCommunicationSpec : ShouldSpec({
                 }
             }
 
-            startServer()
+            startServer(server!!)
             connectClients(clientList)
             totalMessagesSent += sendClientMessages(msgCount, clientList)
             waitForMessagesServer(totalMessagesSent, serverReceiverList, DEBUG)
@@ -187,7 +203,7 @@ class JsonCommunicationSpec : ShouldSpec({
                 }
             }
 
-            startServer()
+            startServer(server!!)
             connectClients(clientList)
             totalMessagesSent += sendClientMessages(msgCount, clientList)
             waitForMessagesServer(totalMessagesSent, serverReceiverList)
@@ -250,7 +266,7 @@ class JsonCommunicationSpec : ShouldSpec({
                }
            }
 
-           startServer()
+           startServer(server!!)
            connectClients(clientList)
            serverBroadcastOnChannels(msgCount,broadcastPorts )
            waitForMessagesClient(totalMessagesSent, clientReceiverList, DEBUG)
@@ -304,7 +320,7 @@ class JsonCommunicationSpec : ShouldSpec({
                }
            }
 
-           startServer()
+           startServer(server!!)
            connectClients(clientList)
            serverBroadcastOnAllChannels(msgCount)
            waitForMessagesClient(totalMessagesSent, clientReceiverList, DEBUG)
@@ -358,7 +374,7 @@ class JsonCommunicationSpec : ShouldSpec({
                }
            }
 
-           startServer()
+           startServer(server!!)
            connectClients(clientList)
            totalMessagesSent += sendClientMessageWithReceiver(msgCount, clientReceiverList)
 
@@ -412,7 +428,7 @@ class JsonCommunicationSpec : ShouldSpec({
                }
            }
 
-           startServer()
+           startServer(server!!)
            connectClients(clientList)
            delay(Duration.milliseconds(delayDurationMs))
 
@@ -462,7 +478,7 @@ class JsonCommunicationSpec : ShouldSpec({
                }
            }
 
-           startServer()
+           startServer(server!!)
            connectClients(clientList)
            delay(Duration.milliseconds(delayDurationMs))
 
@@ -520,7 +536,7 @@ class JsonCommunicationSpec : ShouldSpec({
                }
            }
 
-           startServer()
+           startServer(server!!)
            connectClients(clientList)
            delay(Duration.milliseconds(delayDurationMs))
 
@@ -570,7 +586,7 @@ class JsonCommunicationSpec : ShouldSpec({
                }
            }
 
-           startServer()
+           startServer(server!!)
            connectClients(clientList)
            disconnectClients(clientList)
            delay(Duration.milliseconds(delayDurationMs))
@@ -636,7 +652,7 @@ class JsonCommunicationSpec : ShouldSpec({
                }
            }
 
-           startServer()
+           startServer(server!!)
            connectClients(clientList)
            delay(Duration.milliseconds(delayDurationMs))
            waitForServerStatusChange(totalConnections,serverStatusList, DEBUG,true)

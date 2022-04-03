@@ -1,4 +1,4 @@
-package konem.json
+package konem.wire
 
 import io.kotest.assertions.until.fixed
 import io.kotest.assertions.until.until
@@ -8,16 +8,19 @@ import io.kotest.datatest.withData
 import konem.*
 import konem.data.json.Heartbeat
 import konem.data.json.KonemMessage
+import konem.data.protobuf.HeartBeat
+import konem.data.protobuf.MessageType
 import konem.netty.ServerHeartbeatProtocol
 import konem.protocol.konem.KonemProtocolPipeline
 import kotlinx.coroutines.delay
+import java.util.*
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
 
 @ExperimentalTime
 @ExperimentalKotest
-class JsonServerStartupSpec : ShouldSpec({
+class WireServerStartupSpec : ShouldSpec({
 
     afterContainer {
         clientFactory?.shutdown()
@@ -35,17 +38,20 @@ class JsonServerStartupSpec : ShouldSpec({
 
         ) { ( portsToConfigure) ->
 
-
             server = Konem.createTcpServer(
                 config = {
                     portsToConfigure.forEach { port ->
                         it.addChannel(port)
                     }
                 },
-                heartbeatProtocol = ServerHeartbeatProtocol { KonemMessage(Heartbeat()) },
-                protocolPipeline = KonemProtocolPipeline.getKonemJsonPipeline()
+                heartbeatProtocol = ServerHeartbeatProtocol {
+                    konem.data.protobuf.KonemMessage(
+                        messageType = MessageType.HEARTBEAT,
+                        heartBeat = HeartBeat(Date().toString())
+                    )
+                },
+                protocolPipeline = KonemProtocolPipeline.getKonemWirePipeline()
             )
-
 
             startServer(server!!)
             delay(Duration.seconds(1))
