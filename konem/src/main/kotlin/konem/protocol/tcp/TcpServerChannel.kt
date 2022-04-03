@@ -5,7 +5,6 @@ import io.netty.channel.socket.SocketChannel
 import io.netty.handler.timeout.IdleStateHandler
 import konem.netty.*
 import konem.netty.server.ServerChannelInfo
-import konem.protocol.konem.json.KonemJsonMessageHandler
 
 class TcpServerChannel<T>(
     private val transceiver: ServerTransceiver<T>,

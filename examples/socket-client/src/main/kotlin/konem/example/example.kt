@@ -8,8 +8,7 @@ import konem.data.json.KonemMessage
 import konem.netty.ClientHeartbeatProtocol
 import konem.netty.ConnectionStatusListener
 import konem.netty.ServerHeartbeatProtocol
-import konem.netty.client.ClientFactoryConfig
-import konem.protocol.konem.json.KonemJsonPipeline
+import konem.protocol.konem.KonemProtocolPipeline
 import java.lang.Thread.sleep
 
 
@@ -19,8 +18,8 @@ fun main(){
         config = { serverConfig ->
             serverConfig.addChannel(6160)
         },
-        ServerHeartbeatProtocol { KonemMessage(Heartbeat()) },
-        KonemJsonPipeline.getKonemJsonPipeline()
+        heartbeatProtocol = ServerHeartbeatProtocol { KonemMessage(Heartbeat()) },
+        protocolPipeline = KonemProtocolPipeline.getKonemJsonPipeline()
     )
 
     server.startServer()
@@ -39,14 +38,11 @@ fun main(){
 
     sleep(1000)
 
-    val clientFactory = Konem.createClientFactoryOfDefaults<KonemMessage> (
+    val clientFactory = Konem.createClientFactoryOfDefaults(
         heartbeatProtocol = ClientHeartbeatProtocol(isHeartbeat = { message ->
-            when(message) {
-                is Heartbeat -> true
-                else -> false
-            }
+            message is Heartbeat
          }),
-        protocolPipeline = KonemJsonPipeline.getKonemJsonPipeline()
+        protocolPipeline = KonemProtocolPipeline.getKonemJsonPipeline()
         )
 
     val client = clientFactory.createClient("localhost",6160)
@@ -57,8 +53,6 @@ fun main(){
 
     client.disconnect()
     client2.disconnect()
-    sleep(1000)
-    client.connect()
-    client2.connect()
+
 
 }

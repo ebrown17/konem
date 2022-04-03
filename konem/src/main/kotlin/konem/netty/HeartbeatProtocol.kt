@@ -2,18 +2,13 @@ package konem.netty
 
 import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
-import io.netty.channel.SimpleChannelInboundHandler
 import io.netty.handler.timeout.IdleState
 import io.netty.handler.timeout.IdleStateEvent
 import konem.logger
 import java.net.InetSocketAddress
 
-
-
-
 data class ClientHeartbeatProtocol<T>(val enabled: Boolean = true, val read_idle_time:Int = 12, val miss_limit: Int  = 2, val isHeartbeat: (message:Any) -> Boolean)
 data class ServerHeartbeatProtocol<T>(val enabled: Boolean = true, val write_idle_time: Int = 10, val generateHeartBeat: () -> T)
-
 
 class HeartbeatProducer<T>(private val transceiver: ServerTransceiver<T>, val generateHeartBeat: () -> T) :
     ChannelDuplexHandler() {

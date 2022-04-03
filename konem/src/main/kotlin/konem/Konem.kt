@@ -1,6 +1,5 @@
 package konem
 
-import konem.data.json.KonemMessage
 import konem.netty.ClientHeartbeatProtocol
 import konem.netty.ProtocolPipeline
 import konem.netty.ServerHeartbeatProtocol
