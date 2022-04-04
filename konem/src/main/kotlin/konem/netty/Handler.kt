@@ -51,4 +51,13 @@ abstract class Handler<T> :
         }
         return false
     }
+
+    fun transceiverReceive(message: T, vararg extra: String) {
+        logger.trace("Id=$handlerId from: {} received: {}", remoteAddress, message)
+        transceiver.receive(remoteAddress, message, *extra)
+    }
+
+    override fun toString(): String {
+        return "Handler(Id=$handlerId,transceiver=$transceiver)"
+    }
 }

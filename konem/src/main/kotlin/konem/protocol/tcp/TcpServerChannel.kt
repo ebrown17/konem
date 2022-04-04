@@ -11,8 +11,6 @@ class TcpServerChannel<T>(
     private val serverChannelInfo: ServerChannelInfo<T>
 ) : ChannelInitializer<SocketChannel>() {
 
-
-
     override fun initChannel(channel: SocketChannel) {
         val pipeline = channel.pipeline()
 
