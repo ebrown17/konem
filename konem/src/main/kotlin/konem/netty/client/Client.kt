@@ -1,6 +1,5 @@
 package konem.netty.client
 
-import ChannelReceiver
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.Channel
 import konem.logger
@@ -13,7 +12,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 
-interface Client<T>: ChannelReceiver<T> {
+interface Client<T>: BaseChannelReceiverRegistrant<T> {
     fun connect()
     fun disconnect()
     fun shutdown()
@@ -30,7 +29,7 @@ interface Client<T>: ChannelReceiver<T> {
 }
 
 abstract class ClientInternal<T>(private val serverAddress: SocketAddress, private val config: ClientBootstrapConfig<T>) :
-    Client<T> {
+    Client<T>, ChannelReceiver<T> {
 
     private val logger = logger(javaClass)
     private val transceiver: Transceiver<T> = config.transceiver

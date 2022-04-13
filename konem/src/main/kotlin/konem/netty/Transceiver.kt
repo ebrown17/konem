@@ -1,6 +1,5 @@
 package konem.netty
 
-import ChannelReceiver
 import java.net.SocketAddress
 import java.util.ArrayList
 import java.util.concurrent.ConcurrentHashMap
@@ -40,8 +39,8 @@ abstract class Transceiver<T>(protected val channelPort: Int) {
         }
     }
 
-    fun registerChannelReceiver(addr: SocketAddress, reader: ChannelReceiver<T>) {
-        channelReceiver.putIfAbsent(addr, reader)
+    fun registerChannelReceiver(addr: SocketAddress, receiver: ChannelReceiver<T>) {
+        channelReceiver.putIfAbsent(addr, receiver)
     }
 
     abstract fun transmit(addr: SocketAddress, message: T, vararg extra: String)

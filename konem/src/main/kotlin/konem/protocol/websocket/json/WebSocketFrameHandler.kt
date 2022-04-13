@@ -32,6 +32,7 @@ class WebSocketFrameHandler(
                 if (!buffer.isReadable) {
                     return
                 }
+
                 val message = buffer.toString(0, buffer.readableBytes(), CharsetUtil.UTF_8)
                 val kMessage = serializer.toKonemMessage(message)
                 transceiver.handleMessage(remoteAddress, webSocketPath, kMessage)

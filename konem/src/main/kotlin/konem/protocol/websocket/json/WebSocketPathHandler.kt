@@ -8,7 +8,7 @@ import io.netty.handler.codec.http.FullHttpRequest
 import io.netty.handler.codec.http.HttpMethod.GET
 import io.netty.handler.codec.http.HttpRequest
 import io.netty.handler.codec.http.HttpResponse
-import io.netty.handler.codec.http.HttpResponseStatus.FORBIDDEN
+import io.netty.handler.codec.http.HttpResponseStatus.*
 import io.netty.handler.codec.http.HttpUtil.isKeepAlive
 import io.netty.handler.codec.http.HttpVersion.HTTP_1_1
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler
@@ -29,7 +29,7 @@ class WebSocketPathHandler(
         try {
             if (isConfiguredWebSocketPath(path)) {
                 if (req.method() != GET) {
-                    sendHttpResponse(ctx, req, DefaultFullHttpResponse(HTTP_1_1, FORBIDDEN))
+                    sendHttpResponse(ctx, req, DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST))
                     return
                 }
                 // made it this far, valid websocket path
@@ -63,7 +63,7 @@ class WebSocketPathHandler(
     private fun sendHttpResponse(ctx: ChannelHandlerContext?, req: HttpRequest, res: HttpResponse) {
         if (ctx != null && (ctx.channel().isOpen || ctx.channel().isActive)) {
             val future = ctx.channel().writeAndFlush(res)
-            if (!isKeepAlive(req) || res.status().code() != OK) {
+            if (!isKeepAlive(req) || res.status().code() != OK.code()) {
                 future.addListener(ChannelFutureListener.CLOSE)
             }
         } else {
@@ -81,7 +81,4 @@ class WebSocketPathHandler(
         return valid
     }
 
-    companion object {
-        private const val OK = 200
-    }
 }

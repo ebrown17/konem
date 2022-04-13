@@ -76,7 +76,7 @@ class JsonCommunicationSpec : ShouldSpec({
             serverReceiverList.add(serverReceiver)
 
             clientConfigs.forEach { config ->
-                server?.registerChannelReceiveListener(config.port, serverReceiver)
+                server?.registerChannelMessageReceiver(config.port, serverReceiver)
                 for (i in 1..config.totalClients) {
                     clientFactory?.createClient("localhost",config.port)?.let {
                         lateinit var clientReceiver: JsonTestClientReceiver
@@ -85,7 +85,7 @@ class JsonCommunicationSpec : ShouldSpec({
                             clientReceiver.messageList.add(msg)
                         }
                         clientReceiver.clientId = "client-$i-${config.port}"
-                        it.registerChannelReceiveListener(clientReceiver)
+                        it.registerChannelMessageReceiver(clientReceiver)
                         clientList.add(it)
                     }
                 }
@@ -129,7 +129,7 @@ class JsonCommunicationSpec : ShouldSpec({
             serverReceiverList.add(serverReceiver)
 
             clientConfigs.forEach { config ->
-                server?.registerChannelReceiveListener(config.port, serverReceiver)
+                server?.registerChannelMessageReceiver(config.port, serverReceiver)
 
                 for (i in 1..config.totalClients) {
                     clientFactory?.createClient("localhost",config.port)?.let {
@@ -140,7 +140,7 @@ class JsonCommunicationSpec : ShouldSpec({
                         }
                         clientReceiver.clientId = "client-$i-${config.port}"
                         clientReceiverList.add(clientReceiver)
-                        it.registerChannelReceiveListener(clientReceiver)
+                        it.registerChannelMessageReceiver(clientReceiver)
                         clientList.add(it)
                     }
                 }
@@ -186,7 +186,7 @@ class JsonCommunicationSpec : ShouldSpec({
             serverReceiverList.add(serverReceiver)
 
             clientConfigs.forEach { config  ->
-                server?.registerChannelReceiveListener(config.port, serverReceiver)
+                server?.registerChannelMessageReceiver(config.port, serverReceiver)
 
                 for(i in 1..config.totalClients){
                     clientFactory?.createClient("localhost",config.port)?.let {
@@ -197,7 +197,7 @@ class JsonCommunicationSpec : ShouldSpec({
                         }
                         clientReceiver.clientId = "client-$i-${config.port}"
                         clientReceiverList.add(clientReceiver)
-                        it.registerChannelReceiveListener(clientReceiver)
+                        it.registerChannelMessageReceiver(clientReceiver)
                         clientList.add(it)
                     }
                 }
@@ -247,7 +247,7 @@ class JsonCommunicationSpec : ShouldSpec({
            serverReceiverList.add(serverReceiver)
 
            clientConfigs.forEach { config ->
-               server?.registerChannelReceiveListener(config.port, serverReceiver)
+               server?.registerChannelMessageReceiver(config.port, serverReceiver)
                if (config.port in broadcastPorts) {
                    totalMessagesSent += (config.totalClients * (msgCount))
                }
@@ -260,7 +260,7 @@ class JsonCommunicationSpec : ShouldSpec({
                        }
                        clientReceiver.clientId = "client-$i-${config.port}"
                        clientReceiverList.add(clientReceiver)
-                       it.registerChannelReceiveListener(clientReceiver)
+                       it.registerChannelMessageReceiver(clientReceiver)
                        clientList.add(it)
                    }
                }
@@ -301,7 +301,7 @@ class JsonCommunicationSpec : ShouldSpec({
            serverReceiverList.add(serverReceiver)
 
            clientConfigs.forEach { config ->
-               server?.registerChannelReceiveListener(config.port, serverReceiver)
+               server?.registerChannelMessageReceiver(config.port, serverReceiver)
 
                totalMessagesSent += (config.totalClients * (msgCount))
 
@@ -314,7 +314,7 @@ class JsonCommunicationSpec : ShouldSpec({
                        }
                        clientReceiver.clientId = "client-$i-${config.port}"
                        clientReceiverList.add(clientReceiver)
-                       it.registerChannelReceiveListener(clientReceiver)
+                       it.registerChannelMessageReceiver(clientReceiver)
                        clientList.add(it)
                    }
                }
@@ -357,7 +357,7 @@ class JsonCommunicationSpec : ShouldSpec({
            serverReceiverList.add(serverReceiver)
 
            clientConfigs.forEach { config  ->
-               server?.registerChannelReceiveListener(config.port, serverReceiver)
+               server?.registerChannelMessageReceiver(config.port, serverReceiver)
 
                for(i in 1..config.totalClients){
                    clientFactory?.createClient("localhost",config.port)?.let {
@@ -368,7 +368,7 @@ class JsonCommunicationSpec : ShouldSpec({
                        }
                        clientReceiver.clientId = "client-$i-${config.port}"
                        clientReceiverList.add(clientReceiver)
-                       it.registerChannelReceiveListener(clientReceiver)
+                       it.registerChannelMessageReceiver(clientReceiver)
                        clientList.add(it)
                    }
                }

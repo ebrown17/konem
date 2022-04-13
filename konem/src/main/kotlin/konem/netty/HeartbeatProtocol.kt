@@ -19,14 +19,14 @@ class DisabledClientHeartbeatProtocol : ClientHeartbeatProtocol(enabled = false,
 open class ServerHeartbeatProtocol<T>(
     val enabled: Boolean = true,
     val write_idle_time: Int = 10,
-    val generateHeartBeat: () -> T
+    val generateHeartbeat: () -> T
 )
 
 class DisabledServerHeartbeatProtocol<T> :
-    ServerHeartbeatProtocol<T>(enabled = false, generateHeartBeat = { Any() as T })
+    ServerHeartbeatProtocol<T>(enabled = false, generateHeartbeat = { Any() as T })
 
 
-class HeartbeatProducer<T>(private val transceiver: ServerTransceiver<T>, val generateHeartBeat: () -> T) :
+class HeartbeatProducer<T>(private val transceiver: ServerTransceiver<T>, val generateHeartbeat: () -> T) :
     ChannelDuplexHandler() {
 
     private val logger = logger(javaClass)
@@ -38,7 +38,7 @@ class HeartbeatProducer<T>(private val transceiver: ServerTransceiver<T>, val ge
                 logger.trace("send heartBeat")
                 transceiver.transmit(
                     ctx.channel().remoteAddress() as InetSocketAddress,
-                    generateHeartBeat()
+                    generateHeartbeat()
                 )
             }
         }

@@ -26,6 +26,7 @@ class WebSocketServerChannel(private val transceiver: WebSocketTransceiver, vara
             WebSocketPathHandler(transceiver, channelIds, *webSocketPaths)
         )
         pipeline.addLast("idleStateHandler", IdleStateHandler(0, WRITE_IDLE_TIME, 0))
+
         pipeline.addLast("pingHandler", WebSocketPingHandler(transceiver))
         pipeline.addLast("exceptionHandler", WebSocketExceptionHandler())
     }

@@ -23,17 +23,17 @@ class TcpClient<T>(private val serverAddress: SocketAddress, config: ClientBoots
         transceiver.transmit(serverAddress, message)
     }
 
-    override fun registerChannelReceiveListener(receiver: MessageReceiver<T>) {
+    override fun registerChannelMessageReceiver(receiver: MessageReceiver<T>) {
         receiveListeners.add(receiver)
     }
 
-    override fun handleReceivedMessage(addr: SocketAddress, port: Int, message: T) {
+    override fun handleReceivedMessage(addr: SocketAddress, port: Int, message: T, extra: String) {
         clientScope.launch {
             receiveMessage(addr, port, message)
         }
     }
 
-    override suspend fun receiveMessage(addr: SocketAddress, port: Int, message: T) {
+    override suspend fun receiveMessage(addr: SocketAddress, port: Int, message: T, extra: String) {
         logger.trace("got message: {}", message)
         for (listener in receiveListeners) {
             listener.handle(addr, message)

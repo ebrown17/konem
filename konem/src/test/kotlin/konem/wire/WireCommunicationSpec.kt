@@ -83,7 +83,7 @@ class WireCommunicationSpec : ShouldSpec({
             serverReceiverList.add(serverReceiver)
 
             clientConfigs.forEach { config ->
-                server?.registerChannelReceiveListener(config.port, serverReceiver)
+                server?.registerChannelMessageReceiver(config.port, serverReceiver)
                 for (i in 1..config.totalClients) {
                     clientFactory?.createClient("localhost",config.port)?.let {
                         lateinit var clientReceiver: WireTestClientReceiver
@@ -92,7 +92,7 @@ class WireCommunicationSpec : ShouldSpec({
                             clientReceiver.messageList.add(msg)
                         }
                         clientReceiver.clientId = "client-$i-${config.port}"
-                        it.registerChannelReceiveListener(clientReceiver)
+                        it.registerChannelMessageReceiver(clientReceiver)
                         clientList.add(it)
                     }
                 }
@@ -136,7 +136,7 @@ class WireCommunicationSpec : ShouldSpec({
             serverReceiverList.add(serverReceiver)
 
             clientConfigs.forEach { config ->
-                server?.registerChannelReceiveListener(config.port, serverReceiver)
+                server?.registerChannelMessageReceiver(config.port, serverReceiver)
 
                 for (i in 1..config.totalClients) {
                     clientFactory?.createClient("localhost",config.port)?.let {
@@ -147,7 +147,7 @@ class WireCommunicationSpec : ShouldSpec({
                         }
                         clientReceiver.clientId = "client-$i-${config.port}"
                         clientReceiverList.add(clientReceiver)
-                        it.registerChannelReceiveListener(clientReceiver)
+                        it.registerChannelMessageReceiver(clientReceiver)
                         clientList.add(it)
                     }
                 }
@@ -193,7 +193,7 @@ class WireCommunicationSpec : ShouldSpec({
             serverReceiverList.add(serverReceiver)
 
             clientConfigs.forEach { config  ->
-                server?.registerChannelReceiveListener(config.port, serverReceiver)
+                server?.registerChannelMessageReceiver(config.port, serverReceiver)
 
                 for(i in 1..config.totalClients){
                     clientFactory?.createClient("localhost",config.port)?.let {
@@ -204,7 +204,7 @@ class WireCommunicationSpec : ShouldSpec({
                         }
                         clientReceiver.clientId = "client-$i-${config.port}"
                         clientReceiverList.add(clientReceiver)
-                        it.registerChannelReceiveListener(clientReceiver)
+                        it.registerChannelMessageReceiver(clientReceiver)
                         clientList.add(it)
                     }
                 }
@@ -254,7 +254,7 @@ class WireCommunicationSpec : ShouldSpec({
            serverReceiverList.add(serverReceiver)
 
            clientConfigs.forEach { config ->
-               server?.registerChannelReceiveListener(config.port, serverReceiver)
+               server?.registerChannelMessageReceiver(config.port, serverReceiver)
                if (config.port in broadcastPorts) {
                    totalMessagesSent += (config.totalClients * (msgCount))
                }
@@ -267,7 +267,7 @@ class WireCommunicationSpec : ShouldSpec({
                        }
                        clientReceiver.clientId = "client-$i-${config.port}"
                        clientReceiverList.add(clientReceiver)
-                       it.registerChannelReceiveListener(clientReceiver)
+                       it.registerChannelMessageReceiver(clientReceiver)
                        clientList.add(it)
                    }
                }
@@ -308,7 +308,7 @@ class WireCommunicationSpec : ShouldSpec({
            serverReceiverList.add(serverReceiver)
 
            clientConfigs.forEach { config ->
-               server?.registerChannelReceiveListener(config.port, serverReceiver)
+               server?.registerChannelMessageReceiver(config.port, serverReceiver)
 
                totalMessagesSent += (config.totalClients * (msgCount))
 
@@ -321,7 +321,7 @@ class WireCommunicationSpec : ShouldSpec({
                        }
                        clientReceiver.clientId = "client-$i-${config.port}"
                        clientReceiverList.add(clientReceiver)
-                       it.registerChannelReceiveListener(clientReceiver)
+                       it.registerChannelMessageReceiver(clientReceiver)
                        clientList.add(it)
                    }
                }
@@ -364,7 +364,7 @@ class WireCommunicationSpec : ShouldSpec({
            serverReceiverList.add(serverReceiver)
 
            clientConfigs.forEach { config  ->
-               server?.registerChannelReceiveListener(config.port, serverReceiver)
+               server?.registerChannelMessageReceiver(config.port, serverReceiver)
 
                for(i in 1..config.totalClients){
                    clientFactory?.createClient("localhost",config.port)?.let {
@@ -375,7 +375,7 @@ class WireCommunicationSpec : ShouldSpec({
                        }
                        clientReceiver.clientId = "client-$i-${config.port}"
                        clientReceiverList.add(clientReceiver)
-                       it.registerChannelReceiveListener(clientReceiver)
+                       it.registerChannelMessageReceiver(clientReceiver)
                        clientList.add(it)
                    }
                }

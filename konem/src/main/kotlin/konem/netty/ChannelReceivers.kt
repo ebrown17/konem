@@ -1,12 +1,14 @@
-import konem.netty.MessageReceiver
+package konem.netty
+
 import java.net.SocketAddress
 
+
 interface ChannelReceiver<T> {
+    fun handleReceivedMessage(addr: SocketAddress, port: Int, message: T, extra: String  = "")
+    suspend fun receiveMessage(addr: SocketAddress, port: Int, message: T, extra: String  = "")
+}
 
-    fun handleReceivedMessage(addr: SocketAddress, port: Int, message: T)
-
-    suspend fun receiveMessage(addr: SocketAddress, port: Int, message: T)
-
+interface BaseChannelReceiverRegistrant<T> {
     /**
      *
      * Registers a Receiver on all active ports
@@ -17,10 +19,10 @@ interface ChannelReceiver<T> {
      *
      * @param receiver receiver to handle read data
      */
-    fun registerChannelReceiveListener(receiver: MessageReceiver<T>)
+    fun registerChannelMessageReceiver(receiver: MessageReceiver<T>)
 }
 
-interface ServerChannelReceiver<T> : ChannelReceiver<T> {
+interface BaseServerChannelReceiverRegistrant<T> : BaseChannelReceiverRegistrant<T> {
     /**
      *
      * Registers a Receiver on specific port
@@ -28,5 +30,33 @@ interface ServerChannelReceiver<T> : ChannelReceiver<T> {
      * @param port port to listen on
      * @param receiver receiver to handle read data
      */
-    fun registerChannelReceiveListener(port: Int, receiver: MessageReceiver<T>)
+    fun registerChannelMessageReceiver(port: Int, receiver: MessageReceiver<T>)
+}
+
+interface WebSocketChannelReceiverRegistrant<T> : BaseChannelReceiverRegistrant<T>{
+    /**
+     * Registers a receiver on the specified websocket paths.
+     *
+     * @param receiver receiver to handle read data
+     * @param webSocketPaths webSocket paths you want to read
+     */
+    fun registerChannelReadListener(receiver: MessageReceiver<T>, vararg webSocketPaths: String)
+}
+
+interface WebSocketServerChannelReceiverRegistrant<T> : BaseServerChannelReceiverRegistrant<T>{
+    /**
+     * Registers a receiver on the specified websocket paths.
+     *
+     * @param receiver receiver to handle read data
+     * @param webSocketPaths webSocket paths you want to read
+     */
+    fun registerChannelReadListener(receiver: MessageReceiver<T>, vararg webSocketPaths: String)
+
+    /**
+     * Registers a receiver on the specified websocket paths.
+     * @param port port to listen on
+     * @param receiver receiver to handle read data
+     * @param webSocketPaths webSocket paths you want to read
+     */
+    fun registerChannelReadListener(port: Int, receiver: MessageReceiver<T>, vararg webSocketPaths: String)
 }

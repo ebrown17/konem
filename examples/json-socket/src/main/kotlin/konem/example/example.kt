@@ -58,11 +58,11 @@ fun main(){
         }
     })
 
-    Thread.sleep(8000)
+    sleep(8000)
 
     client.disconnect()
 
-    Thread.sleep(1000)
+    sleep(1000)
 
     println(client.toString())
 

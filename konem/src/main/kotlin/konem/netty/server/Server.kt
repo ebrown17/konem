@@ -1,6 +1,5 @@
 package konem.netty.server
 
-import ServerChannelReceiver
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.buffer.PooledByteBufAllocator
 import io.netty.channel.*
@@ -63,7 +62,7 @@ data class ServerChannelInfo<T>(
 )
 
 
-interface Server<T> : ServerChannelReceiver<T> {
+interface Server<T> : BaseServerChannelReceiverRegistrant<T> {
     /**
      * Sends a message to all connected clients on specified port
      *
@@ -104,7 +103,7 @@ interface Server<T> : ServerChannelReceiver<T> {
 abstract class ServerInternal<T>(
     val serverConfig: ServerConfig, val heartbeatProtocol: ServerHeartbeatProtocol<T>,
     val protocolPipeline: ProtocolPipeline<T>
-) : HandlerListener<T>, Server<T> {
+) : HandlerListener<T>, Server<T>,ChannelReceiver<T> {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 

@@ -21,13 +21,13 @@ class TcpServer<T> internal constructor(
 
     private val logger = logger(this)
 
-    override fun registerChannelReceiveListener(receiver: MessageReceiver<T>) {
+    override fun registerChannelMessageReceiver(receiver: MessageReceiver<T>) {
         for (list in receiveListeners.values) {
             list.add(receiver)
         }
     }
 
-    override fun registerChannelReceiveListener(port: Int, receiver: MessageReceiver<T>) {
+    override fun registerChannelMessageReceiver(port: Int, receiver: MessageReceiver<T>) {
         if (!isPortConfigured(port)) {
             throw IllegalArgumentException("port type can't be null or port is not configured: port $port")
         }
@@ -102,13 +102,13 @@ class TcpServer<T> internal constructor(
         }
     }
 
-    override fun handleReceivedMessage(addr: SocketAddress, port: Int, message: T) {
+    override fun handleReceivedMessage(addr: SocketAddress, port: Int, message: T, extra: String) {
         serverScope.launch {
             receiveMessage(addr, port, message)
         }
     }
 
-    override suspend fun receiveMessage(addr: SocketAddress, port: Int, message: T) {
+    override suspend fun receiveMessage(addr: SocketAddress, port: Int, message: T, extra: String) {
         logger.trace("{}", message)
         val receiveListenerList = receiveListeners[port]
         if (receiveListenerList != null) {
