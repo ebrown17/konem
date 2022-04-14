@@ -1,12 +1,11 @@
 package konem.example
 
+import konem.Konem
 import konem.data.protobuf.Data
 import konem.data.protobuf.KonemMessage
 import konem.data.protobuf.MessageType
 import konem.netty.ConnectionListener
-import konem.protocol.konem.KonemWireMessageReceiver
-import konem.protocol.konem.wire.WireClientFactory
-import konem.protocol.konem.wire.WireServer
+
 import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger("wireServerExamples")
@@ -16,8 +15,8 @@ fun main(){
 }
 
 fun wireServerExamples() {
-  val server = WireServer.create { serverConfig ->
-      serverConfig.addChannel(8085)
+/*  val server = Konem.createSocketServer( serverConfig -> {
+        serverConfig.addChannel(8085)
   }
   server.startServer()
 
@@ -42,7 +41,7 @@ fun wireServerExamples() {
     client.disconnect()
     server.shutdownServer()
 
-  })
+  })*/
 }
 
 fun wireMessage(test: String): KonemMessage {

@@ -14,7 +14,7 @@ import java.lang.Thread.sleep
 
 fun main(){
 
-    val server = Konem.createTcpServer<KonemMessage>(
+    val server = Konem.createTcpSocketServer<KonemMessage>(
         config = { serverConfig ->
             serverConfig.addChannel(6160)
         },
@@ -38,7 +38,7 @@ fun main(){
 
     sleep(1000)
 
-    val clientFactory = Konem.createClientFactoryOfDefaults(
+    val clientFactory = Konem.createTcpSocketClientFactoryOfDefaults(
         heartbeatProtocol = ClientHeartbeatProtocol(isHeartbeat = { message ->
             message is KonemMessage && (message.message is Heartbeat)
          }),

@@ -24,7 +24,7 @@ class JsonCommunicationSpec : ShouldSpec({
         clientFactory?.shutdown()
         server?.shutdownServer()
 
-        server = Konem.createTcpServer(
+        server = Konem.createTcpSocketServer(
             config = {
                 it.addChannel(6060)
                 it.addChannel(6061)
@@ -35,7 +35,7 @@ class JsonCommunicationSpec : ShouldSpec({
             protocolPipeline = KonemProtocolPipeline.getKonemJsonPipeline()
         )
 
-        clientFactory = Konem.createClientFactoryOfDefaults(
+        clientFactory = Konem.createTcpSocketClientFactoryOfDefaults(
             heartbeatProtocol = ClientHeartbeatProtocol(isHeartbeat = { message ->
                 message is Heartbeat
             }),

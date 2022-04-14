@@ -14,9 +14,9 @@ fun main(){
 
     var count = 0
 
-    val server = Konem.createTcpServer(
-        config = { serverConfig ->
-            serverConfig.addChannel(6160)
+    val server = Konem.createTcpSocketServer(
+        config = {
+            it.addChannel(6160)
         },
         heartbeatProtocol = ServerHeartbeatProtocol { KonemMessage(Heartbeat()) },
         protocolPipeline = KonemProtocolPipeline.getKonemJsonPipeline()
@@ -24,7 +24,7 @@ fun main(){
 
     server.startServer()
 
-    server.registerChannelReceiveListener(MessageReceiver{ from, msg ->
+    server.registerChannelMessageReceiver(MessageReceiver{ from, msg ->
         println("SERVER Msg: $msg from $from")
         sleep(500)
         server.sendMessage(from,KonemMessage(message = Data("Send message ${count++}")))
@@ -34,7 +34,7 @@ fun main(){
 
     sleep(1000)
 
-    val clientFactory = Konem.createClientFactoryOfDefaults(
+    val clientFactory = Konem.createTcpSocketClientFactoryOfDefaults(
         heartbeatProtocol = ClientHeartbeatProtocol(isHeartbeat = { message ->
             message is Heartbeat
         }),
@@ -49,7 +49,7 @@ fun main(){
     })
 
 
-    client.registerChannelReceiveListener(MessageReceiver{ from, msg ->
+    client.registerChannelMessageReceiver(MessageReceiver{ from, msg ->
         println("CLIENT Msg: $msg from $from")
 
 

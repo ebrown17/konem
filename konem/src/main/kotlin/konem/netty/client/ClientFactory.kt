@@ -44,6 +44,24 @@ data class ClientChannelInfo<T>(
 
 data class RetryInfo(val retry_period: Long, val max_retry_period: Long, var retries_until_period_increase: Int)
 
+interface  TcpSocketClientFactory<T> {
+    fun createClient(host: String, port: Int): Client<T>
+    fun createClient(
+        address: InetSocketAddress,
+        config: ClientBootstrapConfig<T>
+    ): Client<T>
+}
+
+interface  WebSocketClientFactory<T> {
+    fun createClient(host: String, port: Int, vararg args: String): Client<T>
+    fun createClient(
+        address: InetSocketAddress,
+        config: ClientBootstrapConfig<T>,
+        vararg args: String
+    ): Client<T>
+}
+
+
 abstract class ClientFactory<T> constructor(
     private val config: ClientFactoryConfig,
     private val heartbeatProtocol: ClientHeartbeatProtocol,
@@ -63,7 +81,7 @@ abstract class ClientFactory<T> constructor(
         this.clientScope = CoroutineScope(CoroutineName("ClientScope"))
     }
 
-    abstract fun createClient(host: String, port: Int, vararg args: String): Client<T>
+
 
     private fun createBootStrap(): Bootstrap {
         val bootstrap = Bootstrap()
@@ -93,12 +111,6 @@ abstract class ClientFactory<T> constructor(
             )
         )
     }
-
-    protected abstract fun createClient(
-        address: InetSocketAddress,
-        config: ClientBootstrapConfig<T>,
-        vararg args: String
-    ): Client<T>
 
     fun shutdown() {
         for (client in clientArrayList) {

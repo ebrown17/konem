@@ -8,14 +8,14 @@ import konem.TestServerReceiver
 import konem.data.json.Data
 import konem.data.json.KonemMessage
 import konem.netty.client.Client
-import konem.netty.server.Server
+import konem.netty.server.TcpSocketServer
 import konem.protocol.tcp.TcpClientFactory
 import konem.waitForMsgTime
 import java.net.SocketAddress
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
-var server: Server<KonemMessage>? = null
+var server: TcpSocketServer<KonemMessage>? = null
 var clientFactory:  TcpClientFactory<KonemMessage>? = null
 
 

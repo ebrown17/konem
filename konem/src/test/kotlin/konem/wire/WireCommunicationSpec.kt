@@ -26,7 +26,7 @@ class WireCommunicationSpec : ShouldSpec({
         clientFactory?.shutdown()
         server?.shutdownServer()
 
-        server = Konem.createTcpServer(
+        server = Konem.createTcpSocketServer(
             config = {
                 it.addChannel(6060)
                 it.addChannel(6061)
@@ -42,7 +42,7 @@ class WireCommunicationSpec : ShouldSpec({
             protocolPipeline = KonemProtocolPipeline.getKonemWirePipeline()
         )
 
-        clientFactory = Konem.createClientFactoryOfDefaults(
+        clientFactory = Konem.createTcpSocketClientFactoryOfDefaults(
             heartbeatProtocol = ClientHeartbeatProtocol(isHeartbeat = { message ->
                 message is HeartBeat
             }),

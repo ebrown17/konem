@@ -8,6 +8,7 @@ import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.util.concurrent.DefaultThreadFactory
 import konem.netty.*
+import konem.protocol.websocket.json.*
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
@@ -40,7 +41,7 @@ class ServerConfig : BaseConfig() {
     }
 }
 
-class WebsocketServerConfig : BaseConfig() {
+class WebSocketServerConfig : BaseConfig() {
     private val portToWsMap: HashMap<Int, Array<String>> = HashMap()
 
     /**
@@ -61,8 +62,7 @@ data class ServerChannelInfo<T>(
     val protocol_pipeline: ProtocolPipeline<T>
 )
 
-
-interface Server<T> : BaseServerChannelReceiverRegistrant<T> {
+interface WebSocketServer<T> : Server<T>, WebSocketServerChannelReceiverRegistrant<T> {
     /**
      * Sends a message to all connected clients on specified port
      *
@@ -79,6 +79,32 @@ interface Server<T> : BaseServerChannelReceiverRegistrant<T> {
      * @param args any extra arguments needed to specify which channels
      */
     fun broadcastOnAllChannels(message: T, vararg args: String)
+
+
+    fun registerPathConnectionListener(listener: WebSocketConnectionListener)
+    fun registerPathDisconnectionListener(listener: WebSocketDisconnectionListener)
+    fun registerPathConnectionStatusListener(listener: WebSocketConnectionStatusListener)
+}
+
+interface TcpSocketServer<T>: Server<T>{
+    /**
+     * Sends a message to all connected clients on specified port
+     *
+     * @param port port of channel to send message on
+     * @param message to send
+     */
+    fun broadcastOnChannel(port: Int, message: T)
+
+    /**
+     * Broadcasts a message on all channels.
+     *
+     * @param message
+     */
+    fun broadcastOnAllChannels(message: T)
+}
+
+
+interface Server<T> : BaseServerChannelReceiverRegistrant<T> {
 
     /**
      * Sends a message to specified host
@@ -100,8 +126,37 @@ interface Server<T> : BaseServerChannelReceiverRegistrant<T> {
 
 }
 
+abstract class WebSocketServerInternal<T>(
+    serverConfig: WebSocketServerConfig, heartbeatProtocol: ServerHeartbeatProtocol<T>,
+    protocolPipeline: ProtocolPipeline<T>
+) : ServerInternal<T>(serverConfig,heartbeatProtocol,protocolPipeline){
+    internal val pathConnectionListeners: MutableList<WsConnectListener> = ArrayList()
+    internal val pathDisconnectionListeners: MutableList<WsDisconnectListener> = ArrayList()
+    internal val websocketMap: ConcurrentHashMap<Int, Array<String>> = ConcurrentHashMap()
+
+    internal fun isPathConfiguredOnPort(port: Int, path: String): Boolean {
+        val configuredPaths = websocketMap[port]
+        return configuredPaths?.contains(path) ?: false
+    }
+
+    internal fun onPathConnect(remoteConnection: InetSocketAddress, paths: String) {
+        for (listener in pathConnectionListeners) {
+            listener.onConnection(remoteConnection, paths)
+        }
+    }
+
+    internal fun onPathDisconnect(remoteConnection: InetSocketAddress, paths: String) {
+        for (listener in pathDisconnectionListeners) {
+            listener.onDisconnection(remoteConnection, paths)
+        }
+    }
+}
+
+
+
+
 abstract class ServerInternal<T>(
-    val serverConfig: ServerConfig, val heartbeatProtocol: ServerHeartbeatProtocol<T>,
+    val serverConfig: BaseConfig, val heartbeatProtocol: ServerHeartbeatProtocol<T>,
     val protocolPipeline: ProtocolPipeline<T>
 ) : HandlerListener<T>, Server<T>,ChannelReceiver<T> {
 

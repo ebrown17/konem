@@ -3,9 +3,7 @@ package konem.protocol.tcp
 import io.netty.bootstrap.ServerBootstrap
 import konem.logger
 import konem.netty.*
-import konem.netty.server.ServerChannelInfo
-import konem.netty.server.ServerConfig
-import konem.netty.server.ServerInternal
+import konem.netty.server.*
 import kotlinx.coroutines.launch
 import java.net.SocketAddress
 import java.util.concurrent.ConcurrentHashMap
@@ -14,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap
 class TcpServer<T> internal constructor(
     serverConfig: ServerConfig, heartbeatProtocol: ServerHeartbeatProtocol<T>,
     protocolPipeline: ProtocolPipeline<T>
-) : ServerInternal<T>(serverConfig, heartbeatProtocol, protocolPipeline) {
+) : ServerInternal<T>(serverConfig, heartbeatProtocol, protocolPipeline), TcpSocketServer<T> {
 
     private val receiveListeners: ConcurrentHashMap<Int, ArrayList<MessageReceiver<T>>> =
         ConcurrentHashMap()
@@ -40,12 +38,12 @@ class TcpServer<T> internal constructor(
         receiveListeners[port] = readerListenerList
     }
 
-    override fun broadcastOnChannel(port: Int, message: T, vararg args: String) {
+    override fun broadcastOnChannel(port: Int, message: T) {
         val transceiver = getTransceiverMap()[port]
         transceiver?.broadcast(message)
     }
 
-    override fun broadcastOnAllChannels(message: T, vararg args: String) {
+    override fun broadcastOnAllChannels(message: T) {
         val transceiverMap = getTransceiverMap()
         for (transceiver in transceiverMap.values) {
             transceiver.broadcast(message)

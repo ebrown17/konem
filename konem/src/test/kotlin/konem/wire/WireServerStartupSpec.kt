@@ -38,7 +38,7 @@ class WireServerStartupSpec : ShouldSpec({
 
         ) { ( portsToConfigure) ->
 
-            server = Konem.createTcpServer(
+            server = Konem.createTcpSocketServer(
                 config = {
                     portsToConfigure.forEach { port ->
                         it.addChannel(port)

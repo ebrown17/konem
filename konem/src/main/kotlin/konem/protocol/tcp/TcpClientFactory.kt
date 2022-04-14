@@ -2,10 +2,7 @@ package konem.protocol.tcp
 
 import konem.netty.ClientHeartbeatProtocol
 import konem.netty.ProtocolPipeline
-import konem.netty.client.Client
-import konem.netty.client.ClientBootstrapConfig
-import konem.netty.client.ClientFactory
-import konem.netty.client.ClientFactoryConfig
+import konem.netty.client.*
 
 import java.net.InetSocketAddress
 
@@ -13,9 +10,9 @@ class TcpClientFactory<T> internal constructor(
     config: ClientFactoryConfig,
     heartbeatProtocol: ClientHeartbeatProtocol,
     protocolPipeline: ProtocolPipeline<T>
-) : ClientFactory<T>(config, heartbeatProtocol, protocolPipeline) {
+) : ClientFactory<T>(config, heartbeatProtocol, protocolPipeline), TcpSocketClientFactory<T> {
 
-    override fun createClient(host: String, port: Int, vararg args: String): Client<T> {
+    override fun createClient(host: String, port: Int): Client<T> {
         val address = InetSocketAddress(host, port)
         val transceiver = TcpTransceiver<T>(port)
         return createClient(address, createClientConfig(transceiver))
@@ -23,8 +20,7 @@ class TcpClientFactory<T> internal constructor(
 
     override fun createClient(
         address: InetSocketAddress,
-        config: ClientBootstrapConfig<T>,
-        vararg args: String
+        config: ClientBootstrapConfig<T>
     ): Client<T> {
         val transceiver = config.transceiver as TcpTransceiver<T>
         val bootstrap = config.bootstrap
