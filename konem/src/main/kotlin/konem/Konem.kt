@@ -2,6 +2,7 @@ package konem
 
 import konem.netty.*
 import konem.netty.client.ClientFactoryConfig
+import konem.netty.client.TcpSocketClientFactory
 import konem.netty.server.ServerConfig
 import konem.netty.server.TcpSocketServer
 import konem.protocol.tcp.TcpClientFactory
@@ -27,7 +28,7 @@ class Konem private constructor() {
         fun <T> createTcpSocketClientFactoryOfDefaults(
             heartbeatProtocol: ClientHeartbeatProtocol,
             protocolPipeline: ProtocolPipeline<T>
-            ): TcpClientFactory<T> {
+            ): TcpSocketClientFactory<T> {
             return TcpClientFactory(ClientFactoryConfig(),heartbeatProtocol,protocolPipeline)
         }
 

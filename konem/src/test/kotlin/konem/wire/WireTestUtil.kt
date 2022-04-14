@@ -9,6 +9,7 @@ import konem.data.protobuf.Data
 import konem.data.protobuf.KonemMessage
 import konem.data.protobuf.MessageType
 import konem.netty.client.Client
+import konem.netty.client.TcpSocketClientFactory
 import konem.netty.server.Server
 import konem.netty.server.TcpSocketServer
 import konem.protocol.tcp.TcpClientFactory
@@ -18,7 +19,7 @@ import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
 var server: TcpSocketServer<KonemMessage>? = null
-var clientFactory:  TcpClientFactory<KonemMessage>? = null
+var clientFactory:  TcpSocketClientFactory<KonemMessage>? = null
 
 
 class WireTestClientReceiver(client: Client<KonemMessage>, receive: (SocketAddress, KonemMessage) -> Unit):

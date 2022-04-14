@@ -8,6 +8,7 @@ import konem.TestServerReceiver
 import konem.data.json.Data
 import konem.data.json.KonemMessage
 import konem.netty.client.Client
+import konem.netty.client.TcpSocketClientFactory
 import konem.netty.server.TcpSocketServer
 import konem.protocol.tcp.TcpClientFactory
 import konem.waitForMsgTime
@@ -16,7 +17,7 @@ import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
 var server: TcpSocketServer<KonemMessage>? = null
-var clientFactory:  TcpClientFactory<KonemMessage>? = null
+var clientFactory:  TcpSocketClientFactory<KonemMessage>? = null
 
 
 class JsonTestClientReceiver(client: Client<KonemMessage>, receive: (SocketAddress, KonemMessage) -> Unit):
