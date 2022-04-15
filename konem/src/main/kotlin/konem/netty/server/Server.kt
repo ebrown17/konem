@@ -62,7 +62,7 @@ data class ServerChannelInfo<T>(
     val protocol_pipeline: ProtocolPipeline<T>
 )
 
-interface WebSocketServer<T> : Server<T>, WebSocketServerChannelReceiverRegistrant<T> {
+interface WebSocketServer<T>: Server<T>, WebSocketServerChannelReceiverRegistrant<T> {
     /**
      * Sends a message to all connected clients on specified port
      *
