@@ -80,7 +80,10 @@ suspend fun <T> startServer(server: Server<T>) : Boolean{
 
 @ExperimentalTime
 suspend fun <T> connectClients(clientList : MutableList<Client<T>>) : Boolean{
-    clientList.forEach { client -> client.connect() }
+    clientList.forEach { client ->
+        client.connect()
+        Thread.sleep(10)
+    }
     return until(activeTime.seconds, 250.milliseconds.fixed()) {
         areClientsActive(clientList)
     }
@@ -88,12 +91,14 @@ suspend fun <T> connectClients(clientList : MutableList<Client<T>>) : Boolean{
 
 @ExperimentalTime
 suspend fun <T> disconnectClients(clientList : MutableList<Client<T>>) : Boolean{
-    clientList.forEach { client -> client.disconnect() }
+    clientList.forEach { client ->
+        client.disconnect()
+        Thread.sleep(10)
+    }
     return until(activeTime.seconds, 250.milliseconds.fixed()) {
         areClientsInactive(clientList)
     }
 }
-
 
 @ExperimentalTime
 suspend fun <T> waitForMessagesServer(totalMessages:Int ,receiverList : MutableList<out TestServerReceiver<T>>,debug: Boolean = false) : Boolean{

@@ -66,8 +66,8 @@ sourceSets {
 }
 
 test {
-    jvmArgs = ["-Dio.netty.leakDetection.level=PARANOID","-Dkonem.secure.keyStoreLocation=config/keystore/konem.jks","-Dkonem.secure.keyStoreType=JKS","-Dkonem.secure.keyStorePassword=test123",
-    "--add-opens","java.base/jdk.internal.misc=ALL-UNNAMED","--add-exports=java.base/sun.security.x509=ALL-UNNAMED","-Dio.netty.tryReflectionSetAccessible=true","--illegal-access=warn"]
+    jvmArgs = ["-Dio.netty.leakDetection.level=PARANOID","-Dkonem.secure.keyStoreLocation=config/keystore/konem.jks",
+               "-Dkonem.secure.keyStoreType=JKS","-Dkonem.secure.keyStorePassword=test123", "-Dio.netty.tryReflectionSetAccessible=true"]
 
     systemProperties 'SKIP.LONG': '1'
 
