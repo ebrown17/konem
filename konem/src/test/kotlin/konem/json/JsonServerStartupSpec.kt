@@ -12,6 +12,8 @@ import konem.netty.ServerHeartbeatProtocol
 import konem.protocol.konem.KonemProtocolPipeline
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
 
@@ -48,8 +50,8 @@ class JsonServerStartupSpec : ShouldSpec({
 
 
             startServer(server!!)
-            delay(Duration.seconds(1))
-            until(Duration.seconds(activeTime), Duration.milliseconds(250).fixed()) {
+            delay(1.seconds)
+            until(activeTime.seconds, 250.milliseconds.fixed()) {
                 if (server != null) {
                     var allPortsConfigured = true
 

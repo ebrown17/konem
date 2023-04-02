@@ -3,40 +3,38 @@ package konem.wire
 import io.kotest.assertions.until.fixed
 import io.kotest.assertions.until.until
 import io.kotest.common.ExperimentalKotest
-import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.core.spec.style.FunSpec
 import io.kotest.datatest.withData
+
 import konem.*
-import konem.data.json.Heartbeat
-import konem.data.json.KonemMessage
 import konem.data.protobuf.HeartBeat
 import konem.data.protobuf.MessageType
 import konem.netty.ServerHeartbeatProtocol
 import konem.protocol.konem.KonemProtocolPipeline
 import kotlinx.coroutines.delay
 import java.util.*
-import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
 
 @ExperimentalTime
 @ExperimentalKotest
-class WireServerStartupSpec : ShouldSpec({
-
-    afterContainer {
+class WireServerStartupSpec : FunSpec({
+    afterTest{
         clientFactory?.shutdown()
         server?.shutdownServer()
     }
-
-    should(": Server starts with expected ports and values: ") {
+    context("Server starts with expected ports and values") {
         withData(
-            nameFn = { data: ServerStartup -> "${this.testCase.displayName} ${data.portsToConfigure}" },
-            ServerStartup( mutableListOf(6060)),
-            ServerStartup( mutableListOf(6060,6061,6062)),
-            ServerStartup( mutableListOf(6060,6061,6062,6063,6064,6065)),
-            ServerStartup( mutableListOf(6060,6061,6062,6060,6061,6062)),
-            ServerStartup( mutableListOf(6060,6061,6062,6061,6062,6065)),
+            nameFn = { data: ServerStartup -> "${this.testCase.name.testName} ${data.portsToConfigure}" },
+            ServerStartup(mutableListOf(6060)),
+            ServerStartup(mutableListOf(6060, 6061, 6062)),
+            ServerStartup(mutableListOf(6060, 6061, 6062, 6063, 6064, 6065)),
+            ServerStartup(mutableListOf(6060, 6061, 6062, 6060, 6061, 6062)),
+            ServerStartup(mutableListOf(6060, 6061, 6062, 6061, 6062, 6065)),
 
-        ) { ( portsToConfigure) ->
+            ) { (portsToConfigure) ->
 
             server = Konem.createTcpSocketServer(
                 config = {
@@ -54,8 +52,8 @@ class WireServerStartupSpec : ShouldSpec({
             )
 
             startServer(server!!)
-            delay(Duration.seconds(1))
-            until(Duration.seconds(activeTime), Duration.milliseconds(250).fixed()) {
+            delay(1.seconds)
+            until(activeTime.seconds, 250.milliseconds.fixed()) {
                 if (server != null) {
                     var allPortsConfigured = true
 
@@ -75,4 +73,5 @@ class WireServerStartupSpec : ShouldSpec({
             if (DEBUG) println("-----------------------------------")
         }
     }
+
 })

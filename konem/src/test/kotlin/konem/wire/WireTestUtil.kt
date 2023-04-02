@@ -10,12 +10,12 @@ import konem.data.protobuf.KonemMessage
 import konem.data.protobuf.MessageType
 import konem.netty.client.Client
 import konem.netty.client.TcpSocketClientFactory
-import konem.netty.server.Server
 import konem.netty.server.TcpSocketServer
-import konem.protocol.tcp.TcpClientFactory
 import konem.waitForMsgTime
 import java.net.SocketAddress
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
 var server: TcpSocketServer<KonemMessage>? = null
@@ -35,7 +35,7 @@ fun sendClientMessages(messageSendCount: Int, clientList: MutableList<Client<Kon
             client.sendMessage(
                 KonemMessage(
                     messageType = MessageType.DATA,
-                    data = Data("Client $index message $i")
+                    data_ = Data("Client $index message $i")
                 )
             )
         }
@@ -51,7 +51,7 @@ fun sendClientMessageWithReceiver(messageSendCount: Int, clientList: MutableList
             receiver.client.sendMessage(
                 KonemMessage(
                     messageType = MessageType.DATA,
-                    data = Data(receiver.clientId)
+                    data_ = Data(receiver.clientId)
                 )
             )
         }
@@ -66,7 +66,7 @@ fun serverBroadcastOnChannels(messageSendCount: Int, broadcastPorts: MutableList
                 port,
                 KonemMessage(
                     messageType = MessageType.DATA,
-                    data = Data("Server message $i")
+                    data_ = Data("Server message $i")
                 )
             )
         }
@@ -78,7 +78,7 @@ fun serverBroadcastOnAllChannels(messageSendCount: Int){
         server?.broadcastOnAllChannels(
             KonemMessage(
                 messageType = MessageType.DATA,
-                data = Data("Server message $i")
+                data_ = Data("Server message $i")
             )
         )
     }
@@ -86,13 +86,13 @@ fun serverBroadcastOnAllChannels(messageSendCount: Int){
 
 @ExperimentalTime
 suspend fun waitForMessagesReceiverClient(totalMessages:Int ,receiverList : MutableList<WireTestClientReceiver>,debug: Boolean = false) : Boolean{
-    return until(Duration.seconds(waitForMsgTime), Duration.milliseconds(250).fixed()) {
+    return until(waitForMsgTime.seconds, 250.milliseconds.fixed()) {
         val received: Int = receiverList.sumOf { it.messageCount }
         var correctMsgs = true
         receiverList.forEach{ receiver ->
             receiver.messageList.forEach {
-                val msg = it.data as Data
-                if(msg.data != receiver.clientId){
+                val msg = it.data_ as Data
+                if(msg.data_ != receiver.clientId){
                     correctMsgs = false
                 }
             }

@@ -14,6 +14,8 @@ import konem.protocol.tcp.TcpClientFactory
 import konem.waitForMsgTime
 import java.net.SocketAddress
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
 var server: TcpSocketServer<KonemMessage>? = null
@@ -63,7 +65,7 @@ fun serverBroadcastOnAllChannels(messageSendCount: Int){
 
 @ExperimentalTime
 suspend fun waitForMessagesReceiverClient(totalMessages:Int ,receiverList : MutableList<JsonTestClientReceiver>,debug: Boolean = false) : Boolean{
-    return until(Duration.seconds(waitForMsgTime), Duration.milliseconds(250).fixed()) {
+    return until(waitForMsgTime.seconds, 250.milliseconds.fixed()) {
         val received: Int = receiverList.sumOf { it.messageCount }
         var correctMsgs = true
         receiverList.forEach{ receiver ->

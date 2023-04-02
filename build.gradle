@@ -35,12 +35,12 @@ allprojects {
 
     compileKotlin {
         kotlinOptions.jvmTarget = jvmTargetVersion
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
 }
 
 wrapper {
-    gradleVersion = '7.1.1'
+    gradleVersion = '8.0.2'
 }

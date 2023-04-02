@@ -1,0 +1,23 @@
+<configuration scan="false" scanPeriod="60 seconds">
+
+    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener" />
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger{25}.%M - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <!--
+    Log will display all levels that are greater than set level
+    TRACE < DEBUG < INFO < WARN < ERROR < OFF
+    Log level for logger in these classes, will override root level if set, will duplicate logs if same appender is added
+    -->
+    <logger name="io.netty" level="WARN" />
+
+    <root level="debug">
+        <appender-ref ref="STDOUT" />
+    </root>
+
+</configuration>

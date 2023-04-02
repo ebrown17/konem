@@ -36,11 +36,12 @@ dependencies {
 
 compileTestKotlin {
     kotlinOptions.jvmTarget = jvmTargetVersion
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 detekt {
+
     input = files("src/main/kotlin")
     parallel = true
     ignoreFailures = true
@@ -52,8 +53,9 @@ detekt {
         xml {enabled = false}
         txt {enabled = false}
     }
-}
 
+}
+tasks.getByPath(':detekt').dependsOn(':konem:generateMainProtos')
 sourceSets {
     test {
         groovy {

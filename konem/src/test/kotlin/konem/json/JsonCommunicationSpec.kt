@@ -14,6 +14,7 @@ import konem.protocol.konem.KonemProtocolPipeline
 
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
@@ -430,7 +431,7 @@ class JsonCommunicationSpec : ShouldSpec({
 
            startServer(server!!)
            connectClients(clientList)
-           delay(Duration.milliseconds(delayDurationMs))
+           delay(delayDurationMs.milliseconds)
 
            waitForClientStatusChange(totalClientConnections, mutableListOf(clientConnnectListenerGlobal), DEBUG)
            waitForClientStatusChange(totalClientConnections,clientDiscList, DEBUG)
@@ -480,7 +481,7 @@ class JsonCommunicationSpec : ShouldSpec({
 
            startServer(server!!)
            connectClients(clientList)
-           delay(Duration.milliseconds(delayDurationMs))
+           delay(delayDurationMs.milliseconds)
 
            waitForServerStatusChange(totalServerConnections,serverConList, DEBUG)
 
@@ -538,11 +539,11 @@ class JsonCommunicationSpec : ShouldSpec({
 
            startServer(server!!)
            connectClients(clientList)
-           delay(Duration.milliseconds(delayDurationMs))
+           delay(delayDurationMs.milliseconds)
 
            waitForServerStatusChange(totalServerConnections,serverConList, DEBUG)
            server?.shutdownServer()
-           delay(Duration.milliseconds(delayDurationMs))
+           delay(delayDurationMs.milliseconds)
 
            waitForClientStatusChange(totalClientDisconnects,clientDiscList, DEBUG)
            if (DEBUG) println("-----------------------------------")
@@ -589,7 +590,7 @@ class JsonCommunicationSpec : ShouldSpec({
            startServer(server!!)
            connectClients(clientList)
            disconnectClients(clientList)
-           delay(Duration.milliseconds(delayDurationMs))
+           delay(delayDurationMs.milliseconds)
 
            waitForServerStatusChange(totalServerDisconnections, mutableListOf(serverDisconnectionListener), DEBUG)
 
@@ -654,24 +655,24 @@ class JsonCommunicationSpec : ShouldSpec({
 
            startServer(server!!)
            connectClients(clientList)
-           delay(Duration.milliseconds(delayDurationMs))
+           delay(delayDurationMs.milliseconds)
            waitForServerStatusChange(totalConnections,serverStatusList, DEBUG,true)
            waitForClientStatusChange(totalConnections,clientStatusList, DEBUG,true)
            waitForClientStatusChange(totalConnections, mutableListOf(clientStatusListenerG), debug=false,true)
            disconnectClients(clientList)
-           delay(Duration.milliseconds(delayDurationMs))
+           delay(delayDurationMs.milliseconds)
            waitForServerStatusChange(totalConnections,serverStatusList, DEBUG,false)
            waitForClientStatusChange(totalConnections,clientStatusList, DEBUG,false)
            waitForClientStatusChange(totalConnections, mutableListOf(clientStatusListenerG), debug=false,false)
 
            connectClients(clientList)
-           delay(Duration.milliseconds(delayDurationMs))
+           delay(delayDurationMs.milliseconds)
            waitForServerStatusChange(totalConnections*2,serverStatusList, DEBUG,true)
            waitForClientStatusChange(totalConnections*2,clientStatusList, DEBUG,true)
            waitForClientStatusChange(totalConnections*2, mutableListOf(clientStatusListenerG), debug=false,true)
 
            server?.shutdownServer()
-           delay(Duration.milliseconds(delayDurationMs))
+           delay(delayDurationMs.milliseconds)
            waitForClientStatusChange(totalConnections*2,clientStatusList, DEBUG,false)
            waitForClientStatusChange(totalConnections*2, mutableListOf(clientStatusListenerG), debug=false,false)
 

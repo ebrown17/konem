@@ -1,11 +1,8 @@
 package konem.example
 
-import konem.Konem
 import konem.data.protobuf.Data
 import konem.data.protobuf.KonemMessage
 import konem.data.protobuf.MessageType
-import konem.netty.ConnectionListener
-
 import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger("wireServerExamples")
@@ -47,6 +44,6 @@ fun wireServerExamples() {
 fun wireMessage(test: String): KonemMessage {
   return KonemMessage(
     messageType = MessageType.DATA,
-    data = Data(test)
+    data_ = Data(test)
   )
 }

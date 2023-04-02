@@ -16,6 +16,7 @@ import konem.protocol.konem.KonemProtocolPipeline
 import kotlinx.coroutines.delay
 import java.util.*
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
@@ -228,7 +229,7 @@ class WireCommunicationSpec : ShouldSpec({
 
    should(": Server's broadcastOnChannel sends to all clients on correct port: ") {
        withData(
-           nameFn = { data: ClientCommConfigsV2 -> "${this.testCase.displayName} ${data.msgCount} ${data.broadcastPorts} ${data.clientConfigs}" },
+           nameFn = { data: ClientCommConfigsV2 -> "${this.testCase.name} ${data.msgCount} ${data.broadcastPorts} ${data.clientConfigs}" },
            ClientCommConfigsV2(1, mutableListOf(6060), mutableListOf(ClientConfig(6060, 1))),
            ClientCommConfigsV2(5,  mutableListOf(6061),  mutableListOf(ClientConfig(6060, 10))),
            ClientCommConfigsV2(5, mutableListOf(6060), mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
@@ -437,7 +438,7 @@ class WireCommunicationSpec : ShouldSpec({
 
            startServer(server!!)
            connectClients(clientList)
-           delay(Duration.milliseconds(delayDurationMs))
+           delay(delayDurationMs.milliseconds)
 
            waitForClientStatusChange(totalClientConnections, mutableListOf(clientConnnectListenerGlobal), DEBUG)
            waitForClientStatusChange(totalClientConnections,clientDiscList, DEBUG)
@@ -487,7 +488,7 @@ class WireCommunicationSpec : ShouldSpec({
 
            startServer(server!!)
            connectClients(clientList)
-           delay(Duration.milliseconds(delayDurationMs))
+           delay(delayDurationMs.milliseconds)
 
            waitForServerStatusChange(totalServerConnections,serverConList, DEBUG)
 
@@ -532,12 +533,12 @@ class WireCommunicationSpec : ShouldSpec({
                totalClientDisconnects = totalServerConnections
                for (i in 1..config.totalClients) {
                    clientFactory?.createClient("localhost",config.port)?.let { client ->
-                       lateinit var clientDisonnectListener: TestDisconnectionListener
-                       clientDisonnectListener = TestDisconnectionListener {
-                           clientDisonnectListener.disconnections++
+                       lateinit var clientDisconnectListener: TestDisconnectionListener
+                       clientDisconnectListener = TestDisconnectionListener {
+                           clientDisconnectListener.disconnections++
                        }
-                       client.registerDisconnectionListener(clientDisonnectListener)
-                       clientDiscList.add(clientDisonnectListener)
+                       client.registerDisconnectionListener(clientDisconnectListener)
+                       clientDiscList.add(clientDisconnectListener)
                        clientList.add(client)
                    }
                }
@@ -545,11 +546,11 @@ class WireCommunicationSpec : ShouldSpec({
 
            startServer(server!!)
            connectClients(clientList)
-           delay(Duration.milliseconds(delayDurationMs))
+           delay(delayDurationMs.milliseconds)
 
            waitForServerStatusChange(totalServerConnections,serverConList, DEBUG)
            server?.shutdownServer()
-           delay(Duration.milliseconds(delayDurationMs))
+           delay(delayDurationMs.milliseconds)
 
            waitForClientStatusChange(totalClientDisconnects,clientDiscList, DEBUG)
            if (DEBUG) println("-----------------------------------")
@@ -596,7 +597,7 @@ class WireCommunicationSpec : ShouldSpec({
            startServer(server!!)
            connectClients(clientList)
            disconnectClients(clientList)
-           delay(Duration.milliseconds(delayDurationMs))
+           delay(delayDurationMs.milliseconds)
 
            waitForServerStatusChange(totalServerDisconnections, mutableListOf(serverDisconnectionListener), DEBUG)
 
@@ -661,24 +662,24 @@ class WireCommunicationSpec : ShouldSpec({
 
            startServer(server!!)
            connectClients(clientList)
-           delay(Duration.milliseconds(delayDurationMs))
+           delay(delayDurationMs.milliseconds)
            waitForServerStatusChange(totalConnections,serverStatusList, DEBUG,true)
            waitForClientStatusChange(totalConnections,clientStatusList, DEBUG,true)
            waitForClientStatusChange(totalConnections, mutableListOf(clientStatusListenerG), debug=false,true)
            disconnectClients(clientList)
-           delay(Duration.milliseconds(delayDurationMs))
+           delay(delayDurationMs.milliseconds)
            waitForServerStatusChange(totalConnections,serverStatusList, DEBUG,false)
            waitForClientStatusChange(totalConnections,clientStatusList, DEBUG,false)
            waitForClientStatusChange(totalConnections, mutableListOf(clientStatusListenerG), debug=false,false)
 
            connectClients(clientList)
-           delay(Duration.milliseconds(delayDurationMs))
+           delay(delayDurationMs.milliseconds)
            waitForServerStatusChange(totalConnections*2,serverStatusList, DEBUG,true)
            waitForClientStatusChange(totalConnections*2,clientStatusList, DEBUG,true)
            waitForClientStatusChange(totalConnections*2, mutableListOf(clientStatusListenerG), debug=false,true)
 
            server?.shutdownServer()
-           delay(Duration.milliseconds(delayDurationMs))
+           delay(delayDurationMs.milliseconds)
            waitForClientStatusChange(totalConnections*2,clientStatusList, DEBUG,false)
            waitForClientStatusChange(totalConnections*2, mutableListOf(clientStatusListenerG), debug=false,false)
 

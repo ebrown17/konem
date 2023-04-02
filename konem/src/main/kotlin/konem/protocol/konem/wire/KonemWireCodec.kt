@@ -8,7 +8,7 @@ import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.MessageToMessageCodec
 import konem.data.protobuf.KonemMessage
 
-class KonemWireCodec: MessageToMessageCodec<ByteBuf,KonemMessage>() {
+class KonemWireCodec: MessageToMessageCodec<ByteBuf, KonemMessage>() {
 
     private val adapter: ProtoAdapter<KonemMessage> = KonemMessage.ADAPTER
 
