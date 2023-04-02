@@ -6,7 +6,7 @@ ext {
     coroutinesVersion = '1.7.0-Beta'
     jsonVersion = '1.4.1'
     nettyVersion = '4.1.90.Final'
-
+    bouncycastleVersion = '1.70'
     spockVersion = '1.2-groovy-2.5'
     groovyVersion = '2.5.5'
 
@@ -34,6 +34,7 @@ ext {
             ],
 
             'netty'  : "io.netty:netty-all:${nettyVersion}",
+            'bouncycastle' : "org.bouncycastle:bcpkix-jdk15on:${bouncycastleVersion}",
             'wire'   : "com.squareup.wire:wire-runtime:${wireVersion}",
 
             'slf4j'  : "org.slf4j:slf4j-api:${slf4jVersion}",
