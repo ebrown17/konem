@@ -1,6 +1,8 @@
 package konem.wire
 
 import io.kotest.common.ExperimentalKotest
+import io.kotest.core.spec.BeforeTest
+import io.kotest.core.spec.style.FunSpec
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.datatest.withData
 import konem.*
@@ -21,12 +23,13 @@ import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
 @ExperimentalKotest
-class WireCommunicationSpec : ShouldSpec({
+class WireCommunicationSpec : FunSpec({
 
-    beforeContainer {
+    beforeTest {
         clientFactory?.shutdown()
         server?.shutdownServer()
 
+        println("XXXX before")
         server = Konem.createTcpSocketServer(
             config = {
                 it.addChannel(6060)
@@ -51,14 +54,15 @@ class WireCommunicationSpec : ShouldSpec({
         )
     }
 
-    afterContainer {
+
+    afterTest {
         clientFactory?.shutdown()
         server?.shutdownServer()
     }
 
-    should(": Server readers can register and then see messages: ") {
+    context(": Server readers can register and then see messages: ") {
         withData(
-            nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.displayName} ${data.msgCount} ${data.clientConfigs}" },
+            nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.testName} ${data.msgCount} ${data.clientConfigs}" },
             ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
             ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
             ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
@@ -108,9 +112,9 @@ class WireCommunicationSpec : ShouldSpec({
     }
 
 
-    should(": Clients can register reader; connect; send and receive messages from server: ") {
+    context(": Clients can register reader; connect; send and receive messages from server: ") {
         withData(
-            nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.displayName} ${data.msgCount} ${data.clientConfigs}" },
+            nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.testName} ${data.msgCount} ${data.clientConfigs}" },
             ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
             ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
             ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
@@ -164,9 +168,9 @@ class WireCommunicationSpec : ShouldSpec({
     }
 
 
-    should(": Clients can register reader; connect and then can send and receive messages from server after a reconnect: ") {
+    context(": Clients can register reader; connect and then can send and receive messages from server after a reconnect: ") {
         withData(
-            nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.displayName} ${data.msgCount} ${data.clientConfigs}" },
+            nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.testName} ${data.msgCount} ${data.clientConfigs}" },
             ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
             ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
             ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
@@ -227,7 +231,7 @@ class WireCommunicationSpec : ShouldSpec({
     }
 
 
-   should(": Server's broadcastOnChannel sends to all clients on correct port: ") {
+    context(": Server's broadcastOnChannel sends to all clients on correct port: ") {
        withData(
            nameFn = { data: ClientCommConfigsV2 -> "${this.testCase.name} ${data.msgCount} ${data.broadcastPorts} ${data.clientConfigs}" },
            ClientCommConfigsV2(1, mutableListOf(6060), mutableListOf(ClientConfig(6060, 1))),
@@ -282,9 +286,9 @@ class WireCommunicationSpec : ShouldSpec({
        }
    }
 
-   should(": Server's broadcastOnAllChannels sends to all clients on all ports: ") {
+    context(": Server's broadcastOnAllChannels sends to all clients on all ports: ") {
        withData(
-           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.displayName} ${data.msgCount} ${data.clientConfigs}" },
+           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.testName} ${data.msgCount} ${data.clientConfigs}" },
            ClientCommConfigsV1(1,  mutableListOf(ClientConfig(6060, 1))),
            ClientCommConfigsV1(5,  mutableListOf(ClientConfig(6060, 10))),
            ClientCommConfigsV1(5,  mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
@@ -336,9 +340,9 @@ class WireCommunicationSpec : ShouldSpec({
        }
    }
 
-   should(": Server can receive and then respond to correct clients: ") {
+    context(": Server can receive and then respond to correct clients: ") {
        withData(
-           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.displayName} ${data.msgCount} ${data.clientConfigs}" },
+           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.testName} ${data.msgCount} ${data.clientConfigs}" },
            ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
@@ -394,9 +398,9 @@ class WireCommunicationSpec : ShouldSpec({
        }
    }
 
-   should(": Each Client's ConnectionListener is called after connected to a server: ") {
+    context(": Each Client's ConnectionListener is called after connected to a server: ") {
        withData(
-           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.displayName} ${data.msgCount} ${data.clientConfigs}" },
+           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.testName} ${data.msgCount} ${data.clientConfigs}" },
            ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
@@ -447,9 +451,9 @@ class WireCommunicationSpec : ShouldSpec({
 
    }
 
-   should(": Server's ConnectionListener is called after each client connects: ") {
+    context(": Server's ConnectionListener is called after each client connects: ") {
        withData(
-           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.displayName} ${data.msgCount} ${data.clientConfigs}" },
+           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.testName} ${data.msgCount} ${data.clientConfigs}" },
            ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
@@ -496,9 +500,9 @@ class WireCommunicationSpec : ShouldSpec({
        }
    }
 
-   should(": Client's DisconnectionListener is called after a disconnect: ") {
+    context(": Client's DisconnectionListener is called after a disconnect: ") {
        withData(
-           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.displayName} ${data.msgCount} ${data.clientConfigs}" },
+           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.testName} ${data.msgCount} ${data.clientConfigs}" },
            ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
@@ -557,9 +561,9 @@ class WireCommunicationSpec : ShouldSpec({
        }
    }
 
-   should(": Server's DisconnectionListener is called after each client disconnects: ") {
+    context(": Server's DisconnectionListener is called after each client disconnects: ") {
        withData(
-           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.displayName} ${data.msgCount} ${data.clientConfigs}" },
+           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.testName} ${data.msgCount} ${data.clientConfigs}" },
            ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
@@ -605,9 +609,9 @@ class WireCommunicationSpec : ShouldSpec({
        }
    }
 
-   should(": Server and Client's ConnectionStatusListener is called after each connect and disconnect: ") {
+    context(": Server and Client's ConnectionStatusListener is called after each connect and disconnect: ") {
        withData(
-           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.displayName} ${data.msgCount} ${data.clientConfigs}" },
+           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.testName} ${data.msgCount} ${data.clientConfigs}" },
            ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),

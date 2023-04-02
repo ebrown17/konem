@@ -3,6 +3,7 @@ package konem.json
 import io.kotest.assertions.until.fixed
 import io.kotest.assertions.until.until
 import io.kotest.common.ExperimentalKotest
+import io.kotest.core.spec.style.FunSpec
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.datatest.withData
 import konem.*
@@ -19,14 +20,14 @@ import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
 @ExperimentalKotest
-class JsonServerStartupSpec : ShouldSpec({
+class JsonServerStartupSpec : FunSpec({
 
-    afterContainer {
+    afterTest {
         clientFactory?.shutdown()
         server?.shutdownServer()
     }
 
-    should(": Server starts with expected ports and values: ") {
+     context(": Server starts with expected ports and values: ") {
         withData(
             nameFn = { data: ServerStartup -> "${this.testCase.displayName} ${data.portsToConfigure}" },
             ServerStartup( mutableListOf(6060)),

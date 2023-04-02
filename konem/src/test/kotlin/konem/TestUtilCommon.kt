@@ -54,6 +54,7 @@ fun <T> areClientsActive(clientList: MutableList<Client<T>>):Boolean{
         if(!client.isActive()){
             allActive = false
         }
+
     }
     return allActive
 }
@@ -72,7 +73,6 @@ fun <T> areClientsInactive(clientList: MutableList<Client<T>>):Boolean{
 @ExperimentalTime
 suspend fun <T> startServer(server: Server<T>) : Boolean{
     server.startServer()
-
     return  until(activeTime.seconds, 250.milliseconds.fixed()) {
         server.allActive()
     }
@@ -81,7 +81,6 @@ suspend fun <T> startServer(server: Server<T>) : Boolean{
 @ExperimentalTime
 suspend fun <T> connectClients(clientList : MutableList<Client<T>>) : Boolean{
     clientList.forEach { client -> client.connect() }
-
     return until(activeTime.seconds, 250.milliseconds.fixed()) {
         areClientsActive(clientList)
     }
@@ -90,7 +89,6 @@ suspend fun <T> connectClients(clientList : MutableList<Client<T>>) : Boolean{
 @ExperimentalTime
 suspend fun <T> disconnectClients(clientList : MutableList<Client<T>>) : Boolean{
     clientList.forEach { client -> client.disconnect() }
-
     return until(activeTime.seconds, 250.milliseconds.fixed()) {
         areClientsInactive(clientList)
     }
