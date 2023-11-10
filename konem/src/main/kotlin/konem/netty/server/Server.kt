@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicLong
 open class BaseConfig {
     var BOSSGROUP_NUM_THREADS: Int = 1
     var WORKGROUP_NUM_THREADS: Int = 0
-    var USE_SSL: Boolean = true
+    var USE_SSL: Boolean = false
     var WRITE_IDLE_TIME: Int = 10
     var CHANNEL_IDS: AtomicLong = AtomicLong(0L)
     var SO_BACKLOG: Int = 25
@@ -243,7 +243,7 @@ abstract class ServerInternal<T>(
                 logger.debug("now listening for connections on port {}", port)
                 val channel = channelFuture.channel()
                 val closeListener = ChannelFutureListener { future: ChannelFuture ->
-                    logger.info("Channel {} closed unexpectedly, closed with {}", port, future.cause())
+                    logger.info("Channel {} closed unexpectedly, closed with {} ", port, future.cause().message)
                     channel.close()
                 }
 

@@ -14,6 +14,7 @@ open class ExceptionHandler : ChannelDuplexHandler() {
         logger.warn("end of pipeline reached without handling: {}", message.toString())
     }
 
+    @Deprecated("Deprecated in Java")
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
         logger.warn("Connection from {} cause {}", ctx.channel().remoteAddress(), cause.toString())
         val now = System.currentTimeMillis()

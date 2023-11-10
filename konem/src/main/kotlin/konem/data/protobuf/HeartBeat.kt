@@ -10,6 +10,7 @@ import com.squareup.wire.ProtoWriter
 import com.squareup.wire.ReverseProtoWriter
 import com.squareup.wire.Syntax.PROTO_2
 import com.squareup.wire.WireField
+import com.squareup.wire.`internal`.JvmField
 import com.squareup.wire.`internal`.missingRequiredFields
 import com.squareup.wire.`internal`.sanitize
 import kotlin.Any
@@ -21,8 +22,6 @@ import kotlin.Int
 import kotlin.Long
 import kotlin.Nothing
 import kotlin.String
-import kotlin.Unit
-import kotlin.jvm.JvmField
 import okio.ByteString
 
 public class HeartBeat(
@@ -30,6 +29,7 @@ public class HeartBeat(
     tag = 1,
     adapter = "com.squareup.wire.ProtoAdapter#STRING",
     label = WireField.Label.REQUIRED,
+    schemaIndex = 0,
   )
   public val time: String,
   unknownFields: ByteString = ByteString.EMPTY,
@@ -38,10 +38,10 @@ public class HeartBeat(
     message = "Shouldn't be used in Kotlin",
     level = DeprecationLevel.HIDDEN,
   )
-  public override fun newBuilder(): Nothing = throw
+  override fun newBuilder(): Nothing = throw
       AssertionError("Builders are deprecated and only available in a javaInterop build; see https://square.github.io/wire/wire_compiler/#kotlin")
 
-  public override fun equals(other: Any?): Boolean {
+  override fun equals(other: Any?): Boolean {
     if (other === this) return true
     if (other !is HeartBeat) return false
     if (unknownFields != other.unknownFields) return false
@@ -49,7 +49,7 @@ public class HeartBeat(
     return true
   }
 
-  public override fun hashCode(): Int {
+  override fun hashCode(): Int {
     var result = super.hashCode
     if (result == 0) {
       result = unknownFields.hashCode()
@@ -59,7 +59,7 @@ public class HeartBeat(
     return result
   }
 
-  public override fun toString(): String {
+  override fun toString(): String {
     val result = mutableListOf<String>()
     result += """time=${sanitize(time)}"""
     return result.joinToString(prefix = "HeartBeat{", separator = ", ", postfix = "}")
@@ -78,23 +78,23 @@ public class HeartBeat(
       null, 
       "konemwiremessage.proto"
     ) {
-      public override fun encodedSize(`value`: HeartBeat): Int {
+      override fun encodedSize(`value`: HeartBeat): Int {
         var size = value.unknownFields.size
         size += ProtoAdapter.STRING.encodedSizeWithTag(1, value.time)
         return size
       }
 
-      public override fun encode(writer: ProtoWriter, `value`: HeartBeat): Unit {
+      override fun encode(writer: ProtoWriter, `value`: HeartBeat) {
         ProtoAdapter.STRING.encodeWithTag(writer, 1, value.time)
         writer.writeBytes(value.unknownFields)
       }
 
-      public override fun encode(writer: ReverseProtoWriter, `value`: HeartBeat): Unit {
+      override fun encode(writer: ReverseProtoWriter, `value`: HeartBeat) {
         writer.writeBytes(value.unknownFields)
         ProtoAdapter.STRING.encodeWithTag(writer, 1, value.time)
       }
 
-      public override fun decode(reader: ProtoReader): HeartBeat {
+      override fun decode(reader: ProtoReader): HeartBeat {
         var time: String? = null
         val unknownFields = reader.forEachTag { tag ->
           when (tag) {
@@ -108,7 +108,7 @@ public class HeartBeat(
         )
       }
 
-      public override fun redact(`value`: HeartBeat): HeartBeat = value.copy(
+      override fun redact(`value`: HeartBeat): HeartBeat = value.copy(
         unknownFields = ByteString.EMPTY
       )
     }

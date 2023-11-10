@@ -10,6 +10,7 @@ import com.squareup.wire.ProtoWriter
 import com.squareup.wire.ReverseProtoWriter
 import com.squareup.wire.Syntax.PROTO_2
 import com.squareup.wire.WireField
+import com.squareup.wire.`internal`.JvmField
 import com.squareup.wire.`internal`.missingRequiredFields
 import com.squareup.wire.`internal`.sanitize
 import kotlin.Any
@@ -21,8 +22,6 @@ import kotlin.Int
 import kotlin.Long
 import kotlin.Nothing
 import kotlin.String
-import kotlin.Unit
-import kotlin.jvm.JvmField
 import okio.ByteString
 
 public class Status(
@@ -30,30 +29,35 @@ public class Status(
     tag = 1,
     adapter = "com.squareup.wire.ProtoAdapter#STRING",
     label = WireField.Label.REQUIRED,
+    schemaIndex = 0,
   )
   public val shortName: String,
   @field:WireField(
     tag = 2,
     adapter = "com.squareup.wire.ProtoAdapter#INT32",
     label = WireField.Label.REQUIRED,
+    schemaIndex = 1,
   )
   public val errors: Int,
   @field:WireField(
     tag = 3,
     adapter = "com.squareup.wire.ProtoAdapter#INT32",
     label = WireField.Label.REQUIRED,
+    schemaIndex = 2,
   )
   public val received: Int,
   @field:WireField(
     tag = 4,
     adapter = "com.squareup.wire.ProtoAdapter#INT32",
     label = WireField.Label.REQUIRED,
+    schemaIndex = 3,
   )
   public val sent: Int,
   @field:WireField(
     tag = 5,
     adapter = "com.squareup.wire.ProtoAdapter#STRING",
     label = WireField.Label.REQUIRED,
+    schemaIndex = 4,
   )
   public val description: String,
   unknownFields: ByteString = ByteString.EMPTY,
@@ -62,10 +66,10 @@ public class Status(
     message = "Shouldn't be used in Kotlin",
     level = DeprecationLevel.HIDDEN,
   )
-  public override fun newBuilder(): Nothing = throw
+  override fun newBuilder(): Nothing = throw
       AssertionError("Builders are deprecated and only available in a javaInterop build; see https://square.github.io/wire/wire_compiler/#kotlin")
 
-  public override fun equals(other: Any?): Boolean {
+  override fun equals(other: Any?): Boolean {
     if (other === this) return true
     if (other !is Status) return false
     if (unknownFields != other.unknownFields) return false
@@ -77,7 +81,7 @@ public class Status(
     return true
   }
 
-  public override fun hashCode(): Int {
+  override fun hashCode(): Int {
     var result = super.hashCode
     if (result == 0) {
       result = unknownFields.hashCode()
@@ -91,7 +95,7 @@ public class Status(
     return result
   }
 
-  public override fun toString(): String {
+  override fun toString(): String {
     val result = mutableListOf<String>()
     result += """shortName=${sanitize(shortName)}"""
     result += """errors=$errors"""
@@ -120,7 +124,7 @@ public class Status(
       null, 
       "konemwiremessage.proto"
     ) {
-      public override fun encodedSize(`value`: Status): Int {
+      override fun encodedSize(`value`: Status): Int {
         var size = value.unknownFields.size
         size += ProtoAdapter.STRING.encodedSizeWithTag(1, value.shortName)
         size += ProtoAdapter.INT32.encodedSizeWithTag(2, value.errors)
@@ -130,7 +134,7 @@ public class Status(
         return size
       }
 
-      public override fun encode(writer: ProtoWriter, `value`: Status): Unit {
+      override fun encode(writer: ProtoWriter, `value`: Status) {
         ProtoAdapter.STRING.encodeWithTag(writer, 1, value.shortName)
         ProtoAdapter.INT32.encodeWithTag(writer, 2, value.errors)
         ProtoAdapter.INT32.encodeWithTag(writer, 3, value.received)
@@ -139,7 +143,7 @@ public class Status(
         writer.writeBytes(value.unknownFields)
       }
 
-      public override fun encode(writer: ReverseProtoWriter, `value`: Status): Unit {
+      override fun encode(writer: ReverseProtoWriter, `value`: Status) {
         writer.writeBytes(value.unknownFields)
         ProtoAdapter.STRING.encodeWithTag(writer, 5, value.description)
         ProtoAdapter.INT32.encodeWithTag(writer, 4, value.sent)
@@ -148,7 +152,7 @@ public class Status(
         ProtoAdapter.STRING.encodeWithTag(writer, 1, value.shortName)
       }
 
-      public override fun decode(reader: ProtoReader): Status {
+      override fun decode(reader: ProtoReader): Status {
         var shortName: String? = null
         var errors: Int? = null
         var received: Int? = null
@@ -174,7 +178,7 @@ public class Status(
         )
       }
 
-      public override fun redact(`value`: Status): Status = value.copy(
+      override fun redact(`value`: Status): Status = value.copy(
         unknownFields = ByteString.EMPTY
       )
     }

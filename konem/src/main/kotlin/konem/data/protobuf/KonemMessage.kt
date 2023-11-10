@@ -10,6 +10,7 @@ import com.squareup.wire.ProtoWriter
 import com.squareup.wire.ReverseProtoWriter
 import com.squareup.wire.Syntax.PROTO_2
 import com.squareup.wire.WireField
+import com.squareup.wire.`internal`.JvmField
 import com.squareup.wire.`internal`.missingRequiredFields
 import kotlin.Any
 import kotlin.AssertionError
@@ -20,8 +21,6 @@ import kotlin.Int
 import kotlin.Long
 import kotlin.Nothing
 import kotlin.String
-import kotlin.Unit
-import kotlin.jvm.JvmField
 import okio.ByteString
 
 public class KonemMessage(
@@ -29,27 +28,32 @@ public class KonemMessage(
     tag = 1,
     adapter = "konem.data.protobuf.MessageType#ADAPTER",
     label = WireField.Label.REQUIRED,
+    schemaIndex = 0,
   )
   public val messageType: MessageType,
   @field:WireField(
     tag = 2,
     adapter = "konem.data.protobuf.Unknown#ADAPTER",
+    schemaIndex = 1,
   )
   public val unknown: Unknown? = null,
   @field:WireField(
     tag = 3,
     adapter = "konem.data.protobuf.Status#ADAPTER",
+    schemaIndex = 2,
   )
   public val status: Status? = null,
   @field:WireField(
     tag = 4,
     adapter = "konem.data.protobuf.HeartBeat#ADAPTER",
+    schemaIndex = 3,
   )
   public val heartBeat: HeartBeat? = null,
   @field:WireField(
     tag = 5,
     adapter = "konem.data.protobuf.Data#ADAPTER",
     declaredName = "data",
+    schemaIndex = 4,
   )
   public val data_: Data? = null,
   unknownFields: ByteString = ByteString.EMPTY,
@@ -58,10 +62,10 @@ public class KonemMessage(
     message = "Shouldn't be used in Kotlin",
     level = DeprecationLevel.HIDDEN,
   )
-  public override fun newBuilder(): Nothing = throw
+  override fun newBuilder(): Nothing = throw
       AssertionError("Builders are deprecated and only available in a javaInterop build; see https://square.github.io/wire/wire_compiler/#kotlin")
 
-  public override fun equals(other: Any?): Boolean {
+  override fun equals(other: Any?): Boolean {
     if (other === this) return true
     if (other !is KonemMessage) return false
     if (unknownFields != other.unknownFields) return false
@@ -73,7 +77,7 @@ public class KonemMessage(
     return true
   }
 
-  public override fun hashCode(): Int {
+  override fun hashCode(): Int {
     var result = super.hashCode
     if (result == 0) {
       result = unknownFields.hashCode()
@@ -87,7 +91,7 @@ public class KonemMessage(
     return result
   }
 
-  public override fun toString(): String {
+  override fun toString(): String {
     val result = mutableListOf<String>()
     result += """messageType=$messageType"""
     if (unknown != null) result += """unknown=$unknown"""
@@ -116,7 +120,7 @@ public class KonemMessage(
       null, 
       "konemwiremessage.proto"
     ) {
-      public override fun encodedSize(`value`: KonemMessage): Int {
+      override fun encodedSize(`value`: KonemMessage): Int {
         var size = value.unknownFields.size
         size += MessageType.ADAPTER.encodedSizeWithTag(1, value.messageType)
         size += Unknown.ADAPTER.encodedSizeWithTag(2, value.unknown)
@@ -126,7 +130,7 @@ public class KonemMessage(
         return size
       }
 
-      public override fun encode(writer: ProtoWriter, `value`: KonemMessage): Unit {
+      override fun encode(writer: ProtoWriter, `value`: KonemMessage) {
         MessageType.ADAPTER.encodeWithTag(writer, 1, value.messageType)
         Unknown.ADAPTER.encodeWithTag(writer, 2, value.unknown)
         Status.ADAPTER.encodeWithTag(writer, 3, value.status)
@@ -135,7 +139,7 @@ public class KonemMessage(
         writer.writeBytes(value.unknownFields)
       }
 
-      public override fun encode(writer: ReverseProtoWriter, `value`: KonemMessage): Unit {
+      override fun encode(writer: ReverseProtoWriter, `value`: KonemMessage) {
         writer.writeBytes(value.unknownFields)
         Data.ADAPTER.encodeWithTag(writer, 5, value.data_)
         HeartBeat.ADAPTER.encodeWithTag(writer, 4, value.heartBeat)
@@ -144,7 +148,7 @@ public class KonemMessage(
         MessageType.ADAPTER.encodeWithTag(writer, 1, value.messageType)
       }
 
-      public override fun decode(reader: ProtoReader): KonemMessage {
+      override fun decode(reader: ProtoReader): KonemMessage {
         var messageType: MessageType? = null
         var unknown: Unknown? = null
         var status: Status? = null
@@ -174,7 +178,7 @@ public class KonemMessage(
         )
       }
 
-      public override fun redact(`value`: KonemMessage): KonemMessage = value.copy(
+      override fun redact(`value`: KonemMessage): KonemMessage = value.copy(
         unknown = value.unknown?.let(Unknown.ADAPTER::redact),
         status = value.status?.let(Status.ADAPTER::redact),
         heartBeat = value.heartBeat?.let(HeartBeat.ADAPTER::redact),

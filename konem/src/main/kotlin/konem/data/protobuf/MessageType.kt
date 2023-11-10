@@ -6,12 +6,12 @@ import com.squareup.wire.EnumAdapter
 import com.squareup.wire.ProtoAdapter
 import com.squareup.wire.Syntax.PROTO_2
 import com.squareup.wire.WireEnum
+import com.squareup.wire.`internal`.JvmField
+import com.squareup.wire.`internal`.JvmStatic
 import kotlin.Int
-import kotlin.jvm.JvmField
-import kotlin.jvm.JvmStatic
 
 public enum class MessageType(
-  public override val `value`: Int,
+  override val `value`: Int,
 ) : WireEnum {
   UNKNOWN(0),
   STATUS(1),
@@ -26,7 +26,7 @@ public enum class MessageType(
       PROTO_2, 
       MessageType.UNKNOWN
     ) {
-      public override fun fromValue(`value`: Int): MessageType? = MessageType.fromValue(value)
+      override fun fromValue(`value`: Int): MessageType? = MessageType.fromValue(value)
     }
 
     @JvmStatic

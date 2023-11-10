@@ -23,7 +23,7 @@ class ClientFactoryConfig {
     var RETRY_TIME = 10L
     var MAX_RETRY_TIME = 60L
     var MAX_RETRY_UNTIL_INCR = 30
-    var USE_SSL = true
+    var USE_SSL = false
     var channelIds = AtomicLong(0L)
 }
 
