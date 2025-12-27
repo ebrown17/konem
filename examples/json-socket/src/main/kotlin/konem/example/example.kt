@@ -51,8 +51,6 @@ fun main(){
 
     client.registerChannelMessageReceiver(MessageReceiver{ from, msg ->
         println("CLIENT Msg: $msg from $from")
-
-
         if(count < 10) {
             client.sendMessage( KonemMessage(message = Data("Send message ${count++}")))
         }

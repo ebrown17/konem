@@ -13,13 +13,13 @@ import java.util.*
 abstract class Message
 
 @Serializable
-data class Data constructor(val data: String) : Message()
+data class Data(val data: String) : Message()
 
 @Serializable
-data class Heartbeat constructor(val sent: String = Date().toString()) : Message()
+data class Heartbeat(val sent: String = Date().toString()) : Message()
 
 @Serializable
-data class Status constructor(
+data class Status(
     val shortName: String = "",
     val errors: Int = -1,
     val received: Int = -1,
@@ -28,7 +28,7 @@ data class Status constructor(
 ) : Message()
 
 @Serializable
-data class Unknown constructor(val unknown: String = "Unknown Message") : Message()
+data class Unknown(val unknown: String = "Unknown Message") : Message()
 
 @Serializable
 data class KonemMessage(@Polymorphic val message: Message)
@@ -41,7 +41,7 @@ class KonemMessageSerializer {
             subclass(Heartbeat::class, Heartbeat.serializer())
             subclass(Status::class, Status.serializer())
             subclass(Unknown::class, Unknown.serializer())
-            default { Unknown.serializer() }
+            defaultDeserializer { Unknown.serializer() }
         }
     }
 
