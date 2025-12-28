@@ -80,10 +80,6 @@ interface WebSocketServer<T>: Server<T>, WebSocketServerChannelReceiverRegistran
      */
     fun broadcastOnAllChannels(message: T, vararg args: String)
 
-
-    fun registerPathConnectionListener(listener: WebSocketConnectionListener)
-    fun registerPathDisconnectionListener(listener: WebSocketDisconnectionListener)
-    fun registerPathConnectionStatusListener(listener: WebSocketConnectionStatusListener)
 }
 
 interface TcpSocketServer<T>: Server<T>{
@@ -150,6 +146,18 @@ abstract class WebSocketServerInternal<T>(
             listener.onDisconnection(remoteConnection, paths)
         }
     }
+    fun registerPathConnectionListener(listener: WebSocketConnectionListener){
+        pathConnectionListeners.add(listener)
+    }
+
+    fun registerPathDisconnectionListener(listener: WebSocketDisconnectionListener){
+        pathDisconnectionListeners.add(listener)
+    }
+
+    fun registerPathConnectionStatusListener(listener: WebSocketConnectionStatusListener){
+        pathConnectionListeners.add(listener)
+        pathDisconnectionListeners.add(listener)
+    }
 }
 
 
@@ -199,7 +207,6 @@ abstract class ServerInternal<T>(
         bootstrap.childHandler(channel)
         return bootstrap
     }
-
 
     /**
      *

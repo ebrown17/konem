@@ -33,30 +33,24 @@ interface BaseServerChannelReceiverRegistrant<T> : BaseChannelReceiverRegistrant
     fun registerChannelMessageReceiver(port: Int, receiver: MessageReceiver<T>)
 }
 
-interface WebSocketChannelReceiverRegistrant<T> : BaseChannelReceiverRegistrant<T>{
+interface WebSocketChannelReceiverRegistrant<T> {
     /**
      * Registers a receiver on the specified websocket paths.
      *
      * @param receiver receiver to handle read data
      * @param webSocketPaths webSocket paths you want to read
      */
-    fun registerChannelReadListener(receiver: MessageReceiver<T>, vararg webSocketPaths: String)
+    fun registerChannelMessageReceiver(receiver: MessageReceiver<T>, vararg webSocketPaths: String)
 }
 
-interface WebSocketServerChannelReceiverRegistrant<T> : BaseServerChannelReceiverRegistrant<T>{
-    /**
-     * Registers a receiver on the specified websocket paths.
-     *
-     * @param receiver receiver to handle read data
-     * @param webSocketPaths webSocket paths you want to read
-     */
-    fun registerChannelReadListener(receiver: MessageReceiver<T>, vararg webSocketPaths: String)
+interface WebSocketServerChannelReceiverRegistrant<T> : WebSocketChannelReceiverRegistrant<T>{
 
     /**
-     * Registers a receiver on the specified websocket paths.
+     * Registers a receiver on the specified websocket paths for specific port.
      * @param port port to listen on
      * @param receiver receiver to handle read data
      * @param webSocketPaths webSocket paths you want to read
      */
-    fun registerChannelReadListener(port: Int, receiver: MessageReceiver<T>, vararg webSocketPaths: String)
+    fun registerChannelMessageReceiver(port: Int, receiver: MessageReceiver<T>, vararg webSocketPaths: String)
+
 }
