@@ -2,9 +2,13 @@ package konem.protocol.websocket
 
 import io.netty.channel.ChannelInitializer
 import io.netty.channel.socket.SocketChannel
+import io.netty.handler.codec.http.HttpObjectAggregator
+import io.netty.handler.codec.http.HttpServerCodec
+import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler
 import io.netty.handler.timeout.IdleStateHandler
 import konem.netty.*
 import konem.netty.server.ServerChannelInfo
+import konem.protocol.websocket.json.WebSocketServerChannel.Companion.maxSize
 
 class WebSocketServerChannel<T>(
     private val transceiver: ServerTransceiver<T>,
@@ -34,6 +38,10 @@ class WebSocketServerChannel<T>(
             }
         }
 
+        pipeline.addLast("httpServerCodec", HttpServerCodec())
+        pipeline.addLast("httpAggregator", HttpObjectAggregator(maxContentLength))
+        pipeline.addLast("compressionHandler", WebSocketServerCompressionHandler(maxAllocation))
+
         protocolPipeline.forEach { entry ->
             pipeline.addLast(entry.key, entry.value)
         }
@@ -46,5 +54,9 @@ class WebSocketServerChannel<T>(
         pipeline.addLast(handlerName, messageHandler)
         pipeline.addLast("exceptionHandler", ExceptionHandler())
 
+    }
+    companion object {
+        const val maxContentLength = 65536
+        const val maxAllocation = 1024 * 1024 * 50 // 50 mb, make part of serverChannelInfo
     }
 }

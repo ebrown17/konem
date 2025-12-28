@@ -20,7 +20,7 @@ class WebSocketServerChannel(private val transceiver: WebSocketTransceiver, vara
 
         pipeline.addLast("httpServerCodec", HttpServerCodec())
         pipeline.addLast("httpAggregator", HttpObjectAggregator(maxSize))
-        pipeline.addLast("compressionHandler", WebSocketServerCompressionHandler())
+        pipeline.addLast("compressionHandler", WebSocketServerCompressionHandler(maxSize))
         pipeline.addLast(
             WebSocketPathHandler::class.java.name,
             WebSocketPathHandler(transceiver, channelIds, *webSocketPaths)

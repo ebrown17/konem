@@ -15,9 +15,8 @@ class WebSocketTransceiver<T>(channelPort: Int) : Transceiver<T>(channelPort) {
     private val logger = logger(this)
 
     private val konemSerializer = KonemMessageSerializer()
-    private val protoSerializer = KonemMessage()
 
-    override fun transmit(addr: SocketAddress, message: T, vararg extra: String) {
+    override fun transmit(addr: SocketAddress, message: T, vararg webSocketPaths: String) {
         synchronized(activeLock) {
             val handler = activeHandlers[addr]
             logger.trace("{} to addr: {} with: {}", handler, addr, message)
@@ -27,7 +26,7 @@ class WebSocketTransceiver<T>(channelPort: Int) : Transceiver<T>(channelPort) {
         }
     }
 
-    override fun receive(addr: SocketAddress, message: T, vararg extra: String) {
+    override fun receive(addr: SocketAddress, message: T, vararg webSocketPaths: String) {
         logger.trace("from {} with {}", addr, message)
         val receiver = channelReceiver[addr]
         receiver?.handleReceivedMessage(addr, channelPort, message) ?: run {
@@ -39,7 +38,7 @@ class WebSocketTransceiver<T>(channelPort: Int) : Transceiver<T>(channelPort) {
 class WebSocketServerTransceiver<T>(channelPort: Int) : ServerTransceiver<T>(channelPort) {
     private val logger = logger(this)
 
-    override fun transmit(addr: SocketAddress, message: T, vararg extra: String) {
+    override fun transmit(addr: SocketAddress, message: T, vararg webSocketPaths: String) {
         synchronized(activeLock) {
             val handler = activeHandlers[addr]
             logger.trace("{} to addr: {} with: {}", handler, addr, message)
@@ -49,7 +48,7 @@ class WebSocketServerTransceiver<T>(channelPort: Int) : ServerTransceiver<T>(cha
         }
     }
 
-    override fun receive(addr: SocketAddress, message: T, vararg extra: String) {
+    override fun receive(addr: SocketAddress, message: T, vararg webSocketPaths: String) {
         val receiver = channelReceiver[addr]
         logger.trace("{} from {} with {}", receiver, addr, message)
         receiver?.handleReceivedMessage(addr, channelPort, message) ?: run {
@@ -59,9 +58,6 @@ class WebSocketServerTransceiver<T>(channelPort: Int) : ServerTransceiver<T>(cha
 
     override fun broadcast(message: T, vararg webSocketPaths: String) {
         logger.debug("paths:{} message: {}", webSocketPaths, message)
-        val frame = when(message) {
-            is Message ->
-        }
         synchronized(activeLock) {
             for (handler in activeHandlers.values) {
                 handler.sendMessage(message)
