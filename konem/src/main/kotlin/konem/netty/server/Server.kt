@@ -42,7 +42,7 @@ class ServerConfig : BaseConfig() {
 }
 
 class WebSocketServerConfig : BaseConfig() {
-    private val portToWsMap: HashMap<Int, Array<String>> = HashMap()
+    internal val portToWsMap: HashMap<Int, Array<String>> = HashMap()
 
     /**
      *
@@ -370,7 +370,7 @@ abstract class ServerInternal<T>(
         return transceiverMap[port] != null
     }
 
-    override fun registerActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress) {
+    override fun registerActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress,vararg extra: String) {
         var channelConnections = channelConnectionMap[channelPort]
         if (channelConnections == null) {
             channelConnections = ArrayList()
@@ -387,7 +387,7 @@ abstract class ServerInternal<T>(
         channelConnectionMap.putIfAbsent(channelPort, channelConnections)
     }
 
-    override fun registerInActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress) {
+    override fun registerInActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress,vararg extra: String) {
         val channelConnections = channelConnectionMap[channelPort]
         if (channelConnections != null) {
             channelConnections.remove(remoteConnection)

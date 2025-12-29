@@ -4,8 +4,10 @@ import io.netty.channel.ChannelInitializer
 import io.netty.channel.socket.SocketChannel
 import io.netty.handler.codec.http.HttpObjectAggregator
 import io.netty.handler.codec.http.HttpServerCodec
+import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler
 import io.netty.handler.timeout.IdleStateHandler
+import konem.logger
 import konem.netty.*
 import konem.netty.server.ServerChannelInfo
 import konem.protocol.websocket.json.WebSocketServerChannel.Companion.maxSize
@@ -13,15 +15,16 @@ import konem.protocol.websocket.json.WebSocketServerChannel.Companion.maxSize
 class WebSocketServerChannel<T>(
     private val transceiver: ServerTransceiver<T>,
     private val serverChannelInfo: ServerChannelInfo<T>,
-    vararg webSocketPaths: String
+    vararg wsPaths: String
 ) : ChannelInitializer<SocketChannel>() {
 
-    private val webSocketPaths: Array<String> = arrayOf(*webSocketPaths)
+    private val webSocketPaths: Array<String> = arrayOf(*wsPaths)
+    private val logger = logger(this)
 
     override fun initChannel(channel: SocketChannel) {
         val pipeline = channel.pipeline()
 
-        val protocolPipeline = serverChannelInfo.protocol_pipeline.getProtocolPipelineCodecs()
+/*        val protocolPipeline= serverChannelInfo.protocol_pipeline.getProtocolPipelineCodecs()
         val heartbeatProtocol = serverChannelInfo.heartbeatProtocol
         val handlerPair = serverChannelInfo.protocol_pipeline.getProtocolMessageHandler()
         val handlerName = handlerPair.first
@@ -29,7 +32,8 @@ class WebSocketServerChannel<T>(
 
         messageHandler.handlerId = serverChannelInfo.channel_id
         messageHandler.transceiver = transceiver
-
+        */
+        logger.info("XXXXXXXXXXXXXXXXXXXXX1: {}",webSocketPaths)
         if (serverChannelInfo.use_ssl) {
             SslContextManager.getServerContext()?.let { context ->
                 pipeline.addLast("serverSslHandler", context.newHandler(channel.alloc()))
@@ -42,7 +46,12 @@ class WebSocketServerChannel<T>(
         pipeline.addLast("httpAggregator", HttpObjectAggregator(maxContentLength))
         pipeline.addLast("compressionHandler", WebSocketServerCompressionHandler(maxAllocation))
 
-        protocolPipeline.forEach { entry ->
+        pipeline.addLast(
+            WebSocketPathHandler::class.java.name,
+            WebSocketPathHandler(transceiver, serverChannelInfo, webSocketPaths )
+        )
+
+/*        protocolPipeline.forEach { entry ->
             pipeline.addLast(entry.key, entry.value)
         }
 
@@ -52,7 +61,7 @@ class WebSocketServerChannel<T>(
         }
 
         pipeline.addLast(handlerName, messageHandler)
-        pipeline.addLast("exceptionHandler", ExceptionHandler())
+        pipeline.addLast("exceptionHandler", ExceptionHandler())*/
 
     }
     companion object {

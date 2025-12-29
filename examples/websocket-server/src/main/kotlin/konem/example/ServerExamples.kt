@@ -1,9 +1,14 @@
 package konem.example
 
+import konem.Konem
 import konem.data.json.Heartbeat
 import konem.data.json.KonemMessage
-import konem.netty.stream.ConnectionListener
+import konem.netty.ConnectionListener
+import konem.netty.ConnectionStatusListener
+import konem.netty.MessageReceiver
+import konem.netty.ServerHeartbeatProtocol
 import konem.netty.stream.DisconnectionListener
+import konem.protocol.konem.KonemProtocolPipeline
 import konem.protocol.websocket.json.KonemMessageReceiver
 import konem.protocol.websocket.json.WebSocketClientFactory
 import konem.protocol.websocket.json.WebSocketConnectionStatusListener
@@ -22,24 +27,39 @@ fun main(){
 
 fun websocketServerExamples() {
 
-  val server = WebSocketServer()
-  server.addChannel(8080, "/tester")
+  //val server = WebSocketServer()
+  //server.addChannel(8080, "/tester")
+
+    val server = Konem.createWebSocketServer(
+        config = {
+            it.addChannel(8080,"/tester")
+            it.USE_SSL = false
+        },
+        heartbeatProtocol = ServerHeartbeatProtocol{ KonemMessage(Heartbeat()) },
+        protocolPipeline = KonemProtocolPipeline.getKonemJsonPipeline()
+    )
+
+
+
   server.startServer()
   var count = 0
 
-  server.registerChannelReadListener(KonemMessageReceiver { _, message ->
-    logger.info("KoneMessageReceiver: got {} ", message)
-    count++
+    sleep(5000)
+
+
+  server.registerChannelMessageReceiver(MessageReceiver<KonemMessage> { _, message ->
+      logger.info("KoneMessageReceiver: got {} ", message)
+      count++
   })
 
-  server.registerPathConnectionStatusListener(
-    WebSocketConnectionStatusListener(
-    connected = { remoteAddr,path ->
-      logger.info("Connection from {} to path {}", remoteAddr,path)
-    }, disconnected = { remoteAddr,path ->
-      logger.info("Disconnection from  {} to path {}", remoteAddr,path)
-    }
-  ))
+  server.registerConnectionStatusListener(
+      ConnectionStatusListener(
+          connected = { remoteAddr  ->
+              logger.info("Connection from {} to path {}", remoteAddr )
+          }, disconnected = { remoteAddr ->
+              logger.info("Disconnection from  {} to path {}", remoteAddr)
+          }
+      ))
 
   val fact = WebSocketClientFactory()
   val client = fact.createClient("localhost", 8080, "/tester")
@@ -49,7 +69,7 @@ fun websocketServerExamples() {
     logger.info("Client connected to {}", remoteAddr)
   }
 
-  client.registerConnectionListener(connectionListener)
+ // client.registerConnectionListener(connectionListener)
 
   client.registerDisconnectionListener(DisconnectionListener { remoteAddr ->
     logger.info("Client {} disconnected from {}", client.toString(), remoteAddr)
@@ -74,5 +94,6 @@ fun websocketServerExamples() {
   client3.disconnect()
 
   sleep(5000)
+    println(count)
   server.shutdownServer()
 }

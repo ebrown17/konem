@@ -5,8 +5,11 @@ import konem.netty.client.ClientFactoryConfig
 import konem.netty.client.TcpSocketClientFactory
 import konem.netty.server.ServerConfig
 import konem.netty.server.TcpSocketServer
+import konem.netty.server.WebSocketServer
+import konem.netty.server.WebSocketServerConfig
 import konem.protocol.tcp.TcpClientFactory
 import konem.protocol.tcp.TcpServer
+import konem.protocol.websocket.WebSocketServerImp
 
 class Konem private constructor() {
     companion object {
@@ -32,6 +35,19 @@ class Konem private constructor() {
             return TcpClientFactory(ClientFactoryConfig(),heartbeatProtocol,protocolPipeline)
         }
 
+        fun <T> createWebSocketServer(
+            config: (WebSocketServerConfig) -> Unit,
+            heartbeatProtocol: ServerHeartbeatProtocol<T>,
+            protocolPipeline: ProtocolPipeline<T>
+        ): WebSocketServer<T> {
+            val userConfig = WebSocketServerConfig()
+            config(userConfig)
+            val server = WebSocketServerImp(userConfig, heartbeatProtocol, protocolPipeline)
+            for((port, websockets) in userConfig.portToWsMap){
+                server.addChannel(port,*websockets)
+            }
+            return server
+        }
 
     }
 

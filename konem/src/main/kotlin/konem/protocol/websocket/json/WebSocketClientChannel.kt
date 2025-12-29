@@ -26,7 +26,7 @@ class WebSocketClientChannel(
     @Throws(Exception::class)
     override fun initChannel(channel: Channel) {
         val pipeline = channel.pipeline()
-        pipeline.addLast("clientSslHandler", SslContextManager.getClientContext().newHandler(channel.alloc()))
+       // pipeline.addLast("clientSslHandler", SslContextManager.getClientContext().newHandler(channel.alloc()))
         pipeline.addLast("clientCodec", HttpClientCodec())
         pipeline.addLast("aggregator", HttpObjectAggregator(Short.MAX_VALUE.toInt()))
         pipeline.addLast("compressionHandler", WebSocketClientCompressionHandler.INSTANCE)

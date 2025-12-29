@@ -6,8 +6,8 @@ import konem.logger
 import java.net.SocketAddress
 
 interface HandlerListener<T> {
-    fun registerActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress)
-    fun registerInActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress)
+    fun registerActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress, vararg extra: String)
+    fun registerInActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress,vararg extra: String)
 }
 
 abstract class Handler<T> :
@@ -53,7 +53,7 @@ abstract class Handler<T> :
     }
 
     fun transceiverReceive(message: T, vararg extra: String) {
-        logger.trace("Id=$handlerId from: {} received: {}", remoteAddress, message)
+        logger.info("Id=$handlerId from: {} received: {}", remoteAddress, message)
         transceiver.receive(remoteAddress, message, *extra)
     }
 

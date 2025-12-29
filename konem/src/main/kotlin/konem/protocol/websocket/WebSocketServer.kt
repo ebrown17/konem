@@ -51,6 +51,11 @@ class WebSocketServerImp<T> internal constructor(
             return false
         }
 
+        for(t in websocketPaths) {
+            println("XXXXXZZZZZ $t")
+        }
+
+        println("paths to add ${arrayOf(websocketPaths)}")
         val validPaths = hashSetOf(*websocketPaths)
 
         for (path in websocketPaths) {
@@ -58,10 +63,12 @@ class WebSocketServerImp<T> internal constructor(
                 validPaths.remove(path)
             }
         }
-
+        println("XCVadfasfd")
         if (validPaths.isNotEmpty()) {
+            println("validpaths: $validPaths")
             val transceiver = WebSocketServerTransceiver<T>(port)
             websocketMap.putIfAbsent(port, validPaths.toTypedArray())
+            println(websocketMap)
             if (addChannel(port, transceiver)) {
                 receiveListenersMap[port] = ConcurrentHashMap()
                 return true
@@ -75,6 +82,7 @@ class WebSocketServerImp<T> internal constructor(
 
     override fun createServerBootstrap(port: Int): ServerBootstrap {
         val transceiver = getTransceiverMap()[port]!!
+        val websocketPaths = websocketMap[port]
         val channel = WebSocketServerChannel(
             transceiver,
             ServerChannelInfo(
@@ -82,13 +90,15 @@ class WebSocketServerImp<T> internal constructor(
                 serverConfig.CHANNEL_IDS.incrementAndGet(),
                 heartbeatProtocol,
                 protocolPipeline
-            )
+            ),
+            *websocketPaths!!
         )
         return createServerBootstrap(channel)
     }
 
     override fun connectionActive(handler: Handler<T>) {
-        val wsHandler = handler as WebSocketFrameHandler
+        val wsHandler = handler as WebSocketHandler<T>
+        logger.info("connection active")
         onPathConnect(wsHandler.remoteAddress as InetSocketAddress, wsHandler.webSocketPath)
         for (listener in connectionListeners) {
             listener.onConnection(handler.remoteAddress)
@@ -96,7 +106,7 @@ class WebSocketServerImp<T> internal constructor(
     }
 
     override fun connectionInActive(handler: Handler<T>) {
-        val wsHandler = handler as WebSocketFrameHandler
+        val wsHandler = handler as WebSocketHandler<T>
         onPathDisconnect(wsHandler.remoteAddress as InetSocketAddress, wsHandler.webSocketPath)
         for (listener in disconnectionListeners) {
             listener.onDisconnection(handler.remoteAddress)
