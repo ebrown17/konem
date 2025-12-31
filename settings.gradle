@@ -3,5 +3,5 @@ rootProject.name = 'konem-parent'
 startParameter.excludedTaskNames = ["generateProtos"]
 
 include ':konem'
-include ':examples:socket-client', ':examples:socket-server' , ':examples:json-serializer' , ':examples:json-socket' , ':examples:websocket-server'
+include ':examples:tcp-sockets', ':examples:socket-client', ':examples:socket-server' , ':examples:json-serializer' , ':examples:json-socket' , ':examples:websocket-server'
 
