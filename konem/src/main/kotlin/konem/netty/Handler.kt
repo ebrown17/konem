@@ -6,8 +6,8 @@ import konem.logger
 import java.net.SocketAddress
 
 interface HandlerListener<T> {
-    fun registerActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress, vararg extra: String)
-    fun registerInActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress,vararg extra: String)
+    fun registerActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress)
+    fun registerInActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress)
 }
 
 abstract class Handler<T> :
@@ -39,7 +39,7 @@ abstract class Handler<T> :
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
-        logger.info("remote peer: {} disconnected", ctx.channel().remoteAddress())
+        logger.info("remote peer: {} disconnected", remoteAddress)
         transceiver.handlerInActive(remoteAddress)
         ctx.fireChannelInactive()
     }

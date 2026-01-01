@@ -375,7 +375,7 @@ abstract class ServerInternal<T>(
         return transceiverMap[port] != null
     }
 
-    override fun registerActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress, vararg extra: String) {
+    override fun registerActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress) {
         var channelConnections = channelConnectionMap[channelPort]
         if (channelConnections == null) {
             channelConnections = ArrayList()
@@ -392,7 +392,7 @@ abstract class ServerInternal<T>(
         channelConnectionMap.putIfAbsent(channelPort, channelConnections)
     }
 
-    override fun registerInActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress,vararg extra: String) {
+    override fun registerInActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress) {
         val channelConnections = channelConnectionMap[channelPort]
         if (channelConnections != null) {
             channelConnections.remove(remoteConnection)
