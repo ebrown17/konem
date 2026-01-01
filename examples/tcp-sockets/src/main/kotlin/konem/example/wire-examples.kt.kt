@@ -2,14 +2,15 @@ package konem.example
 
 
 import konem.Konem
-import konem.data.json.Data
-import konem.data.json.Heartbeat
-import konem.data.json.KonemMessage
-import konem.logger
+import konem.data.protobuf.Data
+import konem.data.protobuf.HeartBeat
+import konem.data.protobuf.KonemMessage
+import konem.data.protobuf.MessageType
 import konem.netty.*
 import konem.protocol.konem.KonemProtocolPipeline
 import org.slf4j.LoggerFactory
 import java.lang.Thread.sleep
+import java.time.LocalDateTime
 
 
 fun main(){
@@ -23,27 +24,27 @@ fun main(){
             it.addChannel(6160)
             it.addChannel(6161)
         },
-        heartbeatProtocol = ServerHeartbeatProtocol { KonemMessage(Heartbeat()) },
-        protocolPipeline = KonemProtocolPipeline.getKonemJsonPipeline()
+        heartbeatProtocol = ServerHeartbeatProtocol { KonemMessage(MessageType.HEARTBEAT, heartBeat = HeartBeat(LocalDateTime.now().toString())) },
+        protocolPipeline = KonemProtocolPipeline.getKonemWirePipeline()
     )
 
     logger.info("Registering channel message receiver for port 6160")
     server.registerChannelMessageReceiver(6160,MessageReceiver{ from, msg ->
         logger.info("Received message: $msg on port 6160 receiver")
         sleep(500)
-        server.sendMessage(from,KonemMessage(message = Data("Received $msg on port 6160 receiver")))
+        server.sendMessage(from,dataMessage(("Received $msg on port 6160 receiver")))
     })
     logger.info("Registering channel message receiver for port 6161")
     server.registerChannelMessageReceiver(6161,MessageReceiver{ from, msg ->
         logger.info("Received message: $msg on port 6161 receiver")
         sleep(500)
-        server.sendMessage(from,KonemMessage(message = Data("Received $msg on port 6161 receiver")))
+        server.sendMessage(from,dataMessage(("Received $msg on port 6161 receiver")))
     })
     logger.info("Registering channel message receiver for all ports")
     server.registerChannelMessageReceiver(MessageReceiver{ from, msg ->
         logger.info("Received message: $msg channel wide receiver")
         sleep(500)
-        server.sendMessage(from,KonemMessage(message = Data("Received $msg on channel wide receiver")))
+        server.sendMessage(from,dataMessage(("Received $msg on channel wide receiver")))
     })
 
     logger.info("Starting server")
@@ -52,16 +53,16 @@ fun main(){
 
     val clientFactory = Konem.createTcpSocketClientFactoryOfDefaults(
         heartbeatProtocol = ClientHeartbeatProtocol(isHeartbeat = { message ->
-            message is Heartbeat
+            message is HeartBeat
         }),
-        protocolPipeline = KonemProtocolPipeline.getKonemJsonPipeline()
+        protocolPipeline = KonemProtocolPipeline.getKonemWirePipeline()
     )
 
     val client = clientFactory.createClient("localhost",6160)
 
     client.registerConnectionListener(ConnectionListener {
         logger.info("Connection established")
-        client.sendMessage(KonemMessage(message = Data("Send message ${count++}") ))
+        client.sendMessage(dataMessage(("Send message ${count++}") ))
     })
 
     client.registerChannelMessageReceiver(MessageReceiver{ from, msg ->
@@ -71,7 +72,7 @@ fun main(){
     client.connect()
     sleep(2000)
     repeat(10) {
-        client.sendMessage(KonemMessage(message = Data("Send message ${count++}")))
+        client.sendMessage(dataMessage(("Send message ${count++}")))
         sleep(1000)
     }
 
@@ -86,4 +87,10 @@ fun main(){
     println(client.toString())
 
     server.shutdownServer()
+}
+
+fun dataMessage(message: String): KonemMessage {
+    return KonemMessage(messageType = MessageType.DATA,
+        data_ = Data(message)
+    )
 }
