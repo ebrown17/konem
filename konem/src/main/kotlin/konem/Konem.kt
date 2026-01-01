@@ -15,7 +15,7 @@ class Konem private constructor() {
     companion object {
 
         fun <T> createTcpSocketServer(
-            config: (ServerConfig) -> Unit,
+            config: ServerConfig.() -> Unit,
             heartbeatProtocol: ServerHeartbeatProtocol<T>,
             protocolPipeline: ProtocolPipeline<T>
         ): TcpSocketServer<T> {

@@ -20,8 +20,8 @@ fun main(){
     logger.info("Creating Server")
     val server = Konem.createTcpSocketServer(
         config = {
-            it.addChannel(6160)
-            it.addChannel(6161)
+            addChannel(6160)
+            addChannel(6161)
         },
         heartbeatProtocol = ServerHeartbeatProtocol { KonemMessage(Heartbeat()) },
         protocolPipeline = KonemProtocolPipeline.getKonemJsonPipeline()
