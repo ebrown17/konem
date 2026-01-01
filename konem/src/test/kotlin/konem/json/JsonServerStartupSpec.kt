@@ -42,7 +42,7 @@ class JsonServerStartupSpec : FunSpec({
             server = Konem.createTcpSocketServer(
                 config = {
                     portsToConfigure.forEach { port ->
-                        it.addChannel(port)
+                        addChannel(port)
                     }
                 },
                 heartbeatProtocol = ServerHeartbeatProtocol { KonemMessage(Heartbeat()) },

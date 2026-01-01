@@ -60,6 +60,8 @@ fun main(){
 
     val client = clientFactory.createClient("localhost",6160)
 
+    val client2 = clientFactory.createClient("localhost",6161)
+
     client.registerConnectionListener(ConnectionListener {
         logger.info("Connection established")
         client.sendMessage(dataMessage(("Send message ${count++}") ))
@@ -70,9 +72,12 @@ fun main(){
     })
 
     client.connect()
+    client2.connect()
     sleep(2000)
     repeat(10) {
         client.sendMessage(dataMessage(("Send message ${count++}")))
+        sleep(1000)
+        client2.sendMessage(dataMessage(("Send message ${count}")))
         sleep(1000)
     }
 
@@ -81,6 +86,7 @@ fun main(){
     sleep(20_000)
 
     client.disconnect()
+    client2.disconnect()
 
     sleep(1000)
 

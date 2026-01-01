@@ -32,10 +32,10 @@ class WireCommunicationSpec : FunSpec({
         println("XXXX before")
         server = Konem.createTcpSocketServer(
             config = {
-                it.addChannel(6060)
-                it.addChannel(6061)
-                it.addChannel(6062)
-                it.addChannel(6063)
+                addChannel(6060)
+                addChannel(6061)
+                addChannel(6062)
+                addChannel(6063)
             },
             heartbeatProtocol = ServerHeartbeatProtocol {
                 KonemMessage(
