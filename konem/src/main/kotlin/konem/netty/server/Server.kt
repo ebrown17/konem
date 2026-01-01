@@ -3,12 +3,27 @@ package konem.netty.server
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.buffer.PooledByteBufAllocator
 import io.netty.channel.*
-import io.netty.channel.nio.NioEventLoopGroup
+import io.netty.channel.nio.NioIoHandler
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
-import io.netty.util.concurrent.DefaultThreadFactory
-import konem.netty.*
-import konem.protocol.websocket.json.*
+import konem.netty.BaseServerChannelReceiverRegistrant
+import konem.netty.ChannelReceiver
+import konem.netty.ConnectListener
+import konem.netty.ConnectionListener
+import konem.netty.ConnectionStatusListener
+import konem.netty.DisconnectListener
+import konem.netty.DisconnectionListener
+import konem.netty.Handler
+import konem.netty.HandlerListener
+import konem.netty.ProtocolPipeline
+import konem.netty.ServerHeartbeatProtocol
+import konem.netty.ServerTransceiver
+import konem.netty.WebSocketServerChannelReceiverRegistrant
+import konem.protocol.websocket.WebSocketConnectionListener
+import konem.protocol.websocket.WebSocketConnectionStatusListener
+import konem.protocol.websocket.WebSocketDisconnectionListener
+import konem.protocol.websocket.WsConnectListener
+import konem.protocol.websocket.WsDisconnectListener
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
@@ -80,6 +95,11 @@ interface WebSocketServer<T>: Server<T>, WebSocketServerChannelReceiverRegistran
      */
     fun broadcastOnAllChannels(message: T, vararg args: String)
 
+    fun registerPathConnectionListener(listener: WebSocketConnectionListener)
+
+    fun registerPathDisconnectionListener(listener: WebSocketDisconnectionListener)
+
+    fun registerPathConnectionStatusListener(listener: WebSocketConnectionStatusListener)
 }
 
 interface TcpSocketServer<T>: Server<T>{
@@ -146,32 +166,17 @@ abstract class WebSocketServerInternal<T>(
             listener.onDisconnection(remoteConnection, paths)
         }
     }
-    fun registerPathConnectionListener(listener: WebSocketConnectionListener){
-        pathConnectionListeners.add(listener)
-    }
-
-    fun registerPathDisconnectionListener(listener: WebSocketDisconnectionListener){
-        pathDisconnectionListeners.add(listener)
-    }
-
-    fun registerPathConnectionStatusListener(listener: WebSocketConnectionStatusListener){
-        pathConnectionListeners.add(listener)
-        pathDisconnectionListeners.add(listener)
-    }
 }
-
-
-
 
 abstract class ServerInternal<T>(
     val serverConfig: BaseConfig, val heartbeatProtocol: ServerHeartbeatProtocol<T>,
     val protocolPipeline: ProtocolPipeline<T>
-) : HandlerListener<T>, Server<T>,ChannelReceiver<T> {
+) : HandlerListener<T>, Server<T>, ChannelReceiver<T> {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private val bossGroup: NioEventLoopGroup
-    private val workerGroup: NioEventLoopGroup
+    private val bossGroup: MultiThreadIoEventLoopGroup
+    private val workerGroup: MultiThreadIoEventLoopGroup
     private var bootstrapMap: ConcurrentHashMap<Int, ServerBootstrap> = ConcurrentHashMap()
     private val channelMap: ConcurrentHashMap<Int, Channel> = ConcurrentHashMap()
     private val channelListenerMap: ConcurrentHashMap<Int, ArrayList<ChannelFutureListener>> =
@@ -189,9 +194,9 @@ abstract class ServerInternal<T>(
     protected val serverScope = CoroutineScope(CoroutineName("ServerScope"))
 
     init {
-        val threadFactory = DefaultThreadFactory("server")
-        bossGroup = NioEventLoopGroup(serverConfig.BOSSGROUP_NUM_THREADS, threadFactory)
-        workerGroup = NioEventLoopGroup(serverConfig.WORKGROUP_NUM_THREADS, threadFactory)
+        val threadFactory = NioIoHandler.newFactory()
+        bossGroup = MultiThreadIoEventLoopGroup(serverConfig.BOSSGROUP_NUM_THREADS, threadFactory)
+        workerGroup = MultiThreadIoEventLoopGroup(serverConfig.WORKGROUP_NUM_THREADS, threadFactory)
     }
 
     protected abstract fun createServerBootstrap(port: Int): ServerBootstrap
@@ -370,7 +375,7 @@ abstract class ServerInternal<T>(
         return transceiverMap[port] != null
     }
 
-    override fun registerActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress,vararg extra: String) {
+    override fun registerActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress, vararg extra: String) {
         var channelConnections = channelConnectionMap[channelPort]
         if (channelConnections == null) {
             channelConnections = ArrayList()

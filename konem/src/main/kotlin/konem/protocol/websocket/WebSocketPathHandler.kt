@@ -1,10 +1,8 @@
 package konem.protocol.websocket
 
 import io.netty.channel.ChannelFutureListener
-import io.netty.channel.ChannelHandlerAdapter
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter
-import io.netty.channel.SimpleChannelInboundHandler
 import io.netty.handler.codec.http.DefaultFullHttpResponse
 import io.netty.handler.codec.http.FullHttpRequest
 import io.netty.handler.codec.http.HttpMethod.GET
@@ -14,18 +12,13 @@ import io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST
 import io.netty.handler.codec.http.HttpResponseStatus.OK
 import io.netty.handler.codec.http.HttpUtil.isKeepAlive
 import io.netty.handler.codec.http.HttpVersion.HTTP_1_1
-import io.netty.handler.codec.http.websocketx.WebSocketFrame
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler
 import io.netty.handler.timeout.IdleStateHandler
 import konem.logger
 import konem.netty.ExceptionHandler
 import konem.netty.HeartbeatProducer
-import konem.netty.ProtocolPipeline
 import konem.netty.ServerTransceiver
 import konem.netty.server.ServerChannelInfo
-import konem.protocol.konem.KonemProtocolPipeline
-import konem.protocol.websocket.json.WebSocketPathHandler
-import kotlin.collections.forEach
 
 class WebSocketPathHandler<T>(
     private val transceiver: ServerTransceiver<T>,
@@ -50,18 +43,17 @@ class WebSocketPathHandler<T>(
                 val wsFrameHandlers  = serverChannelInfo.protocol_pipeline.getProtocolWebSocketPipelineFrameHandlers()
                 val heartbeatProtocol = serverChannelInfo.heartbeatProtocol
                 val handlerPair = serverChannelInfo.protocol_pipeline.getProtocolMessageHandler(path)
-                val handlerName = handlerPair.first
-                val messageHandler = handlerPair.second
 
+                val handlerName = "messageHandler"
+                val messageHandler = object: WebSocketHandler<T>(path){
+                    override fun channelRead0(p0: ChannelHandlerContext?, message: T) {
+                        transceiverReceive(message)
+                    }
 
-                /*                val handlerName = "messageHandler"
-                                val messageHandler = object: WebSocketHandler<T>(path){
-                                    override fun channelRead0(p0: ChannelHandlerContext?, message: T) {
-                                        transceiverReceive(message)
-                                    }
+                }
 
-                                }*/
-
+                messageHandler.handlerId = serverChannelInfo.channel_id
+                messageHandler.transceiver = transceiver
                 logger.info("XXXXXXXXXXXXXXXXXXXXXX")
 
 

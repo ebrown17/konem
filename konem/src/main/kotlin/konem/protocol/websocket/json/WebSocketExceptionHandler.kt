@@ -37,7 +37,7 @@ class WebSocketExceptionHandler : ExceptionHandler() {
             else -> {
                 logger.warn(
                     "end of pipeline reached without with unexpected type {}; closing connection",
-                    message.javaClass
+                    message.toString()
                 )
                 ctx.close()
             }

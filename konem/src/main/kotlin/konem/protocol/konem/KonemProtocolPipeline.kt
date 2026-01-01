@@ -9,7 +9,6 @@ import io.netty.util.CharsetUtil
 import konem.netty.ProtocolPipeline
 import konem.protocol.konem.json.KonemJsonCodec
 import konem.protocol.konem.json.KonemJsonMessageHandler
-import konem.protocol.konem.json.KonemJsonWebSocketMessageHandler
 import konem.protocol.konem.json.WebSocketFrameJsonDecoder
 import konem.protocol.konem.json.WebSocketFrameJsonEncoder
 import konem.protocol.konem.string.KonemStringMessageHandler
@@ -24,13 +23,8 @@ class KonemProtocolPipeline private constructor(){
     companion object {
         fun getKonemJsonPipeline(): ProtocolPipeline<konem.data.json.KonemMessage> {
             return ProtocolPipeline(
-                protocolMessageHandler = { wsPath ->
-                    if( wsPath.isNotBlank()){
-                        Pair("messageHandler", KonemJsonWebSocketMessageHandler(wsPath))
-                    }
-                    else {
-                        Pair("messageHandler", KonemJsonMessageHandler())
-                    }
+                protocolMessageHandler = {
+                    Pair("messageHandler", KonemJsonMessageHandler())
                 },
                 protoPipelineCodecs = { pipeline ->
                     pipeline["jsonDecoder"] = JsonObjectDecoder()

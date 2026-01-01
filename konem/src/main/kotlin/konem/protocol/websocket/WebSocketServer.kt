@@ -2,12 +2,14 @@ package konem.protocol.websocket
 
 import io.netty.bootstrap.ServerBootstrap
 import konem.logger
-import konem.netty.*
-import konem.netty.server.*
-import konem.protocol.websocket.json.WebSocketConnectionListener
-import konem.protocol.websocket.json.WebSocketConnectionStatusListener
-import konem.protocol.websocket.json.WebSocketDisconnectionListener
-import konem.protocol.websocket.json.WebSocketFrameHandler
+import konem.netty.Handler
+import konem.netty.MessageReceiver
+import konem.netty.ProtocolPipeline
+import konem.netty.ServerHeartbeatProtocol
+import konem.netty.server.ServerChannelInfo
+import konem.netty.server.WebSocketServer
+import konem.netty.server.WebSocketServerConfig
+import konem.netty.server.WebSocketServerInternal
 import kotlinx.coroutines.launch
 import java.net.InetSocketAddress
 import java.net.SocketAddress
@@ -63,7 +65,6 @@ class WebSocketServerImp<T> internal constructor(
                 validPaths.remove(path)
             }
         }
-        println("XCVadfasfd")
         if (validPaths.isNotEmpty()) {
             println("validpaths: $validPaths")
             val transceiver = WebSocketServerTransceiver<T>(port)
@@ -205,6 +206,19 @@ class WebSocketServerImp<T> internal constructor(
                 }
             }
         }
+    }
+
+    override fun registerPathConnectionListener(listener: WebSocketConnectionListener){
+        pathConnectionListeners.add(listener)
+    }
+
+    override fun registerPathDisconnectionListener(listener: WebSocketDisconnectionListener){
+        pathDisconnectionListeners.add(listener)
+    }
+
+    override fun registerPathConnectionStatusListener(listener: WebSocketConnectionStatusListener){
+        pathConnectionListeners.add(listener)
+        pathDisconnectionListeners.add(listener)
     }
 
 }
