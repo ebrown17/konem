@@ -8,7 +8,7 @@ import konem.netty.server.TcpSocketServer
 import konem.netty.server.WebSocketServer
 import konem.netty.server.WebSocketServerConfig
 import konem.protocol.tcp.TcpClientFactory
-import konem.protocol.tcp.TcpServer
+import konem.protocol.tcp.TcpSocketServerImp
 import konem.protocol.websocket.WebSocketServerImp
 
 class Konem private constructor() {
@@ -21,7 +21,7 @@ class Konem private constructor() {
         ): TcpSocketServer<T> {
             val userConfig = ServerConfig()
             config(userConfig)
-            val server = TcpServer(userConfig, heartbeatProtocol, protocolPipeline)
+            val server = TcpSocketServerImp(userConfig, heartbeatProtocol, protocolPipeline)
             for (port in userConfig.portSet) {
                 server.addChannel(port)
             }

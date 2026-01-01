@@ -10,10 +10,8 @@ import konem.data.json.KonemMessage
 import konem.netty.client.Client
 import konem.netty.client.TcpSocketClientFactory
 import konem.netty.server.TcpSocketServer
-import konem.protocol.tcp.TcpClientFactory
 import konem.waitForMsgTime
 import java.net.SocketAddress
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime

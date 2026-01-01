@@ -9,7 +9,7 @@ import java.net.SocketAddress
 import java.util.concurrent.ConcurrentHashMap
 
 
-class TcpServer<T> internal constructor(
+class TcpSocketServerImp<T> internal constructor(
     serverConfig: ServerConfig, heartbeatProtocol: ServerHeartbeatProtocol<T>,
     protocolPipeline: ProtocolPipeline<T>
 ) : ServerInternal<T>(serverConfig, heartbeatProtocol, protocolPipeline), TcpSocketServer<T> {
