@@ -10,7 +10,7 @@ import java.net.SocketAddress
 class TcpTransceiver<T>(channelPort: Int) : Transceiver<T>(channelPort) {
     private val logger = logger(this)
 
-    override fun transmit(addr: SocketAddress, message: T, vararg extra: String) {
+    override fun transmit(addr: SocketAddress, message: T ) {
         synchronized(activeLock) {
             val handler = activeHandlers[addr]
             logger.trace("{} to addr: {} with: {}", handler, addr, message)
@@ -20,7 +20,7 @@ class TcpTransceiver<T>(channelPort: Int) : Transceiver<T>(channelPort) {
         }
     }
 
-    override fun receive(addr: SocketAddress, message: T, vararg extra: String) {
+    override fun receive(addr: SocketAddress, message: T, extra: String) {
         logger.trace("from {} with {}", addr, message)
         val receiver = channelReceiver[addr]
         receiver?.handleReceivedMessage(addr, channelPort, message) ?: run {
@@ -32,7 +32,7 @@ class TcpTransceiver<T>(channelPort: Int) : Transceiver<T>(channelPort) {
 class TcpServerTransceiver<T>(channelPort: Int) : ServerTransceiver<T>(channelPort) {
     private val logger = logger(this)
 
-    override fun transmit(addr: SocketAddress, message: T, vararg extra: String) {
+    override fun transmit(addr: SocketAddress, message: T) {
         synchronized(activeLock) {
             val handler = activeHandlers[addr]
             logger.trace("{} to addr: {} with: {}", handler, addr, message)
@@ -42,7 +42,7 @@ class TcpServerTransceiver<T>(channelPort: Int) : ServerTransceiver<T>(channelPo
         }
     }
 
-    override fun receive(addr: SocketAddress, message: T, vararg extra: String) {
+    override fun receive(addr: SocketAddress, message: T, extra: String) {
         val receiver = channelReceiver[addr]
         logger.trace("{} from {} with {}", receiver, addr, message)
         receiver?.handleReceivedMessage(addr, channelPort, message) ?: run {

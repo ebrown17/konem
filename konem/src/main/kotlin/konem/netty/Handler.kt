@@ -52,9 +52,9 @@ abstract class Handler<T> :
         return false
     }
 
-    fun transceiverReceive(message: T, vararg extra: String) {
+    fun transceiverReceive(message: T,  extra: String="") {
         logger.info("Id=$handlerId from: {} received: {}", remoteAddress, message)
-        transceiver.receive(remoteAddress, message, *extra)
+        transceiver.receive(remoteAddress, message, extra)
     }
 
     override fun toString(): String {

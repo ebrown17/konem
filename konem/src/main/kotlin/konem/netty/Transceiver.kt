@@ -43,9 +43,9 @@ abstract class Transceiver<T>(protected val channelPort: Int) {
         channelReceiver.putIfAbsent(addr, receiver)
     }
 
-    abstract fun transmit(addr: SocketAddress, message: T, vararg extra: String)
+    abstract fun transmit(addr: SocketAddress, message: T)
 
-    abstract fun receive(addr: SocketAddress, message: T, vararg extra: String)
+    abstract fun receive(addr: SocketAddress, message: T, extra: String)
 
     override fun toString(): String {
         return (
