@@ -47,7 +47,7 @@ class WebSocketPathHandler<T>(
                 val handlerName = "messageHandler"
                 val messageHandler = object: WebSocketHandler<T>(path){
                     override fun channelRead0(p0: ChannelHandlerContext?, message: T) {
-                        transceiverReceive(message)
+                        transceiverReceive(message,path)
                     }
 
                 }
