@@ -17,7 +17,7 @@ class KonemWireMessageHandler : Handler<KonemMessage>() {
 class KonemWireWebSocketMessageHandler(webSocketPath:String ) : WebSocketHandler<KonemMessage>(webSocketPath) {
 
     override fun channelRead0(ctx: ChannelHandlerContext, message: KonemMessage) {
-        transceiverReceive(message)
+        transceiverReceive(message,webSocketPath)
     }
 
 }

@@ -27,14 +27,14 @@ class KonemProtocolPipeline private constructor(){
                     Pair("messageHandler", KonemJsonMessageHandler())
                 },
                 protoPipelineCodecs = { pipeline ->
-                    pipeline["jsonDecoder"] = JsonObjectDecoder()
+/*                    pipeline["jsonDecoder"] = JsonObjectDecoder()
                     pipeline["stringDecoder"] = StringDecoder(CharsetUtil.UTF_8)
-                    pipeline["stringEncoder"] = StringEncoder(CharsetUtil.UTF_8)
+                    pipeline["stringEncoder"] = StringEncoder(CharsetUtil.UTF_8)*/
                     pipeline["konemCodec"] = KonemJsonCodec()
                 },
                 wsPipelineFrameCodec = { pipeline ->
-                    pipeline["webSocketFrameDecoder"] = WebSocketFrameJsonDecoder()
                     pipeline["webSocketFrameEncoder"] = WebSocketFrameJsonEncoder()
+                    pipeline["webSocketFrameDecoder"] = WebSocketFrameJsonDecoder()
                 })
         }
 

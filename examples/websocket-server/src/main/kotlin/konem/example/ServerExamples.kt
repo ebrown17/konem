@@ -7,8 +7,10 @@ import konem.netty.MessageReceiver
 import konem.netty.ServerHeartbeatProtocol
 import konem.netty.stream.ConnectionListener
 import konem.netty.stream.DisconnectionListener
+import konem.netty.stream.Receiver
 import konem.protocol.konem.KonemProtocolPipeline
 import konem.protocol.websocket.WebSocketConnectionStatusListener
+import konem.protocol.websocket.json.KonemMessageReceiver
 import konem.protocol.websocket.json.WebSocketClientFactory
 import org.slf4j.LoggerFactory
 import java.lang.Thread.sleep
@@ -31,7 +33,7 @@ fun websocketServerExamples() {
         config = {
             it.addChannel(8080,"/tester")
         },
-        heartbeatProtocol = ServerHeartbeatProtocol{ KonemMessage(Heartbeat()) },
+        heartbeatProtocol = ServerHeartbeatProtocol(false,0) { KonemMessage(Heartbeat()) },
         protocolPipeline = KonemProtocolPipeline.getKonemJsonPipeline()
     )
 
@@ -40,11 +42,10 @@ fun websocketServerExamples() {
 
   sleep(5000)
 
-
   server.registerChannelMessageReceiver(MessageReceiver { from, message ->
       logger.info("KoneMessageReceiver: got {} from {} ", message,from)
       count++
-  })
+  },"/tester")
 
   server.registerPathConnectionStatusListener(
       WebSocketConnectionStatusListener(
@@ -71,10 +72,18 @@ fun websocketServerExamples() {
 
   client.connect()
 
+  client.registerChannelReadListener(KonemMessageReceiver { from, msg ->
+      logger.info("KonemMessageReceiver: got {} from {}", from, msg)
+  })
+
+
+
   Thread.sleep(1000)
 
   repeat(10) {
-    client.sendMessage(KonemMessage(Heartbeat("$it")))
+      logger.info("SENDING")
+ //   client.sendMessage(KonemMessage(Heartbeat("$it")))
+      server.broadcastOnAllChannels(KonemMessage(Heartbeat("$it")))
     Thread.sleep(2000)
   }
   Thread.sleep(1000)

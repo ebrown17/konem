@@ -10,7 +10,9 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame
 import io.netty.util.CharsetUtil
 import konem.data.json.KonemMessage
 import konem.data.json.KonemMessageSerializer
+import konem.logger
 import java.rmi.UnexpectedException
+import kotlin.math.log
 
 class WebSocketFrameJsonDecoder : SimpleChannelInboundHandler<WebSocketFrame>() {
 
@@ -47,14 +49,15 @@ class WebSocketFrameJsonDecoder : SimpleChannelInboundHandler<WebSocketFrame>() 
 }
 
 @ChannelHandler.Sharable
-class WebSocketFrameJsonEncoder : MessageToMessageEncoder<KonemMessage>(){
-    private val serializer = KonemMessageSerializer()
+class WebSocketFrameJsonEncoder : MessageToMessageEncoder<String>(){
+    private val logger = logger(this)
     override fun encode(
         ctx: ChannelHandlerContext?,
-        msg: KonemMessage,
+        msg: String,
         out: MutableList<Any>
     ) {
-        out.add(TextWebSocketFrame(serializer.toJson(msg)))
+        logger.info("Sending {}",msg )
+        out.add(TextWebSocketFrame(msg))
     }
 
 }

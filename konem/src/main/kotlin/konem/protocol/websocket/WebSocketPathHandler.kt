@@ -54,8 +54,6 @@ class WebSocketPathHandler<T>(
 
                 messageHandler.handlerId = serverChannelInfo.channel_id
                 messageHandler.transceiver = transceiver
-                logger.info("XXXXXXXXXXXXXXXXXXXXXX")
-
 
                 val wsProtoName = WebSocketServerProtocolHandler::class.java.name
                 ctx.pipeline().addAfter(
