@@ -13,3 +13,10 @@ class KonemJsonMessageHandler : Handler<KonemMessage>() {
 
 }
 
+class KonemJsonWebSocketMessageHandler(websocketPath: String) : WebSocketHandler<KonemMessage>(websocketPath) {
+
+    override fun channelRead0(ctx: ChannelHandlerContext, message:KonemMessage ) {
+        transceiverReceive(message,webSocketPath)
+    }
+
+}

@@ -1,5 +1,6 @@
 package konem.protocol.websocket
 
+import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInitializer
 import io.netty.channel.socket.SocketChannel
 import io.netty.handler.codec.http.HttpObjectAggregator
@@ -24,16 +25,11 @@ class WebSocketServerChannel<T>(
     override fun initChannel(channel: SocketChannel) {
         val pipeline = channel.pipeline()
 
-/*        val protocolPipeline= serverChannelInfo.protocol_pipeline.getProtocolPipelineCodecs()
-        val heartbeatProtocol = serverChannelInfo.heartbeatProtocol
-        val handlerPair = serverChannelInfo.protocol_pipeline.getProtocolMessageHandler()
-        val handlerName = handlerPair.first
-        val messageHandler = handlerPair.second
+        val protocolPipeline= serverChannelInfo.protocol_pipeline.getProtocolPipelineCodecs()
+        val wsFrameHandlers = serverChannelInfo.protocol_pipeline.getProtocolWebSocketPipelineFrameHandlers()
 
-        messageHandler.handlerId = serverChannelInfo.channel_id
-        messageHandler.transceiver = transceiver
-        */
-        logger.info("XXXXXXXXXXXXXXXXXXXXX1: {}",webSocketPaths)
+        val heartbeatProtocol = serverChannelInfo.heartbeatProtocol
+
         if (serverChannelInfo.use_ssl) {
             SslContextManager.getServerContext()?.let { context ->
                 pipeline.addLast("serverSslHandler", context.newHandler(channel.alloc()))
@@ -48,11 +44,18 @@ class WebSocketServerChannel<T>(
 
         pipeline.addLast(
             WebSocketPathHandler::class.java.name,
-            WebSocketPathHandler(transceiver, serverChannelInfo, webSocketPaths )
+            WebSocketPathHandler(
+                serverChannelInfo.channel_id,
+                transceiver,
+                webSocketPaths)
         )
 
-/*        protocolPipeline.forEach { entry ->
-            pipeline.addLast(entry.key, entry.value)
+        wsFrameHandlers.forEach {(handlerName,handler) ->
+            pipeline.addLast( handlerName, handler)
+        }
+
+        protocolPipeline.forEach { (handlerName,handler) ->
+            pipeline.addLast(handlerName, handler)
         }
 
         if (heartbeatProtocol.enabled) {
@@ -60,8 +63,7 @@ class WebSocketServerChannel<T>(
             pipeline.addLast("heartBeatHandler", HeartbeatProducer(transceiver, heartbeatProtocol.generateHeartbeat))
         }
 
-        pipeline.addLast(handlerName, messageHandler)
-        pipeline.addLast("exceptionHandler", ExceptionHandler())*/
+        pipeline.addLast("exceptionHandler", ExceptionHandler())
 
     }
     companion object {

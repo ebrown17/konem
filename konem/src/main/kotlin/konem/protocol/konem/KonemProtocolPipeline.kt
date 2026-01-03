@@ -1,13 +1,13 @@
 package konem.protocol.konem
 
-import io.netty.handler.codec.json.JsonObjectDecoder
 import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender
 import io.netty.handler.codec.string.StringDecoder
 import io.netty.handler.codec.string.StringEncoder
 import io.netty.util.CharsetUtil
 import konem.netty.ProtocolPipeline
-import konem.protocol.konem.json.KonemJsonCodec
+import konem.protocol.konem.json.KonemJsonDecoder
+import konem.protocol.konem.json.KonemJsonEncoder
 import konem.protocol.konem.json.KonemJsonMessageHandler
 import konem.protocol.konem.json.WebSocketFrameJsonDecoder
 import konem.protocol.konem.json.WebSocketFrameJsonEncoder
@@ -27,10 +27,8 @@ class KonemProtocolPipeline private constructor(){
                     Pair("messageHandler", KonemJsonMessageHandler())
                 },
                 protoPipelineCodecs = { pipeline ->
-/*                    pipeline["jsonDecoder"] = JsonObjectDecoder()
-                    pipeline["stringDecoder"] = StringDecoder(CharsetUtil.UTF_8)
-                    pipeline["stringEncoder"] = StringEncoder(CharsetUtil.UTF_8)*/
-                    pipeline["konemCodec"] = KonemJsonCodec()
+                    pipeline["konemEncoder"] = KonemJsonEncoder()
+                    pipeline["konemDecoder"] = KonemJsonDecoder()
                 },
                 wsPipelineFrameCodec = { pipeline ->
                     pipeline["webSocketFrameEncoder"] = WebSocketFrameJsonEncoder()
