@@ -17,7 +17,6 @@ import kotlin.math.log
 class WebSocketFrameJsonDecoder : SimpleChannelInboundHandler<WebSocketFrame>() {
 
     private val serializer = KonemMessageSerializer()
-
     override fun channelRead0(
         ctx: ChannelHandlerContext,
         frame: WebSocketFrame
@@ -50,14 +49,11 @@ class WebSocketFrameJsonDecoder : SimpleChannelInboundHandler<WebSocketFrame>() 
 
 @ChannelHandler.Sharable
 class WebSocketFrameJsonEncoder : MessageToMessageEncoder<String>(){
-    private val logger = logger(this)
     override fun encode(
         ctx: ChannelHandlerContext?,
         msg: String,
         out: MutableList<Any>
     ) {
-        logger.info("Sending {}",msg )
         out.add(TextWebSocketFrame(msg))
     }
-
 }

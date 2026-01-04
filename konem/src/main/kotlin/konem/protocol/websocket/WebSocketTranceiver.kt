@@ -57,7 +57,7 @@ class WebSocketServerTransceiver<T>(channelPort: Int) : ServerTransceiver<T>(cha
     }
 
     override fun broadcast(message: T, vararg webSocketPaths: String) {
-        logger.info("paths:{} message: {}", webSocketPaths, message)
+        logger.trace("paths:{} message: {}", webSocketPaths, message)
         synchronized(activeLock) {
             for (handler in activeHandlers.values) {
                 handler.sendMessage(message)

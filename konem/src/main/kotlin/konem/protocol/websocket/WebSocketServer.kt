@@ -53,11 +53,6 @@ class WebSocketServerImp<T> internal constructor(
             return false
         }
 
-        for(t in websocketPaths) {
-            println("XXXXXZZZZZ $t")
-        }
-
-        println("paths to add ${arrayOf(websocketPaths)}")
         val validPaths = hashSetOf(*websocketPaths)
 
         for (path in websocketPaths) {
@@ -66,10 +61,8 @@ class WebSocketServerImp<T> internal constructor(
             }
         }
         if (validPaths.isNotEmpty()) {
-            println("validpaths: $validPaths")
             val transceiver = WebSocketServerTransceiver<T>(port)
             websocketMap.putIfAbsent(port, validPaths.toTypedArray())
-            println(websocketMap)
             if (addChannel(port, transceiver)) {
                 receiveListenersMap[port] = ConcurrentHashMap()
                 return true

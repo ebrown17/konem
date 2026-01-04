@@ -13,7 +13,7 @@ interface HandlerListener<T> {
 abstract class Handler<T> :
     SimpleChannelInboundHandler<T>() {
 
-    internal val logger = logger(javaClass)
+    internal val logger = logger(this)
 
     private lateinit var context: ChannelHandlerContext
     internal lateinit var remoteAddress: SocketAddress
@@ -53,7 +53,7 @@ abstract class Handler<T> :
     }
 
     fun transceiverReceive(message: T,  extra: String="") {
-        logger.info("Id=$handlerId from: {} received: {}", remoteAddress, message)
+        logger.debug("Id=$handlerId from: {} received: {}", remoteAddress, message)
         transceiver.receive(remoteAddress, message, extra)
     }
 

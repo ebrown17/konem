@@ -24,38 +24,45 @@ class WebSocketPathHandler<T>(
 
     @Throws(Exception::class)
     override fun channelRead(ctx: ChannelHandlerContext, msg: Any) {
-        val req = (msg as FullHttpRequest).copy()
-        val path = req.uri()
+        if(msg !is FullHttpRequest){
+            ctx.fireChannelRead(msg)
+            return
+        }
+        val path = getCleanPath(msg.uri())
+
+        if(!isConfiguredWebSocketPath(path)){
+            ctx.fireChannelRead(msg)
+            return
+        }
+
         try {
-            if (isConfiguredWebSocketPath(path)) {
-                if (req.method() != GET) {
-                    sendHttpResponse(ctx, req, DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST))
+                logger.info("---I am in ----")
+                if (msg.method() != GET) {
+                    sendHttpResponse(ctx, msg, DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST))
+                    msg.release()
                     return
                 }
                 // made it this far, valid websocket path
-                val wsProtoName = WebSocketServerProtocolHandler::class.java.name
                 ctx.pipeline().addAfter(
-                    ctx.name(),wsProtoName ,
+                    ctx.name(),
+                    "wsProtoName-$path" ,
                     WebSocketServerProtocolHandler(path, null, true)
                 )
+                val messageHandler = webSocketHandlerHolder.getHandler(path)
                 ctx.pipeline().addBefore(
                     "exceptionHandler",
-                    "messageHandler",
-                    webSocketHandlerHolder.getHandler(path)
+                    "messageHandler-${path}",
+                    messageHandler
                 )
                 logger.info("WebSocketServerProtocolHandler added for websocket path: {}", path)
-                logger.info("{}",ctx.channel().pipeline())
-
-                ctx.pipeline().remove(WebSocketPathHandler::class.java.name)
-                ctx.fireChannelActive()
-                ctx.pipeline().names().forEach { name ->
-                    logger.info(name)
-                }
-            } else {
+                messageHandler.channelActive(ctx)
+                ctx.pipeline().remove(this)
                 ctx.fireChannelRead(msg)
-            }
-        } finally {
-            req.release()
+
+        } catch(e: Exception) {
+            logger.error("Failed to setup WebSocket pipeline for path: {}", path, e)
+            msg.release()
+            ctx.close()
         }
     }
 
@@ -70,15 +77,12 @@ class WebSocketPathHandler<T>(
         }
     }
 
-    private fun isConfiguredWebSocketPath(path: String): Boolean {
-        var valid = false
-        print("XXX $wsPaths ==== $path")
-        for (configuredPath in wsPaths) {
-            if (path == configuredPath) {
-                valid = true
-            }
-        }
-        return valid
+    private fun getCleanPath(uri: String): String {
+        val queryIndex = uri.indexOf('?')
+        return if (queryIndex >= 0) uri.substring(0, queryIndex) else uri
     }
+
+    private fun isConfiguredWebSocketPath(path: String): Boolean =
+        path in wsPaths
 
 }

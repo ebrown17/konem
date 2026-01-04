@@ -10,7 +10,6 @@ class ProtocolPipeline<T>(
 ) {
 
     fun getProtocolMessageHandler(wsPath: String = ""): Pair<String, Handler<T>> {
-        println("protocol message handler: $wsPath")
         return protocolMessageHandler(wsPath)
     }
 

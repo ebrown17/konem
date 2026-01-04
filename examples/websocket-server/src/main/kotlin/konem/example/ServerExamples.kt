@@ -43,8 +43,9 @@ fun websocketServerExamples() {
   sleep(5000)
 
   server.registerChannelMessageReceiver(MessageReceiver { from, message ->
-      logger.info("KoneMessageReceiver: got {} from {} ", message,from)
-      count++
+      logger.info("Server KoneMessageReceiver: got {} from {} ", message,from)
+      sleep(3000)
+      server.broadcastOnAllChannels(KonemMessage(Heartbeat("${count++}")))
   },"/tester")
 
   server.registerPathConnectionStatusListener(
@@ -62,6 +63,8 @@ fun websocketServerExamples() {
   val client = fact.createClient("localhost", 8080, "/tester")
   val connectionListener = ConnectionListener { remoteAddr: SocketAddress ->
       logger.info("Client connected to {}", remoteAddr)
+      sleep(2000)
+      client.sendMessage(KonemMessage(Heartbeat("${count++}")))
   }
 
   client.registerConnectionListener(connectionListener)
@@ -73,24 +76,15 @@ fun websocketServerExamples() {
   client.connect()
 
   client.registerChannelReadListener(KonemMessageReceiver { from, msg ->
-      logger.info("KonemMessageReceiver: got {} from {}", from, msg)
+      logger.info("Client KonemMessageReceiver: got {} from {}", from, msg)
+      sleep(3000)
+      client.sendMessage(KonemMessage(Heartbeat("${count++}")))
   })
 
 
+sleep(20_000)
 
-  Thread.sleep(1000)
-
-  repeat(10) {
-      logger.info("SENDING")
-    client.sendMessage(KonemMessage(Heartbeat("$it")))
- //     server.broadcastOnAllChannels(KonemMessage(Heartbeat("$it")))
-    Thread.sleep(2000)
-  }
-  Thread.sleep(1000)
-  println(count)
-  count = 0
-
-  client.disconnect()
+    client.disconnect()
 
   sleep(5000)
     println(count)
