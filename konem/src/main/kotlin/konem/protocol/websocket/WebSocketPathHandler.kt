@@ -19,47 +19,46 @@ import konem.netty.ServerTransceiver
 class WebSocketPathHandler<T>(
     private val webSocketHandlerHolder: WebSocketHandlerHolder<T>,
     private val wsPaths: Array<String>
-): ChannelInboundHandlerAdapter() {
+) : ChannelInboundHandlerAdapter() {
     private val logger = logger(this)
 
     @Throws(Exception::class)
     override fun channelRead(ctx: ChannelHandlerContext, msg: Any) {
-        if(msg !is FullHttpRequest){
+        if (msg !is FullHttpRequest) {
             ctx.fireChannelRead(msg)
             return
         }
         val path = getCleanPath(msg.uri())
 
-        if(!isConfiguredWebSocketPath(path)){
+        if (!isConfiguredWebSocketPath(path)) {
             ctx.fireChannelRead(msg)
             return
         }
 
         try {
-                logger.info("---I am in ----")
-                if (msg.method() != GET) {
-                    sendHttpResponse(ctx, msg, DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST))
-                    msg.release()
-                    return
-                }
-                // made it this far, valid websocket path
-                ctx.pipeline().addAfter(
-                    ctx.name(),
-                    "wsProtoName-$path" ,
-                    WebSocketServerProtocolHandler(path, null, true)
-                )
-                val messageHandler = webSocketHandlerHolder.getHandler(path)
-                ctx.pipeline().addBefore(
-                    "exceptionHandler",
-                    "messageHandler-${path}",
-                    messageHandler
-                )
-                logger.info("WebSocketServerProtocolHandler added for websocket path: {}", path)
-                messageHandler.channelActive(ctx)
-                ctx.pipeline().remove(this)
-                ctx.fireChannelRead(msg)
+            if (msg.method() != GET) {
+                sendHttpResponse(ctx, msg, DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST))
+                msg.release()
+                return
+            }
+            // made it this far, valid websocket path
+            ctx.pipeline().addAfter(
+                ctx.name(),
+                "wsProtoName-$path",
+                WebSocketServerProtocolHandler(path, null, true)
+            )
+            val messageHandler = webSocketHandlerHolder.getHandler(path)
+            ctx.pipeline().addBefore(
+                "exceptionHandler",
+                "messageHandler-${path}",
+                messageHandler
+            )
+            logger.info("WebSocketServerProtocolHandler added for websocket path: {}", path)
+            messageHandler.channelActive(ctx)
+            ctx.pipeline().remove(this)
+            ctx.fireChannelRead(msg)
 
-        } catch(e: Exception) {
+        } catch (e: Exception) {
             logger.error("Failed to setup WebSocket pipeline for path: {}", path, e)
             msg.release()
             ctx.close()
