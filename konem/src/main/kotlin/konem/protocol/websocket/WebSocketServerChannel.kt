@@ -42,11 +42,12 @@ class WebSocketServerChannel<T>(
         pipeline.addLast("httpAggregator", HttpObjectAggregator(maxContentLength))
         pipeline.addLast("compressionHandler", WebSocketServerCompressionHandler(maxAllocation))
 
+        val webSocketHandlerHolder = WebSocketHandlerHolder(serverChannelInfo.channel_id,transceiver)
+
         pipeline.addLast(
             WebSocketPathHandler::class.java.name,
             WebSocketPathHandler(
-                serverChannelInfo.channel_id,
-                transceiver,
+                webSocketHandlerHolder,
                 webSocketPaths)
         )
 

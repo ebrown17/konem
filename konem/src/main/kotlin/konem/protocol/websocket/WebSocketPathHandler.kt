@@ -17,8 +17,7 @@ import konem.logger
 import konem.netty.ServerTransceiver
 
 class WebSocketPathHandler<T>(
-    private val handlerId: Long,
-    private val transceiver: ServerTransceiver<T>,
+    private val webSocketHandlerHolder: WebSocketHandlerHolder<T>,
     private val wsPaths: Array<String>
 ): ChannelInboundHandlerAdapter() {
     private val logger = logger(this)
@@ -34,25 +33,24 @@ class WebSocketPathHandler<T>(
                     return
                 }
                 // made it this far, valid websocket path
-                val messageHandler = object: WebSocketHandler<T>(path){
-                    override fun channelRead0(p0: ChannelHandlerContext?, message: T) {
-                        transceiverReceive(message,webSocketPath)
-                    }
-                }
-                messageHandler.handlerId = handlerId
-                messageHandler.transceiver = transceiver
                 val wsProtoName = WebSocketServerProtocolHandler::class.java.name
                 ctx.pipeline().addAfter(
                     ctx.name(),wsProtoName ,
                     WebSocketServerProtocolHandler(path, null, true)
                 )
-                ctx.pipeline().addBefore("exceptionHandler","messageHandler",messageHandler)
-                logger.info(
-                    "WebSocketServerProtocolHandler added for websocket path: {}",
-                    path
+                ctx.pipeline().addBefore(
+                    "exceptionHandler",
+                    "messageHandler",
+                    webSocketHandlerHolder.getHandler(path)
                 )
-                ctx.fireChannelActive()
+                logger.info("WebSocketServerProtocolHandler added for websocket path: {}", path)
+                logger.info("{}",ctx.channel().pipeline())
+
                 ctx.pipeline().remove(WebSocketPathHandler::class.java.name)
+                ctx.fireChannelActive()
+                ctx.pipeline().names().forEach { name ->
+                    logger.info(name)
+                }
             } else {
                 ctx.fireChannelRead(msg)
             }

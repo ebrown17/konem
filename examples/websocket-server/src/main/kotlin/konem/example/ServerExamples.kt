@@ -82,8 +82,8 @@ fun websocketServerExamples() {
 
   repeat(10) {
       logger.info("SENDING")
- //   client.sendMessage(KonemMessage(Heartbeat("$it")))
-      server.broadcastOnAllChannels(KonemMessage(Heartbeat("$it")))
+    client.sendMessage(KonemMessage(Heartbeat("$it")))
+ //     server.broadcastOnAllChannels(KonemMessage(Heartbeat("$it")))
     Thread.sleep(2000)
   }
   Thread.sleep(1000)
