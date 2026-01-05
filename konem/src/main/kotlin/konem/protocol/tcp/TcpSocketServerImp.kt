@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 
 class TcpSocketServerImp<T> internal constructor(
-    serverConfig: ServerConfig, heartbeatProtocol: ServerHeartbeatProtocol<T>,
+    serverConfig: ServerConfig, heartbeatProtocol: ServerHeartbeatProtocol,
     protocolPipeline: ProtocolPipeline<T>
 ) : ServerInternal<T>(serverConfig, heartbeatProtocol, protocolPipeline), TcpSocketServer<T> {
 

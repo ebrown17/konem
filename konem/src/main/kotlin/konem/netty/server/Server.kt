@@ -73,7 +73,7 @@ class WebSocketServerConfig : BaseConfig() {
 data class ServerChannelInfo<T>(
     val use_ssl: Boolean,
     val channel_id: Long,
-    val heartbeatProtocol: ServerHeartbeatProtocol<T>,
+    val heartbeatProtocol: ServerHeartbeatProtocol,
     val protocol_pipeline: ProtocolPipeline<T>
 )
 
@@ -143,7 +143,7 @@ interface Server<T> : BaseServerChannelReceiverRegistrant<T> {
 }
 
 abstract class WebSocketServerInternal<T>(
-    serverConfig: WebSocketServerConfig, heartbeatProtocol: ServerHeartbeatProtocol<T>,
+    serverConfig: WebSocketServerConfig, heartbeatProtocol: ServerHeartbeatProtocol,
     protocolPipeline: ProtocolPipeline<T>
 ) : ServerInternal<T>(serverConfig,heartbeatProtocol,protocolPipeline){
     internal val pathConnectionListeners: MutableList<WsConnectListener> = ArrayList()
@@ -169,7 +169,7 @@ abstract class WebSocketServerInternal<T>(
 }
 
 abstract class ServerInternal<T>(
-    val serverConfig: BaseConfig, val heartbeatProtocol: ServerHeartbeatProtocol<T>,
+    val serverConfig: BaseConfig, val heartbeatProtocol: ServerHeartbeatProtocol,
     val protocolPipeline: ProtocolPipeline<T>
 ) : HandlerListener<T>, Server<T>, ChannelReceiver<T> {
 

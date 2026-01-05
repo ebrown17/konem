@@ -1,5 +1,6 @@
 package konem.example
 
+import io.netty.handler.codec.http.websocketx.PingWebSocketFrame
 import konem.Konem
 import konem.data.json.Heartbeat
 import konem.data.json.KonemMessage
@@ -33,7 +34,7 @@ fun websocketServerExamples() {
         config = {
             it.addChannel(8080,"/tester")
         },
-        heartbeatProtocol = ServerHeartbeatProtocol(false,0) { KonemMessage(Heartbeat()) },
+        heartbeatProtocol = ServerHeartbeatProtocol(true,10) { PingWebSocketFrame() },
         protocolPipeline = KonemProtocolPipeline.getKonemJsonPipeline()
     )
 
@@ -64,7 +65,7 @@ fun websocketServerExamples() {
   val connectionListener = ConnectionListener { remoteAddr: SocketAddress ->
       logger.info("Client connected to {}", remoteAddr)
       sleep(2000)
-      client.sendMessage(KonemMessage(Heartbeat("${count++}")))
+    //  client.sendMessage(KonemMessage(Heartbeat("${count++}")))
   }
 
   client.registerConnectionListener(connectionListener)
@@ -73,7 +74,7 @@ fun websocketServerExamples() {
     logger.info("Client {} disconnected from {}", client.toString(), remoteAddr)
   })
 
-  client.connect()
+  //client.connect()
 
   client.registerChannelReadListener(KonemMessageReceiver { from, msg ->
       logger.info("Client KonemMessageReceiver: got {} from {}", from, msg)
@@ -82,7 +83,7 @@ fun websocketServerExamples() {
   })
 
 
-sleep(20_000)
+sleep(60_000)
 
     client.disconnect()
 

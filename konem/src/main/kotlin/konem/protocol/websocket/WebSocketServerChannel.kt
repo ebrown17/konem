@@ -48,7 +48,8 @@ class WebSocketServerChannel<T>(
             WebSocketPathHandler::class.java.name,
             WebSocketPathHandler(
                 webSocketHandlerHolder,
-                webSocketPaths)
+                webSocketPaths
+            )
         )
 
         wsFrameHandlers.forEach {(handlerName,handler) ->
@@ -61,7 +62,7 @@ class WebSocketServerChannel<T>(
 
         if (heartbeatProtocol.enabled) {
             pipeline.addLast("idleStateHandler", IdleStateHandler(0, heartbeatProtocol.write_idle_time, 0))
-            pipeline.addLast("heartBeatHandler", HeartbeatProducer(transceiver, heartbeatProtocol.generateHeartbeat))
+            pipeline.addLast("heartBeatHandler", HeartbeatProducer( heartbeatProtocol.generateHeartbeat))
         }
 
         pipeline.addLast("exceptionHandler", ExceptionHandler())

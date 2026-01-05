@@ -16,7 +16,7 @@ class Konem private constructor() {
 
         fun <T> createTcpSocketServer(
             config: ServerConfig.() -> Unit,
-            heartbeatProtocol: ServerHeartbeatProtocol<T>,
+            heartbeatProtocol: ServerHeartbeatProtocol,
             protocolPipeline: ProtocolPipeline<T>
         ): TcpSocketServer<T> {
             val userConfig = ServerConfig()
@@ -37,7 +37,7 @@ class Konem private constructor() {
 
         fun <T> createWebSocketServer(
             config: (WebSocketServerConfig) -> Unit,
-            heartbeatProtocol: ServerHeartbeatProtocol<T>,
+            heartbeatProtocol: ServerHeartbeatProtocol,
             protocolPipeline: ProtocolPipeline<T>
         ): WebSocketServer<T> {
             val userConfig = WebSocketServerConfig()

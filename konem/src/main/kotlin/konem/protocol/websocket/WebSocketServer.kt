@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 
 class WebSocketServerImp<T> internal constructor(
-    serverConfig: WebSocketServerConfig, heartbeatProtocol: ServerHeartbeatProtocol<T>,
+    serverConfig: WebSocketServerConfig, heartbeatProtocol: ServerHeartbeatProtocol,
     protocolPipeline: ProtocolPipeline<T>
 ) : WebSocketServerInternal<T>(serverConfig, heartbeatProtocol, protocolPipeline), WebSocketServer<T> {
 

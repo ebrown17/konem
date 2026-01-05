@@ -5,6 +5,9 @@ import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import io.netty.handler.codec.MessageToMessageEncoder
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame
+import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame
+import io.netty.handler.codec.http.websocketx.PingWebSocketFrame
+import io.netty.handler.codec.http.websocketx.PongWebSocketFrame
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame
 import io.netty.handler.codec.http.websocketx.WebSocketFrame
 import io.netty.util.CharsetUtil
@@ -15,12 +18,13 @@ import java.rmi.UnexpectedException
 import kotlin.math.log
 
 class WebSocketFrameJsonDecoder : SimpleChannelInboundHandler<WebSocketFrame>() {
-
+    val logger = logger(this)
     private val serializer = KonemMessageSerializer()
     override fun channelRead0(
         ctx: ChannelHandlerContext,
         frame: WebSocketFrame
     ) {
+        logger.info("XXXXX got: {}",frame)
         when(frame) {
             is TextWebSocketFrame -> {
                 ctx.fireChannelRead(serializer.toKonemMessage(frame.text()))
@@ -57,3 +61,4 @@ class WebSocketFrameJsonEncoder : MessageToMessageEncoder<String>(){
         out.add(TextWebSocketFrame(msg))
     }
 }
+

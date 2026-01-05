@@ -37,7 +37,7 @@ class TcpServerChannel<T>(
 
         if (heartbeatProtocol.enabled) {
             pipeline.addLast("idleStateHandler", IdleStateHandler(0, heartbeatProtocol.write_idle_time, 0))
-            pipeline.addLast("heartBeatHandler", HeartbeatProducer(transceiver, heartbeatProtocol.generateHeartbeat))
+            pipeline.addLast("heartBeatHandler", HeartbeatProducer( heartbeatProtocol.generateHeartbeat))
         }
 
         pipeline.addLast(handlerName, messageHandler)

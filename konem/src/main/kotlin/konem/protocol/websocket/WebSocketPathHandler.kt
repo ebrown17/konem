@@ -45,7 +45,14 @@ class WebSocketPathHandler<T>(
             ctx.pipeline().addAfter(
                 ctx.name(),
                 "wsProtoName-$path",
-                WebSocketServerProtocolHandler(path, null, true)
+                WebSocketServerProtocolHandler(
+                    path,
+                    null,
+                    true,
+                    65536,
+                    false,
+                    true
+                )
             )
             val messageHandler = webSocketHandlerHolder.getHandler(path)
             ctx.pipeline().addBefore(

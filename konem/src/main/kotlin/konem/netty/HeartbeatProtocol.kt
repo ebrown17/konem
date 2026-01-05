@@ -16,17 +16,17 @@ open class ClientHeartbeatProtocol(
 
 class DisabledClientHeartbeatProtocol : ClientHeartbeatProtocol(enabled = false, isHeartbeat = { false })
 
-open class ServerHeartbeatProtocol<T>(
+open class ServerHeartbeatProtocol(
     val enabled: Boolean = true,
     val write_idle_time: Int = 10,
-    val generateHeartbeat: () -> T
+    val generateHeartbeat: () -> Any
 )
 
-class DisabledServerHeartbeatProtocol<T> :
-    ServerHeartbeatProtocol<T>(enabled = false, generateHeartbeat = { Any() as T })
+class DisabledServerHeartbeatProtocol :
+    ServerHeartbeatProtocol(enabled = false, generateHeartbeat = { Any() })
 
 
-class HeartbeatProducer<T>(private val transceiver: ServerTransceiver<T>, val generateHeartbeat: () -> T) :
+class HeartbeatProducer(val generateHeartbeat: () -> Any) :
     ChannelDuplexHandler() {
 
     private val logger = logger(javaClass)
@@ -35,12 +35,19 @@ class HeartbeatProducer<T>(private val transceiver: ServerTransceiver<T>, val ge
     override fun userEventTriggered(ctx: ChannelHandlerContext, evt: Any) {
         if (evt is IdleStateEvent) {
             if (evt.state() == IdleState.WRITER_IDLE) {
-                logger.trace("send heartBeat")
-                transceiver.transmit(
-                    ctx.channel().remoteAddress() as InetSocketAddress,
-                    generateHeartbeat()
-                )
+                logger.info("send heartBeat")
+                ctx.writeAndFlush(generateHeartbeat()).addListener { future ->
+                    if (future.isSuccess) {
+                        logger.info("Ping sent successfully")
+                    } else {
+                        logger.error("Failed to send ping", future.cause())
+                        ctx.close()
+                    }
+                }
             }
+        }
+        else{
+            super.userEventTriggered(ctx, evt)
         }
     }
 }
@@ -92,6 +99,9 @@ class HeartbeatReceiver(
                 }
                 missCount++
             }
+        }
+        else{
+            super.userEventTriggered(ctx, evt)
         }
     }
 }
