@@ -24,7 +24,6 @@ class WebSocketFrameJsonDecoder : SimpleChannelInboundHandler<WebSocketFrame>() 
         ctx: ChannelHandlerContext,
         frame: WebSocketFrame
     ) {
-        logger.info("XXXXX got: {}",frame)
         when(frame) {
             is TextWebSocketFrame -> {
                 ctx.fireChannelRead(serializer.toKonemMessage(frame.text()))

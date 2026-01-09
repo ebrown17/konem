@@ -44,6 +44,9 @@ class WebSocketServerChannel<T>(
 
         val webSocketHandlerHolder = WebSocketHandlerHolder(serverChannelInfo.channel_id,transceiver)
 
+        if (heartbeatProtocol.enabled) {
+            pipeline.addLast("idleStateHandler", IdleStateHandler(0, heartbeatProtocol.write_idle_time, 0))
+        }
         pipeline.addLast(
             WebSocketPathHandler::class.java.name,
             WebSocketPathHandler(
@@ -61,7 +64,6 @@ class WebSocketServerChannel<T>(
         }
 
         if (heartbeatProtocol.enabled) {
-            pipeline.addLast("idleStateHandler", IdleStateHandler(0, heartbeatProtocol.write_idle_time, 0))
             pipeline.addLast("heartBeatHandler", HeartbeatProducer( heartbeatProtocol.generateHeartbeat))
         }
 
