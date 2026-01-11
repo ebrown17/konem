@@ -27,14 +27,10 @@ fun main(){
 
 fun websocketServerExamples() {
 
-  //val server = WebSocketServer()
-  //server.addChannel(8080, "/tester")
-
     val server = Konem.createWebSocketServer(
         config = {
-            it.addChannel(8080,"/tester")
+            addChannel(8080,"/tester")
         },
-        heartbeatProtocol = ServerHeartbeatProtocol(true,10) { PingWebSocketFrame() },
         protocolPipeline = KonemProtocolPipeline.getKonemJsonPipeline()
     )
 

@@ -15,8 +15,8 @@ import java.lang.Thread.sleep
 fun main(){
 
     val server = Konem.createTcpSocketServer<KonemMessage>(
-        config = { serverConfig ->
-            serverConfig.addChannel(6160)
+        config = {
+            addChannel(6160)
         },
         heartbeatProtocol = ServerHeartbeatProtocol { KonemMessage(Heartbeat()) },
         protocolPipeline = KonemProtocolPipeline.getKonemJsonPipeline()

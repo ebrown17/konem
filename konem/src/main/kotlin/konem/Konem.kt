@@ -1,5 +1,6 @@
 package konem
 
+import io.netty.handler.codec.http.websocketx.PingWebSocketFrame
 import konem.netty.*
 import konem.netty.client.ClientFactoryConfig
 import konem.netty.client.TcpSocketClientFactory
@@ -36,13 +37,16 @@ class Konem private constructor() {
         }
 
         fun <T> createWebSocketServer(
-            config: (WebSocketServerConfig) -> Unit,
-            heartbeatProtocol: ServerHeartbeatProtocol,
+            config: WebSocketServerConfig.() -> Unit,
             protocolPipeline: ProtocolPipeline<T>
         ): WebSocketServer<T> {
             val userConfig = WebSocketServerConfig()
             config(userConfig)
-            val server = WebSocketServerImp(userConfig, heartbeatProtocol, protocolPipeline)
+            val server = WebSocketServerImp(
+                userConfig,
+                ServerHeartbeatProtocol(true,10) { PingWebSocketFrame() },
+                protocolPipeline
+            )
             for((port, websockets) in userConfig.portToWsMap){
                 server.addChannel(port,*websockets)
             }

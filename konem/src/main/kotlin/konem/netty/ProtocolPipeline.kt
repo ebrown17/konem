@@ -4,13 +4,13 @@ import io.netty.channel.ChannelHandlerAdapter
 import kotlin.collections.LinkedHashMap
 
 class ProtocolPipeline<T>(
-    private val protocolMessageHandler: (wsPath: String) -> Pair<String, Handler<T>>,
+    private val protocolMessageHandler: () -> Pair<String, Handler<T>>,
     private val protoPipelineCodecs: (LinkedHashMap<String, ChannelHandlerAdapter>) -> Unit,
     private val wsPipelineFrameCodec: (LinkedHashMap<String,ChannelHandlerAdapter>) -> Unit
 ) {
 
-    fun getProtocolMessageHandler(wsPath: String = ""): Pair<String, Handler<T>> {
-        return protocolMessageHandler(wsPath)
+    fun getProtocolMessageHandler(): Pair<String, Handler<T>> {
+        return protocolMessageHandler()
     }
 
 

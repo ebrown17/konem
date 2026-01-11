@@ -73,6 +73,8 @@ class WebSocketServerConfig : BaseConfig() {
 data class ServerChannelInfo<T>(
     val use_ssl: Boolean,
     val channel_id: Long,
+/*    val maxContentLength: Int = 65536,
+    val maxAllocation: Int = 1024 * 1024 * 50,*/
     val heartbeatProtocol: ServerHeartbeatProtocol,
     val protocol_pipeline: ProtocolPipeline<T>
 )

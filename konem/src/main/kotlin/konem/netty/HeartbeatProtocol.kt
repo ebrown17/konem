@@ -11,6 +11,7 @@ open class ClientHeartbeatProtocol(
     val enabled: Boolean = true,
     val read_idle_time: Int = 12,
     val miss_limit: Int = 2,
+    val dropHeartbeat: Boolean = true,
     val isHeartbeat: (message: Any) -> Boolean
 )
 
@@ -38,7 +39,7 @@ class HeartbeatProducer(val generateHeartbeat: () -> Any) :
                 logger.info("send heartBeat")
                 ctx.writeAndFlush(generateHeartbeat()).addListener { future ->
                     if (future.isSuccess) {
-                        logger.info("Ping sent successfully")
+                        logger.trace("Heartbeat sent successfully")
                     } else {
                         logger.error("Failed to send ping", future.cause())
                         ctx.close()
@@ -69,6 +70,7 @@ class HeartbeatProducer(val generateHeartbeat: () -> Any) :
 class HeartbeatReceiver(
     private val expectedInterval: Int,
     private val missedLimit: Int,
+    private val dropHeartbeat: Boolean,
     private val isHeartbeat: (message: Any) -> Boolean
 ) : ChannelDuplexHandler() {
 
@@ -79,15 +81,17 @@ class HeartbeatReceiver(
         if (isHeartbeat(message)) {
             logger.trace("received {} heartbeat", message)
             missCount = 0
-        } else {
-            ctx.fireChannelRead(message)
+            if (dropHeartbeat){
+                return
+            }
         }
+        ctx.fireChannelRead(message)
     }
 
     @Throws(Exception::class)
     override fun userEventTriggered(ctx: ChannelHandlerContext, evt: Any) {
         if (evt is IdleStateEvent) {
-            logger.info("{} miss count {}", evt.state(), missCount)
+            logger.info("{}, idle count is {}", evt.state(), missCount)
 
             if (evt.state() == IdleState.READER_IDLE) {
                 if (missCount >= missedLimit) {
