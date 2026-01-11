@@ -45,6 +45,7 @@ class TcpClientChannel<T>(
                 HeartbeatReceiver(
                     heartbeatProtocol.read_idle_time,
                     heartbeatProtocol.miss_limit,
+                    heartbeatProtocol.dropHeartbeat,
                     heartbeatProtocol.isHeartbeat
                 )
             )

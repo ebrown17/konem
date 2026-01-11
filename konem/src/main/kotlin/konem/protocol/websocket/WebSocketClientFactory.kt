@@ -5,6 +5,8 @@ import konem.netty.ProtocolPipeline
 import konem.netty.client.*
 
 import java.net.InetSocketAddress
+import java.net.URI
+import java.net.URISyntaxException
 
 class WebSocketClientFactoryImp<T> internal constructor(
     config: ClientFactoryConfig,
@@ -12,24 +14,29 @@ class WebSocketClientFactoryImp<T> internal constructor(
     protocolPipeline: ProtocolPipeline<T>
 ) : ClientFactory<T>(config, heartbeatProtocol, protocolPipeline), WebSocketClientFactory<T> {
 
-    override fun createClient(host: String, port: Int,vararg args: String): Client<T> {
+    override fun createClient(host: String, port: Int,webSocketPath: String): Client<T> {
         val address = InetSocketAddress(host, port)
         val transceiver = WebSocketTransceiver<T>(port)
-        return createClient(address, createClientConfig(transceiver))
+        return createClient(address, createClientConfig(transceiver),webSocketPath)
     }
 
     override fun createClient(
         address: InetSocketAddress,
         config: ClientBootstrapConfig<T>,
-        vararg args: String
+        webSocketPath: String
     ): Client<T> {
+        val fullWebSocketUrl = buildFullWebSocketPath(address, webSocketPath)
         val transceiver = config.transceiver as WebSocketTransceiver<T>
         val bootstrap = config.bootstrap
         val client = WebSocketClient(address, config)
-        val clientChannel = WebSocketClientChannel(transceiver, config.clientChannelInfo)
+        val clientChannel = WebSocketClientChannel(transceiver, config.clientChannelInfo, fullWebSocketUrl)
         bootstrap.handler(clientChannel)
         clientArrayList.add(client)
         return client
     }
 
+    @Throws(URISyntaxException::class)
+    private fun buildFullWebSocketPath(address: InetSocketAddress, webSocketPath: String): URI {
+        return URI("ws://" + address.hostString + ":" + address.port + webSocketPath)
+    }
 }
