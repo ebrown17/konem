@@ -54,7 +54,8 @@ class Konem private constructor() {
         }
 
     }
-
+// TODO when adding websocket clientfactory, besure to make isHeartbeat is WebSocketFrame, so all reads work
+//
 
 }
 
