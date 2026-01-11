@@ -1,5 +1,6 @@
 package konem.protocol.tcp
 
+import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInitializer
 import io.netty.channel.socket.SocketChannel
 import io.netty.handler.timeout.IdleStateHandler
@@ -16,10 +17,12 @@ class TcpServerChannel<T>(
 
         val protocolPipeline = serverChannelInfo.protocol_pipeline.getProtocolPipelineCodecs()
         val heartbeatProtocol = serverChannelInfo.heartbeatProtocol
-        val handlerPair = serverChannelInfo.protocol_pipeline.getProtocolMessageHandler()
-        val handlerName = handlerPair.first
-        val messageHandler = handlerPair.second
 
+        val messageHandler = object: Handler<T>() {
+            override fun channelRead0(p0: ChannelHandlerContext?, message: T) {
+                transceiverReceive(message)
+            }
+        }
         messageHandler.handlerId = serverChannelInfo.channel_id
         messageHandler.transceiver = transceiver
 
@@ -40,7 +43,7 @@ class TcpServerChannel<T>(
             pipeline.addLast("heartBeatHandler", HeartbeatProducer( heartbeatProtocol.generateHeartbeat))
         }
 
-        pipeline.addLast(handlerName, messageHandler)
+        pipeline.addLast("messageHandler", messageHandler)
         pipeline.addLast("exceptionHandler", ExceptionHandler())
 
     }

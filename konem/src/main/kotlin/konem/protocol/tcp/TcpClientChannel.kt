@@ -1,9 +1,11 @@
 package konem.protocol.tcp
 
 import io.netty.channel.Channel
+import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInitializer
 import io.netty.handler.timeout.IdleStateHandler
 import konem.netty.ExceptionHandler
+import konem.netty.Handler
 import konem.netty.HeartbeatReceiver
 import konem.netty.SslContextManager
 import konem.netty.client.ClientChannelInfo
@@ -19,10 +21,12 @@ class TcpClientChannel<T>(
 
         val protocolPipeline = clientChannelInfo.protocol_pipeline.getProtocolPipelineCodecs()
         val heartbeatProtocol = clientChannelInfo.heartbeatProtocol
-        val handlerPair = clientChannelInfo.protocol_pipeline.getProtocolMessageHandler()
-        val handlerName = handlerPair.first
-        val messageHandler = handlerPair.second
 
+        val messageHandler = object: Handler<T>() {
+            override fun channelRead0(p0: ChannelHandlerContext?, message: T) {
+                transceiverReceive(message)
+            }
+        }
         messageHandler.handlerId = clientChannelInfo.channel_id
         messageHandler.transceiver = transceiver
 
@@ -51,7 +55,7 @@ class TcpClientChannel<T>(
             )
         }
 
-        pipeline.addLast(handlerName, messageHandler)
+        pipeline.addLast("messageHandler", messageHandler)
         pipeline.addLast("exceptionHandler", ExceptionHandler())
     }
 }

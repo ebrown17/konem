@@ -45,8 +45,8 @@ class JsonServerStartupSpec : FunSpec({
                         addChannel(port)
                     }
                 },
-                heartbeatProtocol = ServerHeartbeatProtocol { KonemMessage(Heartbeat()) },
-                protocolPipeline = KonemProtocolPipeline.getKonemJsonPipeline()
+                protocolPipeline = KonemProtocolPipeline.getKonemJsonPipeline(),
+                heartbeatProtocol = ServerHeartbeatProtocol { KonemMessage(Heartbeat()) }
             )
 
 

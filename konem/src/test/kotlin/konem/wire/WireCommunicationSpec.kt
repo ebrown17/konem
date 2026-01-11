@@ -37,20 +37,20 @@ class WireCommunicationSpec : FunSpec({
                 addChannel(6062)
                 addChannel(6063)
             },
+            protocolPipeline = KonemProtocolPipeline.getKonemWirePipeline(),
             heartbeatProtocol = ServerHeartbeatProtocol {
                 KonemMessage(
                     messageType = MessageType.HEARTBEAT,
                     heartBeat = HeartBeat(Date().toString())
                 )
             },
-            protocolPipeline = KonemProtocolPipeline.getKonemWirePipeline()
         )
 
         clientFactory = Konem.createTcpSocketClientFactoryOfDefaults(
+            protocolPipeline = KonemProtocolPipeline.getKonemWirePipeline(),
             heartbeatProtocol = ClientHeartbeatProtocol(isHeartbeat = { message ->
                 message is HeartBeat
             }),
-            protocolPipeline = KonemProtocolPipeline.getKonemWirePipeline()
         )
     }
 

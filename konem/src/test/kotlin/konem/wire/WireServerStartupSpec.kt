@@ -42,13 +42,13 @@ class WireServerStartupSpec : FunSpec({
                         addChannel(port)
                     }
                 },
+                protocolPipeline = KonemProtocolPipeline.getKonemWirePipeline(),
                 heartbeatProtocol = ServerHeartbeatProtocol {
                     konem.data.protobuf.KonemMessage(
                         messageType = MessageType.HEARTBEAT,
                         heartBeat = HeartBeat(Date().toString())
                     )
                 },
-                protocolPipeline = KonemProtocolPipeline.getKonemWirePipeline()
             )
 
             startServer(server!!)

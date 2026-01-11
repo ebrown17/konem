@@ -37,15 +37,15 @@ class JsonCommunicationSpec : FunSpec({
                 addChannel(6062)
                 addChannel(6063)
             },
+            protocolPipeline = KonemProtocolPipeline.getKonemJsonPipeline(),
             heartbeatProtocol = ServerHeartbeatProtocol { KonemMessage(Heartbeat()) },
-            protocolPipeline = KonemProtocolPipeline.getKonemJsonPipeline()
         )
 
         clientFactory = Konem.createTcpSocketClientFactoryOfDefaults(
-            heartbeatProtocol = ClientHeartbeatProtocol(isHeartbeat = { message ->
+            protocolPipeline = KonemProtocolPipeline.getKonemJsonPipeline(),
+             heartbeatProtocol = ClientHeartbeatProtocol(isHeartbeat = { message ->
                 message is Heartbeat
             }),
-            protocolPipeline = KonemProtocolPipeline.getKonemJsonPipeline()
         )
     }
 

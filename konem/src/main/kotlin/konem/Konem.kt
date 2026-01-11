@@ -17,8 +17,8 @@ class Konem private constructor() {
 
         fun <T> createTcpSocketServer(
             config: ServerConfig.() -> Unit,
+            protocolPipeline: ProtocolPipeline<T>,
             heartbeatProtocol: ServerHeartbeatProtocol,
-            protocolPipeline: ProtocolPipeline<T>
         ): TcpSocketServer<T> {
             val userConfig = ServerConfig()
             config(userConfig)
@@ -30,8 +30,8 @@ class Konem private constructor() {
         }
 
         fun <T> createTcpSocketClientFactoryOfDefaults(
+            protocolPipeline: ProtocolPipeline<T>,
             heartbeatProtocol: ClientHeartbeatProtocol,
-            protocolPipeline: ProtocolPipeline<T>
             ): TcpSocketClientFactory<T> {
             return TcpClientFactory(ClientFactoryConfig(),heartbeatProtocol,protocolPipeline)
         }

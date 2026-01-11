@@ -24,8 +24,13 @@ fun main(){
             addChannel(6160)
             addChannel(6161)
         },
-        heartbeatProtocol = ServerHeartbeatProtocol { KonemMessage(MessageType.HEARTBEAT, heartBeat = HeartBeat(LocalDateTime.now().toString())) },
-        protocolPipeline = KonemProtocolPipeline.getKonemWirePipeline()
+        protocolPipeline = KonemProtocolPipeline.getKonemWirePipeline(),
+        heartbeatProtocol = ServerHeartbeatProtocol {
+            KonemMessage(
+                MessageType.HEARTBEAT,
+                heartBeat = HeartBeat(LocalDateTime.now().toString())
+            )
+        },
     )
 
     logger.info("Registering channel message receiver for port 6160")
