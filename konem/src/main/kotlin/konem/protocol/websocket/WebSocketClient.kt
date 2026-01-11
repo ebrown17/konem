@@ -6,8 +6,13 @@ import konem.netty.client.ClientBootstrapConfig
 import konem.netty.client.ClientInternal
 import kotlinx.coroutines.launch
 import java.net.SocketAddress
+import java.net.URI
 
-class WebSocketClient<T>(private val serverAddress: SocketAddress, config: ClientBootstrapConfig<T>):
+class WebSocketClient<T>(
+    private val serverAddress: SocketAddress,
+    config: ClientBootstrapConfig<T>,
+    private val fullWebSocketPath: URI
+):
     ClientInternal<T>(serverAddress,config) {
 
     private val logger = logger(this)
@@ -29,19 +34,19 @@ class WebSocketClient<T>(private val serverAddress: SocketAddress, config: Clien
 
     override fun handleReceivedMessage(addr: SocketAddress, port: Int, message: T, extra: String) {
         clientScope.launch {
-            receiveMessage(addr, port, message)
+            receiveMessage(addr, port, message,extra)
         }
     }
 
     override suspend fun receiveMessage(addr: SocketAddress, port: Int, message: T, extra: String) {
-        logger.trace("got message: {}", message)
+        logger.trace("got message: {} for path: {}", message,extra)
         for (listener in receiveListeners) {
             listener.handle(addr, message)
         }
     }
 
     override fun toString(): String {
-        return "WebSocketClient{Transceiver=$transceiver}"
+        return "WebSocketClient{Path=$fullWebSocketPath, $transceiver}"
     }
 
 }

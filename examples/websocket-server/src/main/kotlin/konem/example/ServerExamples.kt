@@ -1,18 +1,13 @@
 package konem.example
 
-import io.netty.handler.codec.http.websocketx.PingWebSocketFrame
 import konem.Konem
 import konem.data.json.Heartbeat
 import konem.data.json.KonemMessage
+import konem.netty.ConnectionListener
+import konem.netty.DisconnectionListener
 import konem.netty.MessageReceiver
-import konem.netty.ServerHeartbeatProtocol
-import konem.netty.stream.ConnectionListener
-import konem.netty.stream.DisconnectionListener
-import konem.netty.stream.Receiver
 import konem.protocol.konem.KonemProtocolPipeline
 import konem.protocol.websocket.WebSocketConnectionStatusListener
-import konem.protocol.websocket.json.KonemMessageReceiver
-import konem.protocol.websocket.json.WebSocketClientFactory
 import org.slf4j.LoggerFactory
 import java.lang.Thread.sleep
 import java.net.SocketAddress
@@ -56,23 +51,23 @@ fun websocketServerExamples() {
 
 
 
-  val fact = WebSocketClientFactory()
+  val fact = Konem.createWebSocketClientFactoryOfDefaults(KonemProtocolPipeline.getKonemJsonPipeline())
   val client = fact.createClient("localhost", 8080, "/tester")
   val connectionListener = ConnectionListener { remoteAddr: SocketAddress ->
       logger.info("Client connected to {}", remoteAddr)
       sleep(2000)
-    //  client.sendMessage(KonemMessage(Heartbeat("${count++}")))
+      //  client.sendMessage(KonemMessage(Heartbeat("${count++}")))
   }
 
   client.registerConnectionListener(connectionListener)
 
   client.registerDisconnectionListener(DisconnectionListener { remoteAddr ->
-    logger.info("Client {} disconnected from {}", client.toString(), remoteAddr)
+      logger.info("Client {} disconnected from {}", client.toString(), remoteAddr)
   })
 
-  //client.connect()
+  client.connect()
 
-  client.registerChannelReadListener(KonemMessageReceiver { from, msg ->
+  client.registerChannelMessageReceiver(MessageReceiver { from, msg ->
       logger.info("Client KonemMessageReceiver: got {} from {}", from, msg)
       sleep(3000)
       client.sendMessage(KonemMessage(Heartbeat("${count++}")))

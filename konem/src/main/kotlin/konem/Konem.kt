@@ -1,15 +1,19 @@
 package konem
 
 import io.netty.handler.codec.http.websocketx.PingWebSocketFrame
+import io.netty.handler.codec.http.websocketx.WebSocketFrame
+import konem.data.protobuf.HeartBeat
 import konem.netty.*
 import konem.netty.client.ClientFactoryConfig
 import konem.netty.client.TcpSocketClientFactory
+import konem.netty.client.WebSocketClientFactory
 import konem.netty.server.ServerConfig
 import konem.netty.server.TcpSocketServer
 import konem.netty.server.WebSocketServer
 import konem.netty.server.WebSocketServerConfig
 import konem.protocol.tcp.TcpClientFactory
 import konem.protocol.tcp.TcpSocketServerImp
+import konem.protocol.websocket.WebSocketClientFactoryImp
 import konem.protocol.websocket.WebSocketServerImp
 
 class Konem private constructor() {
@@ -53,9 +57,20 @@ class Konem private constructor() {
             return server
         }
 
+        fun <T> createWebSocketClientFactoryOfDefaults(
+            protocolPipeline: ProtocolPipeline<T>
+        ): WebSocketClientFactory<T> {
+            return WebSocketClientFactoryImp(
+                ClientFactoryConfig(),
+                protocolPipeline,
+                heartbeatProtocol = ClientHeartbeatProtocol(dropHeartbeat=false, isHeartbeat = { message ->
+                    message is WebSocketFrame
+                })
+            )
+        }
+
     }
-// TODO when adding websocket clientfactory, besure to make isHeartbeat is WebSocketFrame, so all reads work
-//
+
 
 }
 

@@ -67,7 +67,14 @@ class WebSocketClientChannel<T>(
                 )
             )
         }
-        pipeline.addLast("clientHandler", WebSocketClientProtocolHandler(clientHandShaker, true, true))
+        pipeline.addLast(
+            "clientHandler-${webSocketPath.path}",
+            WebSocketClientProtocolHandler(
+                clientHandShaker,
+                true,
+                true)
+        )
+
         wsFrameHandlers.forEach {(handlerName,handler) ->
             pipeline.addLast( handlerName, handler)
         }

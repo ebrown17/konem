@@ -10,8 +10,8 @@ import java.net.URISyntaxException
 
 class WebSocketClientFactoryImp<T> internal constructor(
     config: ClientFactoryConfig,
-    heartbeatProtocol: ClientHeartbeatProtocol,
-    protocolPipeline: ProtocolPipeline<T>
+    protocolPipeline: ProtocolPipeline<T>,
+    heartbeatProtocol: ClientHeartbeatProtocol
 ) : ClientFactory<T>(config, heartbeatProtocol, protocolPipeline), WebSocketClientFactory<T> {
 
     override fun createClient(host: String, port: Int,webSocketPath: String): Client<T> {
@@ -28,7 +28,7 @@ class WebSocketClientFactoryImp<T> internal constructor(
         val fullWebSocketUrl = buildFullWebSocketPath(address, webSocketPath)
         val transceiver = config.transceiver as WebSocketTransceiver<T>
         val bootstrap = config.bootstrap
-        val client = WebSocketClient(address, config)
+        val client = WebSocketClient(address, config,fullWebSocketUrl)
         val clientChannel = WebSocketClientChannel(transceiver, config.clientChannelInfo, fullWebSocketUrl)
         bootstrap.handler(clientChannel)
         clientArrayList.add(client)
