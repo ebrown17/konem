@@ -12,7 +12,8 @@ import konem.protocol.konem.json.WebSocketFrameJsonDecoder
 import konem.protocol.konem.json.WebSocketFrameJsonEncoder
 import konem.protocol.konem.string.WebSocketFrameStringDecoder
 import konem.protocol.konem.string.WebSocketFrameStringEncoder
-import konem.protocol.konem.wire.KonemWireCodec
+import konem.protocol.konem.wire.KonemWireDecoder
+import konem.protocol.konem.wire.KonemWireEncoder
 import konem.protocol.konem.wire.WebSocketFrameWireDecoder
 import konem.protocol.konem.wire.WebSocketFrameWireEncoder
 
@@ -40,7 +41,8 @@ class KonemProtocolPipeline private constructor(){
                 protoPipelineCodecs = { pipeline ->
                     pipeline["frameDecoder"] = ProtobufVarint32FrameDecoder()
                     pipeline["frameEncoder"] = ProtobufVarint32LengthFieldPrepender()
-                    pipeline["konemCodec"] = KonemWireCodec()
+                    pipeline["konemDecoder"] = KonemWireDecoder()
+                    pipeline["konemEncoder"] = KonemWireEncoder()
 
                 },
                 wsPipelineFrameCodec = { pipeline ->
@@ -48,7 +50,8 @@ class KonemProtocolPipeline private constructor(){
                     pipeline["webSocketFrameEncoder"] = WebSocketFrameWireEncoder()
                     pipeline["frameDecoder"] = ProtobufVarint32FrameDecoder()
                     pipeline["frameEncoder"] = ProtobufVarint32LengthFieldPrepender()
-                    pipeline["konemCodec"] = KonemWireCodec()
+                    pipeline["konemDecoder"] = KonemWireDecoder()
+                    pipeline["konemEncoder"] = KonemWireEncoder()
                 })
         }
 
