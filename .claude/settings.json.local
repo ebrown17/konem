@@ -1,0 +1,8 @@
+{
+  "ignorePatterns": [
+    "groovy",
+    "build",
+    "konem/src/main/kotlin/konem/netty/stream",
+    "konem/src/main/kotlin/konem/protocol/websocket/json"
+  ]
+}
