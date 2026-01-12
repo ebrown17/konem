@@ -1,4 +1,6 @@
 apply plugin: 'com.squareup.wire'
+apply plugin: "org.jlleitschuh.gradle.ktlint"
+apply plugin: "groovy"
 
 description = "Kotlin Netty Medium"
 
@@ -6,43 +8,45 @@ configurations {
     ktlint
 }
 
+ktlint {
+    debug = true
+    ignoreFailures = true
+
+}
+
 dependencies {
-    implementation libs.kotlin.coroutines.core
-    implementation libs.kotlin.kotlinSerialization
+    implementation libs.kotlin.coroutines_core
+    implementation libs.kotlin.serialization_json
     implementation libs.netty
     implementation libs.wire
+    implementation libs.bouncycastle
+
+    implementation libs.slf4j
+
+    testImplementation libs.slf4j
+    testImplementation libs.logback
+    testImplementation libs.kotest.junit5
+    testImplementation libs.kotest.assertions
+    testImplementation libs.kotest.property
+    testImplementation libs.kotest.datatest
+
+    testImplementation libs.groovy
     testImplementation libs.spock
-    testImplementation libs.junit
-    ktlint libs.ktlint
+
 }
 
 compileTestKotlin {
     kotlinOptions.jvmTarget = jvmTargetVersion
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
-
-task ktlint(type: JavaExec, group: "verification") {
-    description = "Check Kotlin code style."
-    classpath = configurations.ktlint
-    main = "com.pinterest.ktlint.Main"
-    args "src/**/*.kt,!src/**/*KoneMessage.kt"
-}
-
-task ktlintFormat(type: JavaExec, group: "formatting") {
-    description = "Fix Kotlin code style deviations."
-    classpath += files("config/ktlint")
-    classpath = configurations.ktlint
-    main = "com.pinterest.ktlint.Main"
-    args "-F", "src/**/*.kt"
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 detekt {
+
     input = files("src/main/kotlin")
     parallel = true
     ignoreFailures = true
-    config = files("config/detekt/yaml/detekt-config.yml")
-    filters = "**/*.Examples.kt,**/protobuf/*.KonemMessage.kt,**/*.WebSocketFrameHandler.kt"
+    config = files("config/detekt/detekt-config.yml")
     reports {
         html {
             enabled = true
@@ -50,11 +54,25 @@ detekt {
         xml {enabled = false}
         txt {enabled = false}
     }
+
+}
+tasks.getByPath(':detekt').dependsOn(':konem:generateMainProtos')
+sourceSets {
+    test {
+        groovy {
+            exclude '**/**'
+        }
+    }
 }
 
 test {
-    jvmArgs = ["-Dio.netty.leakDetection.level=PARANOID","-Dkonem.secure.keyStoreLocation=config/keystore/konem.jks","-Dkonem.secure.keyStoreType=JKS","-Dkonem.secure.keyStorePassword=test123"]
+    jvmArgs = ["-Dio.netty.leakDetection.level=PARANOID","-Dkonem.secure.keyStoreLocation=config/keystore/konem.jks",
+               "-Dkonem.secure.keyStoreType=JKS","-Dkonem.secure.keyStorePassword=test123", "-Dio.netty.tryReflectionSetAccessible=true"]
+
     systemProperties 'SKIP.LONG': '1'
+
+    useJUnitPlatform()
+
 }
 
 wire {

@@ -1,64 +1,58 @@
 package konem.data.json
 
-import java.util.*
-import konem.data.json.Message.Data
-import konem.data.json.Message.Heartbeat
-import konem.data.json.Message.Status
-import konem.data.json.Message.Unknown
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.Polymorphic
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.StringFormat
+import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
+import java.util.*
 
 @Serializable
-sealed class Message {
+abstract class Message
 
-  @Serializable
-  data class Data constructor(val data: String) : Message()
+@Serializable
+data class Data(val data: String) : Message()
 
-  @Serializable
-  data class Heartbeat constructor(val sent: String = Date().toString()) : Message()
+@Serializable
+data class Heartbeat(val sent: String = Date().toString()) : Message()
 
-  @Serializable
-  data class Status constructor(
+@Serializable
+data class Status(
     val shortName: String = "",
     val errors: Int = -1,
     val received: Int = -1,
     val sent: Int = -1,
     val description: String = ""
-  ) : Message()
-
-  @Serializable
-  data class Unknown constructor(val unknown: String = "Unknown Message") : Message()
-}
+) : Message()
 
 @Serializable
-data class KonemMessage(@Polymorphic val konemMessage: Message)
+data class Unknown(val unknown: String = "Unknown Message") : Message()
+
+@Serializable
+data class KonemMessage(@Polymorphic val message: Message)
 
 class KonemMessageSerializer {
 
-  private val sealedModule = SerializersModule {
-    polymorphic(Message::class) {
-      Data::class with Data.serializer()
-      Heartbeat::class with Heartbeat.serializer()
-      Status::class with Status.serializer()
-      Unknown::class with Unknown.serializer()
+    val module = SerializersModule {
+        polymorphic(Message::class) {
+            subclass(Data::class, Data.serializer())
+            subclass(Heartbeat::class, Heartbeat.serializer())
+            subclass(Status::class, Status.serializer())
+            subclass(Unknown::class, Unknown.serializer())
+            defaultDeserializer { Unknown.serializer() }
+        }
     }
-  }
 
-  private val serializer: KSerializer<KonemMessage>
-    get() = KonemMessage.serializer()
+    private val format: StringFormat
+        get() = Json { serializersModule = module }
 
-  private val format: StringFormat
-    get() = Json(context = sealedModule)
+    fun toJson(msg: KonemMessage): String {
+        return format.encodeToString(msg)
+    }
 
-  fun toJson(msg: KonemMessage): String {
-    return format.stringify(serializer, msg)
-  }
-
-  fun toKonemMessage(json: String): KonemMessage {
-    return format.parse(serializer, json)
-  }
+    fun toKonemMessage(json: String): KonemMessage {
+        return format.decodeFromString(json)
+    }
 }
