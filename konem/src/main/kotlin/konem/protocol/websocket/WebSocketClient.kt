@@ -4,16 +4,17 @@ import konem.logger
 import konem.netty.MessageReceiver
 import konem.netty.client.ClientBootstrapConfig
 import konem.netty.client.ClientInternal
+import konem.netty.client.WebSocketClient
 import kotlinx.coroutines.launch
 import java.net.SocketAddress
 import java.net.URI
 
-class WebSocketClient<T>(
+class WebSocketClientImp<T>(
     private val serverAddress: SocketAddress,
     config: ClientBootstrapConfig<T>,
     private val fullWebSocketPath: URI
 ):
-    ClientInternal<T>(serverAddress,config) {
+    ClientInternal<T>(serverAddress,config), WebSocketClient<T> {
 
     private val logger = logger(this)
     private val transceiver = config.transceiver
@@ -47,6 +48,13 @@ class WebSocketClient<T>(
 
     override fun toString(): String {
         return "WebSocketClient{Path=$fullWebSocketPath, $transceiver}"
+    }
+
+    override fun registerChannelMessageReceiver(
+        receiver: MessageReceiver<T>,
+        vararg webSocketPaths: String
+    ) {
+        registerChannelMessageReceiver(receiver)
     }
 
 }

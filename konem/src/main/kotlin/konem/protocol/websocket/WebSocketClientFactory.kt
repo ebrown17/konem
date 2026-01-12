@@ -14,7 +14,7 @@ class WebSocketClientFactoryImp<T> internal constructor(
     heartbeatProtocol: ClientHeartbeatProtocol
 ) : ClientFactory<T>(config, heartbeatProtocol, protocolPipeline), WebSocketClientFactory<T> {
 
-    override fun createClient(host: String, port: Int,webSocketPath: String): Client<T> {
+    override fun createClient(host: String, port: Int,webSocketPath: String): WebSocketClient<T> {
         val address = InetSocketAddress(host, port)
         val transceiver = WebSocketTransceiver<T>(port)
         return createClient(address, createClientConfig(transceiver),webSocketPath)
@@ -24,11 +24,11 @@ class WebSocketClientFactoryImp<T> internal constructor(
         address: InetSocketAddress,
         config: ClientBootstrapConfig<T>,
         webSocketPath: String
-    ): Client<T> {
+    ): WebSocketClient<T> {
         val fullWebSocketUrl = buildFullWebSocketPath(address, webSocketPath)
         val transceiver = config.transceiver as WebSocketTransceiver<T>
         val bootstrap = config.bootstrap
-        val client = WebSocketClient(address, config,fullWebSocketUrl)
+        val client = WebSocketClientImp(address, config,fullWebSocketUrl)
         val clientChannel = WebSocketClientChannel(transceiver, config.clientChannelInfo, fullWebSocketUrl)
         bootstrap.handler(clientChannel)
         clientArrayList.add(client)

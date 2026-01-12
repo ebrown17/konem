@@ -7,6 +7,7 @@ import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import io.netty.handler.codec.MessageToMessageEncoder
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame
+import io.netty.handler.codec.http.websocketx.ContinuationWebSocketFrame
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame
 import io.netty.handler.codec.http.websocketx.WebSocketFrame
 import io.netty.util.CharsetUtil
@@ -21,11 +22,12 @@ class WebSocketFrameWireDecoder : SimpleChannelInboundHandler<WebSocketFrame>() 
         frame: WebSocketFrame
     ) {
         when(frame) {
-            is BinaryWebSocketFrame -> {
-                ctx.fireChannelRead(frame.content())
+            is BinaryWebSocketFrame,
+            is ContinuationWebSocketFrame -> {
+                ctx.fireChannelRead(frame.content().retain())
             }
             else -> {
-                val message = "unsupported frame type: " + frame!!.javaClass
+                val message = "unsupported frame type: " + frame.javaClass
                 ctx.fireExceptionCaught(UnsupportedOperationException(message))
                 frame.release()
             }
@@ -38,10 +40,10 @@ class WebSocketFrameWireDecoder : SimpleChannelInboundHandler<WebSocketFrame>() 
 class WebSocketFrameWireEncoder : MessageToMessageEncoder<ByteBuf>(){
     override fun encode(
         ctx: ChannelHandlerContext,
-        byteBuf: ByteBuf,
+        msg: ByteBuf,
         out: MutableList<Any>
     ) {
-        out.add(BinaryWebSocketFrame(byteBuf))
+        out.add(BinaryWebSocketFrame(msg.retain()))
     }
 
 }

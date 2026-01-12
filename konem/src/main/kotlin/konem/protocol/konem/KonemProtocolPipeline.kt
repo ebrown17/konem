@@ -29,6 +29,8 @@ class KonemProtocolPipeline private constructor(){
                 wsPipelineFrameCodec = { pipeline ->
                     pipeline["webSocketFrameEncoder"] = WebSocketFrameJsonEncoder()
                     pipeline["webSocketFrameDecoder"] = WebSocketFrameJsonDecoder()
+                    pipeline["konemDecoder"] = KonemJsonDecoder()
+                    pipeline["konemEncoder"] = KonemJsonEncoder()
                 })
         }
 
@@ -44,6 +46,9 @@ class KonemProtocolPipeline private constructor(){
                 wsPipelineFrameCodec = { pipeline ->
                     pipeline["webSocketFrameDecoder"] = WebSocketFrameWireDecoder()
                     pipeline["webSocketFrameEncoder"] = WebSocketFrameWireEncoder()
+                    pipeline["frameDecoder"] = ProtobufVarint32FrameDecoder()
+                    pipeline["frameEncoder"] = ProtobufVarint32LengthFieldPrepender()
+                    pipeline["konemCodec"] = KonemWireCodec()
                 })
         }
 

@@ -1,8 +1,10 @@
 package konem.protocol.websocket
 
 import io.netty.channel.Channel
+import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInitializer
+import io.netty.channel.ChannelPromise
 import io.netty.handler.codec.http.DefaultHttpHeaders
 import io.netty.handler.codec.http.HttpClientCodec
 import io.netty.handler.codec.http.HttpObjectAggregator
@@ -26,14 +28,20 @@ class WebSocketClientChannel<T>(
 ) : ChannelInitializer<Channel>() {
 
     private val clientHandShaker: WebSocketClientHandshaker
-        get() = WebSocketClientHandshakerFactory.newHandshaker(
-            webSocketPath, WebSocketVersion.V13, null, true, DefaultHttpHeaders()
+        get() =  WebSocketClientHandshakerFactory.newHandshaker(
+            webSocketPath,
+            WebSocketVersion.V13,
+            null,
+            true,
+            DefaultHttpHeaders(),
+            maxContentLength,
+            true,   // performMasking (client MUST mask)
+            false   // allowMaskMismatch (usually false)
         )
 
     override fun initChannel(channel: Channel) {
         val pipeline = channel.pipeline()
 
-        val protocolPipeline = clientChannelInfo.protocol_pipeline.getProtocolPipelineCodecs()
         val wsFrameHandlers = clientChannelInfo.protocol_pipeline.getProtocolWebSocketPipelineFrameHandlers()
         val heartbeatProtocol = clientChannelInfo.heartbeatProtocol
         val webSocketMessageHandler = object: WebSocketHandler<T>(webSocketPath.path ){
@@ -78,11 +86,10 @@ class WebSocketClientChannel<T>(
         wsFrameHandlers.forEach {(handlerName,handler) ->
             pipeline.addLast( handlerName, handler)
         }
-        protocolPipeline.forEach { entry ->
-            pipeline.addLast(entry.key, entry.value)
-        }
+
         pipeline.addLast("messageHandler-${webSocketPath.path}", webSocketMessageHandler)
         pipeline.addLast("exceptionHandler", ExceptionHandler())
+
     }
     companion object {
         const val maxContentLength = 65536

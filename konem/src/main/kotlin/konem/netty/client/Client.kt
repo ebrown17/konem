@@ -28,6 +28,9 @@ interface Client<T>: BaseChannelReceiverRegistrant<T> {
     fun sendMessage(message: T)
 }
 
+interface WebSocketClient<T>: Client<T>, WebSocketChannelReceiverRegistrant<T> {
+
+}
 abstract class ClientInternal<T>(private val serverAddress: SocketAddress, private val config: ClientBootstrapConfig<T>) :
     Client<T>, ChannelReceiver<T> {
 

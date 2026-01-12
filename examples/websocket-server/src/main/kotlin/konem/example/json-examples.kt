@@ -56,7 +56,7 @@ fun websocketServerExamples() {
   val connectionListener = ConnectionListener { remoteAddr: SocketAddress ->
       logger.info("Client connected to {}", remoteAddr)
       sleep(2000)
-      //  client.sendMessage(KonemMessage(Heartbeat("${count++}")))
+      client.sendMessage(KonemMessage(Heartbeat("${count++}")))
   }
 
   client.registerConnectionListener(connectionListener)

@@ -12,17 +12,8 @@ class KonemWireCodec: MessageToMessageCodec<ByteBuf, KonemMessage>() {
     private val adapter: ProtoAdapter<KonemMessage> = KonemMessage.ADAPTER
 
     override fun decode(ctx: ChannelHandlerContext, buf: ByteBuf, out: MutableList<Any>) {
-        val bytes: ByteArray = if (buf.hasArray()) {
-            buf.array()
-        } else {
-            ByteBufUtil.getBytes(
-                buf,
-                buf.readerIndex(),
-                buf.readableBytes(),
-                false
-            )
-        }
-
+        val bytes = ByteArray(buf.readableBytes())
+        buf.getBytes(buf.readerIndex(), bytes)
         out.add(adapter.decode(bytes))
     }
 

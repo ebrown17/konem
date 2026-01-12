@@ -59,12 +59,12 @@ interface TcpSocketClientFactory<T> : ClientFactoryControl {
 }
 
 interface WebSocketClientFactory<T> : ClientFactoryControl {
-    fun createClient(host: String, port: Int, webSocketPath: String): Client<T>
+    fun createClient(host: String, port: Int, webSocketPath: String): WebSocketClient<T>
     fun createClient(
         address: InetSocketAddress,
         config: ClientBootstrapConfig<T>,
         webSocketPath: String
-    ): Client<T>
+    ): WebSocketClient<T>
 }
 
 

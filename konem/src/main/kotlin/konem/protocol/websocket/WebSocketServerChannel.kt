@@ -25,9 +25,7 @@ class WebSocketServerChannel<T>(
     override fun initChannel(channel: SocketChannel) {
         val pipeline = channel.pipeline()
 
-        val protocolPipeline= serverChannelInfo.protocol_pipeline.getProtocolPipelineCodecs()
         val wsFrameHandlers = serverChannelInfo.protocol_pipeline.getProtocolWebSocketPipelineFrameHandlers()
-
         val heartbeatProtocol = serverChannelInfo.heartbeatProtocol
 
         if (serverChannelInfo.use_ssl) {
@@ -59,10 +57,6 @@ class WebSocketServerChannel<T>(
 
         wsFrameHandlers.forEach {(handlerName,handler) ->
             pipeline.addLast( handlerName, handler)
-        }
-
-        protocolPipeline.forEach { (handlerName,handler) ->
-            pipeline.addLast(handlerName, handler)
         }
 
         pipeline.addLast("exceptionHandler", ExceptionHandler())
