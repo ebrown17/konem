@@ -1,7 +1,6 @@
 package konem.wire
 
-import io.kotest.assertions.until.fixed
-import io.kotest.assertions.until.until
+import io.kotest.assertions.nondeterministic.until
 import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.datatest.withData
@@ -13,7 +12,6 @@ import konem.netty.ServerHeartbeatProtocol
 import konem.protocol.konem.KonemProtocolPipeline
 import kotlinx.coroutines.delay
 import java.util.*
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
@@ -27,13 +25,15 @@ class WireServerStartupSpec : FunSpec({
     }
     context("Server starts with expected ports and values") {
         withData(
-            nameFn = { data: ServerStartup -> "${this.testCase.name.testName} ${data.portsToConfigure}" },
+            nameFn = { data: ServerStartup -> "${this.testCase.name.name} ${data.portsToConfigure}" },
+            ts = listOf(
             ServerStartup(mutableListOf(6060)),
             ServerStartup(mutableListOf(6060, 6061, 6062)),
             ServerStartup(mutableListOf(6060, 6061, 6062, 6063, 6064, 6065)),
             ServerStartup(mutableListOf(6060, 6061, 6062, 6060, 6061, 6062)),
             ServerStartup(mutableListOf(6060, 6061, 6062, 6061, 6062, 6065)),
 
+            ),
             ) { (portsToConfigure) ->
 
             server = Konem.createTcpSocketServer(
@@ -53,7 +53,7 @@ class WireServerStartupSpec : FunSpec({
 
             startServer(server!!)
             delay(1.seconds)
-            until(activeTime.seconds, 250.milliseconds.fixed()) {
+            until(activeTime.seconds) {
                 if (server != null) {
                     var allPortsConfigured = true
 

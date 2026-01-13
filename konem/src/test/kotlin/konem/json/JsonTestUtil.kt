@@ -1,8 +1,7 @@
 package konem.json
 
 
-import io.kotest.assertions.until.fixed
-import io.kotest.assertions.until.until
+import io.kotest.assertions.nondeterministic.until
 import konem.TestClientReceiver
 import konem.TestServerReceiver
 import konem.data.json.Data
@@ -63,7 +62,7 @@ fun serverBroadcastOnAllChannels(messageSendCount: Int){
 
 @ExperimentalTime
 suspend fun waitForMessagesReceiverClient(totalMessages:Int ,receiverList : MutableList<JsonTestClientReceiver>,debug: Boolean = false) : Boolean{
-    return until(waitForMsgTime.seconds, 250.milliseconds.fixed()) {
+    until(waitForMsgTime.seconds) {
         val received: Int = receiverList.sumOf { it.messageCount }
         var correctMsgs = true
         receiverList.forEach{ receiver ->
@@ -79,4 +78,5 @@ suspend fun waitForMessagesReceiverClient(totalMessages:Int ,receiverList : Muta
         }
         (received == totalMessages) && correctMsgs
     }
+    return true
 }

@@ -1,8 +1,7 @@
 package konem.wire
 
 
-import io.kotest.assertions.until.fixed
-import io.kotest.assertions.until.until
+import io.kotest.assertions.nondeterministic.until
 import konem.TestClientReceiver
 import konem.TestServerReceiver
 import konem.data.protobuf.Data
@@ -13,7 +12,6 @@ import konem.netty.client.TcpSocketClientFactory
 import konem.netty.server.TcpSocketServer
 import konem.waitForMsgTime
 import java.net.SocketAddress
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
@@ -85,7 +83,7 @@ fun serverBroadcastOnAllChannels(messageSendCount: Int){
 
 @ExperimentalTime
 suspend fun waitForMessagesReceiverClient(totalMessages:Int ,receiverList : MutableList<WireTestClientReceiver>,debug: Boolean = false) : Boolean{
-    return until(waitForMsgTime.seconds, 250.milliseconds.fixed()) {
+    until(waitForMsgTime.seconds) {
         val received: Int = receiverList.sumOf { it.messageCount }
         var correctMsgs = true
         receiverList.forEach{ receiver ->
@@ -101,4 +99,5 @@ suspend fun waitForMessagesReceiverClient(totalMessages:Int ,receiverList : Muta
         }
         (received == totalMessages) && correctMsgs
     }
+    return true
 }

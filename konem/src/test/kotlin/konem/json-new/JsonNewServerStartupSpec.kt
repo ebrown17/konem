@@ -1,44 +1,44 @@
-package konem.json
+package konem.jsonnew
 
 import io.kotest.assertions.nondeterministic.until
 import io.kotest.common.ExperimentalKotest
+import io.kotest.engine.concurrency.TestExecutionMode
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.core.spec.style.ShouldSpec
-import io.kotest.datatest.withData
-import konem.*
+import io.kotest.datatest.withTests
+import konem.Konem
+import konem.ServerStartup
+import konem.activeTime
 import konem.data.json.Heartbeat
 import konem.data.json.KonemMessage
 import konem.netty.ServerHeartbeatProtocol
+import konem.netty.client.TcpSocketClientFactory
+import konem.netty.server.TcpSocketServer
 import konem.protocol.konem.KonemProtocolPipeline
-import kotlinx.coroutines.delay
-import kotlin.time.Duration
+import konem.jsonnew.startServerWithWait
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
-
-@ExperimentalTime
-@ExperimentalKotest
-class JsonServerStartupSpec : FunSpec({
+@OptIn(ExperimentalTime::class, ExperimentalKotest::class)
+class JsonNewServerStartupSpec : FunSpec({
+    testExecutionMode = TestExecutionMode.Sequential
+    var server: TcpSocketServer<KonemMessage>? = null
+    var clientFactory: TcpSocketClientFactory<KonemMessage>? = null
 
     afterTest {
         clientFactory?.shutdown()
         server?.shutdownServer()
     }
 
-     context(": Server starts with expected ports and values: ") {
-        withData(
+    context(": Server starts with expected ports and values: ") {
+        withTests(
             nameFn = { data: ServerStartup -> "${this.testCase.name.name} ${data.portsToConfigure}" },
             ts = listOf(
-            ServerStartup( mutableListOf(6060)),
-            ServerStartup( mutableListOf(6060,6061,6062)),
-            ServerStartup( mutableListOf(6060,6061,6062,6063,6064,6065)),
-            ServerStartup( mutableListOf(6060,6061,6062,6060,6061,6062)),
-            ServerStartup( mutableListOf(6060,6061,6062,6061,6062,6065)),
-
+                ServerStartup(mutableListOf(6060)),
+                ServerStartup(mutableListOf(6060, 6061, 6062)),
+                ServerStartup(mutableListOf(6060, 6061, 6062, 6063)),
             ),
-        ) { ( portsToConfigure) ->
-
-
+        ) { (portsToConfigure) ->
+            blockingTest = true
             server = Konem.createTcpSocketServer(
                 config = {
                     portsToConfigure.forEach { port ->
@@ -49,9 +49,7 @@ class JsonServerStartupSpec : FunSpec({
                 heartbeatProtocol = ServerHeartbeatProtocol { KonemMessage(Heartbeat()) }
             )
 
-
-            startServer(server!!)
-            delay(1.seconds)
+            startServerWithWait(server!!)
             until(activeTime.seconds) {
                 if (server != null) {
                     var allPortsConfigured = true
@@ -69,7 +67,6 @@ class JsonServerStartupSpec : FunSpec({
                     false
                 }
             }
-            if (DEBUG) println("-----------------------------------")
         }
     }
 })

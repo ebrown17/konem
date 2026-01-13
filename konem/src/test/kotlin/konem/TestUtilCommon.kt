@@ -1,13 +1,11 @@
 package konem
 
-import io.kotest.assertions.until.fixed
-import io.kotest.assertions.until.until
+import io.kotest.assertions.nondeterministic.until
 import konem.netty.*
 import konem.netty.client.Client
 import konem.netty.server.Server
 import java.net.SocketAddress
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
@@ -73,9 +71,10 @@ fun <T> areClientsInactive(clientList: MutableList<Client<T>>):Boolean{
 @ExperimentalTime
 suspend fun <T> startServer(server: Server<T>) : Boolean{
     server.startServer()
-    return  until(activeTime.seconds, 250.milliseconds.fixed()) {
+    until(activeTime.seconds) {
         server.allActive()
     }
+    return true
 }
 
 @ExperimentalTime
@@ -84,9 +83,10 @@ suspend fun <T> connectClients(clientList : MutableList<Client<T>>) : Boolean{
         client.connect()
         Thread.sleep(10)
     }
-    return until(activeTime.seconds, 250.milliseconds.fixed()) {
+    until(activeTime.seconds) {
         areClientsActive(clientList)
     }
+    return true
 }
 
 @ExperimentalTime
@@ -95,38 +95,41 @@ suspend fun <T> disconnectClients(clientList : MutableList<Client<T>>) : Boolean
         client.disconnect()
         Thread.sleep(10)
     }
-    return until(activeTime.seconds, 250.milliseconds.fixed()) {
+    until(activeTime.seconds) {
         areClientsInactive(clientList)
     }
+    return true
 }
 
 @ExperimentalTime
 suspend fun <T> waitForMessagesServer(totalMessages:Int ,receiverList : MutableList<out TestServerReceiver<T>>,debug: Boolean = false) : Boolean{
     var waitCount = 1
-    return until(waitForMsgTime.seconds, 250.milliseconds.fixed()) {
+    until(waitForMsgTime.seconds) {
         val received: Int = receiverList.sumOf { it.messageCount }
         if(debug){
-            println("Server received: $received out of $totalMessages within ${250 * waitCount++} ms duration")
+            println("Server received: $received out of $totalMessages (check ${waitCount++})")
         }
         received == totalMessages
     }
+    return true
 }
 
 @ExperimentalTime
 suspend fun <T> waitForMessagesClient(totalMessages:Int ,receiverList : MutableList<out TestClientReceiver<T>>,debug: Boolean = false) : Boolean{
     var waitCount = 1
-    return until(waitForMsgTime.seconds, 250.milliseconds.fixed()) {
+    until(waitForMsgTime.seconds) {
         val received: Int = receiverList.sumOf { it.messageCount }
         if(debug){
-            println("Clients received: $received out of $totalMessages within ${250 * waitCount++} ms duration")
+            println("Clients received: $received out of $totalMessages (check ${waitCount++})")
         }
         received == totalMessages
     }
+    return true
 }
 
 @ExperimentalTime
 suspend fun waitForClientStatusChange(totalChanges:Int, list : MutableList<out StatusListener>, debug: Boolean = false, checkConnect:Boolean = false) : Boolean{
-    return until(waitForMsgTime.seconds, 250.milliseconds.fixed()) {
+    until(waitForMsgTime.seconds) {
         var type = ""
         val received: Int = list.sumOf { statusChange ->
             when(statusChange){
@@ -148,11 +151,12 @@ suspend fun waitForClientStatusChange(totalChanges:Int, list : MutableList<out S
         }
         received == totalChanges
     }
+    return true
 }
 
 @ExperimentalTime
 suspend fun waitForServerStatusChange(totalChanges:Int, list : MutableList<out StatusListener>, debug: Boolean = false, checkConnect:Boolean = false) : Boolean{
-    return until(waitForMsgTime.seconds, 250.milliseconds.fixed()) {
+    until(waitForMsgTime.seconds) {
         var type = ""
         val received: Int = list.sumOf { statusChange ->
             when(statusChange){
@@ -174,4 +178,5 @@ suspend fun waitForServerStatusChange(totalChanges:Int, list : MutableList<out S
         }
         received == totalChanges
     }
+    return true
 }
