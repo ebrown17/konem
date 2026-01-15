@@ -91,6 +91,7 @@ suspend fun waitForMessagesReceiverClient(totalMessages:Int ,receiverList : Muta
                 val msg = it.data_ as Data
                 if(msg.data_ != receiver.clientId){
                     correctMsgs = false
+                    println("Bad data? ${msg.data_} != ${receiver.clientId}")
                 }
             }
         }

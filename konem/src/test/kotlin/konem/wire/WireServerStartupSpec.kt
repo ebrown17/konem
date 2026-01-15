@@ -3,7 +3,8 @@ package konem.wire
 import io.kotest.assertions.nondeterministic.until
 import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.datatest.withData
+import io.kotest.datatest.withTests
+import io.kotest.engine.concurrency.TestExecutionMode
 
 import konem.*
 import konem.data.protobuf.HeartBeat
@@ -12,6 +13,7 @@ import konem.netty.ServerHeartbeatProtocol
 import konem.protocol.konem.KonemProtocolPipeline
 import kotlinx.coroutines.delay
 import java.util.*
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
@@ -19,12 +21,14 @@ import kotlin.time.ExperimentalTime
 @ExperimentalTime
 @ExperimentalKotest
 class WireServerStartupSpec : FunSpec({
+    testExecutionMode = TestExecutionMode.Sequential
     afterTest{
         clientFactory?.shutdown()
         server?.shutdownServer()
+        delay(500.milliseconds)
     }
     context("Server starts with expected ports and values") {
-        withData(
+        withTests(
             nameFn = { data: ServerStartup -> "${this.testCase.name.name} ${data.portsToConfigure}" },
             ts = listOf(
             ServerStartup(mutableListOf(6060)),
