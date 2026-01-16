@@ -13,7 +13,7 @@ ext {
     slf4jVersion = '2.0.9'
     logbackVersion = '1.4.11'
 
-    detektVersion = '1.22.0'
+    detektVersion = '1.23.8'
     ktlintVersion = '0.48.2'
     ktlintGradleVersion = '11.3.1'
     kotestVersion = '6.0.7'
@@ -33,7 +33,15 @@ ext {
                     'serialization_json'         : "org.jetbrains.kotlinx:kotlinx-serialization-json:${jsonVersion}"
             ],
 
-            'netty'  : "io.netty:netty-all:${nettyVersion}",
+            'netty'  : [
+                    'common' : "io.netty:netty-common:${nettyVersion}",
+                    'buffer' : "io.netty:netty-buffer:${nettyVersion}",
+                    'transport' : "io.netty:netty-transport:${nettyVersion}",
+                    'handler' : "io.netty:netty-handler:${nettyVersion}",
+                    'codec' : "io.netty:netty-codec:${nettyVersion}",
+                    'codec_http' : "io.netty:netty-codec-http:${nettyVersion}",
+                    'codec_protobuf' : "io.netty:netty-codec-protobuf:${nettyVersion}"
+            ],
             'bouncycastle' : "org.bouncycastle:bcprov-jdk18on:${bouncycastleVersion}",
             'wire'   : "com.squareup.wire:wire-runtime:${wireVersion}",
 

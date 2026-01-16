@@ -1,5 +1,4 @@
 dependencies{
     implementation project(':konem')
-    implementation libs.netty
     implementation libs.logback
 }

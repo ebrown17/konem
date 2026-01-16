@@ -1,6 +1,5 @@
 dependencies{
     implementation project(':konem')
     implementation libs.logback
-    implementation libs.netty
     implementation libs.wire
 }

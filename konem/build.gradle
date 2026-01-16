@@ -11,13 +11,26 @@ configurations {
 ktlint {
     debug = true
     ignoreFailures = true
-
 }
+
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}
+
 
 dependencies {
     implementation libs.kotlin.coroutines_core
     implementation libs.kotlin.serialization_json
-    implementation libs.netty
+    implementation libs.netty.common
+    implementation libs.netty.buffer
+    implementation libs.netty.transport
+    implementation libs.netty.handler
+    implementation libs.netty.codec
+    implementation libs.netty.codec_http
+    implementation libs.netty.codec_protobuf
     implementation libs.wire
     implementation libs.bouncycastle
 
@@ -45,7 +58,7 @@ detekt {
     input = files("src/main/kotlin")
     parallel = true
     ignoreFailures = true
-    config = files("config/detekt/detekt-config.yml")
+   // config = files("config/detekt/detekt-config.yml")
     reports {
         html {
             enabled = true
