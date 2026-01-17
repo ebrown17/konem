@@ -3,7 +3,6 @@ package konem.json
 import io.kotest.assertions.nondeterministic.until
 import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.datatest.withTests
 import io.kotest.engine.concurrency.TestExecutionMode
 import konem.*
@@ -12,7 +11,6 @@ import konem.data.json.KonemMessage
 import konem.netty.ServerHeartbeatProtocol
 import konem.protocol.konem.KonemProtocolPipeline
 import kotlinx.coroutines.delay
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
