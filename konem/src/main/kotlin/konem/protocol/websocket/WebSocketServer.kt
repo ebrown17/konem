@@ -214,4 +214,8 @@ class WebSocketServerImp<T> internal constructor(
         pathDisconnectionListeners.add(listener)
     }
 
+    override fun isPathConfigured(port: Int, path: String): Boolean {
+        return isPathConfiguredOnPort(port,path)
+    }
+
 }

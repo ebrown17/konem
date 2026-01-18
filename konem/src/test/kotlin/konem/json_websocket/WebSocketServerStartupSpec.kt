@@ -9,7 +9,6 @@ import konem.DEBUG
 import konem.Konem
 import konem.WebSocketServerStartup
 import konem.activeTime
-import konem.delayDurationMs
 import konem.protocol.konem.KonemProtocolPipeline
 import konem.startServer
 import kotlinx.coroutines.delay
@@ -81,9 +80,21 @@ class WebSocketServerStartupSpec: FunSpec({
             delay(1.seconds)
             until(activeTime.seconds){
                 var allPortsActive = false
-                server?.let { allPortsActive = it.allActive() }
+                var allPathsConfigured = true
+                server?.let {
+                    allPortsActive = it.allActive()
+                    portsToWebSocketPaths.forEach { (port, paths) ->
+                        paths.forEach { path ->
+                            if(!it.isPathConfigured(port,path)){
+                                allPathsConfigured = false
+                            }
+                        }
+                    }
+                }
+
                 println("All ports $ports are active: $allPortsActive")
-                allPortsActive
+                println("All paths are configred: $allPathsConfigured")
+                allPortsActive && allPathsConfigured
             }
             if (DEBUG) println("-----------------------------------")
         }

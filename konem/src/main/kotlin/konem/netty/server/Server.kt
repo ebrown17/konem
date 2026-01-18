@@ -102,6 +102,8 @@ interface WebSocketServer<T>: Server<T>, WebSocketServerChannelReceiverRegistran
     fun registerPathDisconnectionListener(listener: WebSocketDisconnectionListener)
 
     fun registerPathConnectionStatusListener(listener: WebSocketConnectionStatusListener)
+
+    fun isPathConfigured(port: Int, path: String): Boolean
 }
 
 interface TcpSocketServer<T>: Server<T>{

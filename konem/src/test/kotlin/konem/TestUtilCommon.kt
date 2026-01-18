@@ -18,6 +18,11 @@ data class ClientConfig(val port: Int,val totalClients: Int)
 data class ClientCommConfigsV1(val msgCount:Int, val clientConfigs: MutableList<ClientConfig>)
 data class ClientCommConfigsV2(val msgCount:Int, val broadcastPorts: MutableList<Int>, val clientConfigs: MutableList<ClientConfig>)
 data class ServerStartup(val portsToConfigure: MutableList<Int>)
+
+
+data class WsClientConfig(val port: Int,val totalClients: Int, val paths: List<String>)
+data class WsClientCommConfigsV1(val msgCount:Int, val clientConfigs: MutableList<WsClientConfig>)
+data class WsClientCommConfigsV2(val msgCount:Int, val broadcastPorts: MutableList<Int>, val clientConfigs: MutableList<WsClientConfig>)
 data class WebSocketServerStartup(val portsToWebSocketPaths: MutableMap<Int, MutableList<String>>)
 
 open class TestServerReceiver<T>(receive: (SocketAddress, T) -> Unit) : MessageReceiver<T>(receive) {
