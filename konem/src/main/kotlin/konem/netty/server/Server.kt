@@ -57,17 +57,42 @@ class ServerConfig : BaseConfig() {
 }
 
 class WebSocketServerConfig : BaseConfig() {
-    internal val portToWsMap: HashMap<Int, Array<String>> = HashMap()
+    internal val portToWsMap: MutableMap<Int, HashSet<String>> = HashMap()
+    internal val allWsPaths: MutableSet<String> = HashSet()
 
     /**
+     * Registers one or more WebSocket paths on the given port.
      *
-     * @param port The port to be used for this channel
-     * @param websocketPaths vararg list of websocket paths to add to this port
+     * WebSocket paths must be globally unique across *all* ports.
+     * Attempting to register a path that already exists on another port
+     * will result in an [IllegalArgumentException].
+     *
+     * This method is intended to be used during server configuration.
+     * Violations indicate incorrect library usage and will fail fast.
+     *
+     * @param port the TCP port to bind the WebSocket paths to
+     * @param websocketPaths one or more WebSocket paths (e.g. "/chat")
+     *
+     * @throws IllegalArgumentException if:
+     * - no paths are provided
+     * - a path is already registered on another port
      */
     fun addChannel(port: Int, vararg websocketPaths: String) {
-        portToWsMap.putIfAbsent(port, hashSetOf(*websocketPaths).toTypedArray())
-    }
+        require(websocketPaths.isNotEmpty()) {
+            "At least one WebSocket path must be provided"
+        }
+        val paths = websocketPaths.toSet()
 
+        paths.forEach { path ->
+            require(path !in allWsPaths) {
+                "WebSocket path '$path' is already registered on another port"
+            }
+        }
+
+        val portPaths = portToWsMap.getOrPut(port) { HashSet() }
+        portPaths.addAll(paths)
+        allWsPaths.addAll(paths)
+    }
 }
 
 data class ServerChannelInfo<T>(
@@ -152,7 +177,7 @@ abstract class WebSocketServerInternal<T>(
 ) : ServerInternal<T>(serverConfig,heartbeatProtocol,protocolPipeline){
     internal val pathConnectionListeners: MutableList<WsConnectListener> = ArrayList()
     internal val pathDisconnectionListeners: MutableList<WsDisconnectListener> = ArrayList()
-    internal val websocketMap: ConcurrentHashMap<Int, Array<String>> = ConcurrentHashMap()
+    internal val websocketMap: ConcurrentHashMap<Int, Set<String>> = ConcurrentHashMap()
 
     internal fun isPathConfiguredOnPort(port: Int, path: String): Boolean {
         val configuredPaths = websocketMap[port]

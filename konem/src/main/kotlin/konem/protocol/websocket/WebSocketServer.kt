@@ -62,7 +62,7 @@ class WebSocketServerImp<T> internal constructor(
         }
         if (validPaths.isNotEmpty()) {
             val transceiver = WebSocketServerTransceiver<T>(port)
-            websocketMap.putIfAbsent(port, validPaths.toTypedArray())
+            websocketMap.putIfAbsent(port, validPaths)
             if (addChannel(port, transceiver)) {
                 receiveListenersMap[port] = ConcurrentHashMap()
                 return true
@@ -85,7 +85,7 @@ class WebSocketServerImp<T> internal constructor(
                 heartbeatProtocol,
                 protocolPipeline
             ),
-            *websocketPaths!!
+            *websocketPaths!!.toTypedArray()
         )
         return createServerBootstrap(channel)
     }
@@ -182,22 +182,27 @@ class WebSocketServerImp<T> internal constructor(
 
     override fun registerChannelMessageReceiver(port: Int, receiver: MessageReceiver<T>, vararg webSocketPaths: String) {
         require(webSocketPaths.isNotEmpty()) { "webSocketPaths type can't be null or empty" }
-        for(path in webSocketPaths) {
-            for(configuredPaths in websocketMap.values) {
-                if(!configuredPaths.contains(path)) {
-                    continue
-                }
-                logger.info("registering receiver for {} on {}",path,port)
-                val receiverListeners = receiveListenersMap[port]
-                if(receiverListeners != null) {
-                    var receiverListnerList: ArrayList<MessageReceiver<T>>? = receiverListeners[path]
-                    if (receiverListnerList == null) {
-                        receiverListnerList = ArrayList()
+        val webSocketPathsForChannel = websocketMap[port]
+        if (webSocketPathsForChannel != null) {
+            for(path in webSocketPaths) {
+                for(configuredPaths in webSocketPathsForChannel) {
+                    if(!configuredPaths.contains(path)) {
+                        continue
                     }
-                    receiverListnerList.add(receiver)
-                    receiverListeners[path] = receiverListnerList
+                    logger.info("registering receiver for {} on {}",path,port)
+                    val receiverListeners = receiveListenersMap[port]
+                    if(receiverListeners != null) {
+                        var receiverListenerList: ArrayList<MessageReceiver<T>>? = receiverListeners[path]
+                        if (receiverListenerList == null) {
+                            receiverListenerList = ArrayList()
+                        }
+                        receiverListenerList.add(receiver)
+                        receiverListeners[path] = receiverListenerList
+                    }
                 }
             }
+        }else {
+            logger.error("Tried to register receiver on none existent channel: {}",port)
         }
     }
 
