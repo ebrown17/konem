@@ -25,7 +25,7 @@ class WebSocketClientFactoryImp<T> internal constructor(
         config: ClientBootstrapConfig<T>,
         webSocketPath: String
     ): WebSocketClient<T> {
-        val fullWebSocketUrl = buildFullWebSocketPath(address, webSocketPath)
+        val fullWebSocketUrl = buildFullWebSocketPath(config.clientChannelInfo.use_ssl,address, webSocketPath)
         val transceiver = config.transceiver as WebSocketTransceiver<T>
         val bootstrap = config.bootstrap
         val client = WebSocketClientImp(address, config,fullWebSocketUrl)
@@ -36,7 +36,8 @@ class WebSocketClientFactoryImp<T> internal constructor(
     }
 
     @Throws(URISyntaxException::class)
-    private fun buildFullWebSocketPath(address: InetSocketAddress, webSocketPath: String): URI {
-        return URI("ws://" + address.hostString + ":" + address.port + webSocketPath)
+    private fun buildFullWebSocketPath(useSsl: Boolean, address: InetSocketAddress, webSocketPath: String): URI {
+        val scheme = if (useSsl) "wss" else "ws"
+        return URI("$scheme://" + address.hostString + ":" + address.port + webSocketPath)
     }
 }
