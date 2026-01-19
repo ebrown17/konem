@@ -29,6 +29,10 @@ class WebSocketClientImp<T>(
         transceiver.transmit(serverAddress, message)
     }
 
+    override fun isActive(): Boolean {
+        return super.isActive() && transceiver.hasActiveHandler(serverAddress)
+    }
+
     override fun registerChannelMessageReceiver(receiver: MessageReceiver<T>) {
         receiveListeners.add(receiver)
     }

@@ -17,6 +17,7 @@ abstract class Handler<T> :
 
     private lateinit var context: ChannelHandlerContext
     internal lateinit var remoteAddress: SocketAddress
+    private var isHandlerActive: Boolean = false
 
     internal var handlerId: Long = -1
     internal lateinit var transceiver: Transceiver<T>
@@ -30,16 +31,28 @@ abstract class Handler<T> :
         }
     }
 
-    override fun channelActive(ctx: ChannelHandlerContext) {
-        logger.info("remote peer: {} connected", ctx.channel().remoteAddress())
+    internal fun initializeContext(ctx: ChannelHandlerContext) {
         context = ctx
         remoteAddress = ctx.channel().remoteAddress()
-        transceiver.handlerActive(remoteAddress, this)
+    }
+
+    internal fun activateHandler() {
+        if (!isHandlerActive) {
+            isHandlerActive = true
+            transceiver.handlerActive(remoteAddress, this)
+        }
+    }
+
+    override fun channelActive(ctx: ChannelHandlerContext) {
+        logger.info("remote peer: {} connected", ctx.channel().remoteAddress())
+        initializeContext(ctx)
+        activateHandler()
         ctx.fireChannelActive()
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
         logger.info("remote peer: {} disconnected", remoteAddress)
+        isHandlerActive = false
         transceiver.handlerInActive(remoteAddress)
         ctx.fireChannelInactive()
     }

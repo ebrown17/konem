@@ -59,6 +59,12 @@ class WebSocketCommunicationSpec: FunSpec ({
                 ),
                 WsClientCommConfigsV1(1, mutableListOf(
                     WsClientConfig(6060,5,listOf("/test0","/test1")))
+                ),
+                WsClientCommConfigsV1(10,
+                    mutableListOf(
+                        WsClientConfig(6060,5,listOf("/test0","/test1")),
+                        WsClientConfig(6061,15,listOf("/test2","/test3"))
+                    )
                 )
             ),
         ) {(msgCount, clientConfigs) ->
@@ -66,9 +72,7 @@ class WebSocketCommunicationSpec: FunSpec ({
             val clientList = mutableListOf<Client<KonemMessage>>()
             val serverReceiverList = mutableListOf<JsonTestWebSocketServerReceiver>()
 
-            var serverReceiver =  JsonTestWebSocketServerReceiver() { _, _ ->
-                println("-----------asdfasdfasdf")
-            }
+            var serverReceiver =  JsonTestWebSocketServerReceiver() { _, _ -> }
 
             serverReceiverList.add(serverReceiver)
             clientConfigs.forEach{ config ->
@@ -87,9 +91,6 @@ class WebSocketCommunicationSpec: FunSpec ({
 
             startServer(server!!)
             connectClients(clientList)
-            println(serverReceiverList)
-            println(clientList)
-            delay(200.milliseconds)
             totalMessagesSent += sendClientMessages(msgCount,clientList)
             waitForMessagesServerNew(totalMessagesSent, serverReceiverList, DEBUG)
             if (DEBUG) println("-----------------------------------")

@@ -43,6 +43,10 @@ abstract class Transceiver<T>(protected val channelPort: Int) {
         channelReceiver.putIfAbsent(addr, receiver)
     }
 
+    fun hasActiveHandler(addr: SocketAddress): Boolean {
+        return activeHandlers.containsKey(addr)
+    }
+
     abstract fun transmit(addr: SocketAddress, message: T)
 
     abstract fun receive(addr: SocketAddress, message: T, extra: String)
