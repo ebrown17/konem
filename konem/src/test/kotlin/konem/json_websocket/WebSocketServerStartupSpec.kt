@@ -39,27 +39,20 @@ class WebSocketServerStartupSpec: FunSpec({
                     6060 to mutableListOf("/test","/test1","/test2","/test3"),
                 )),
                 WebSocketServerStartup(mutableMapOf(
-                    6060 to mutableListOf("/test","/test1","/test1","/test1"),
+                    6060 to mutableListOf("/test","/test1","/test2","/test3"),
+                    6061 to mutableListOf("/test4","/test5","/test6","/test7"),
                 )),
                 WebSocketServerStartup(mutableMapOf(
                     6060 to mutableListOf("/test","/test1","/test2","/test3"),
-                    6061 to mutableListOf("/test","/test1","/test2","/test3"),
-                )),
-                WebSocketServerStartup(mutableMapOf(
-                    6060 to mutableListOf("/test","/test1","/test2","/test2"),
-                    6061 to mutableListOf("/test","/test1","/test2","/test2"),
-                )),
-                WebSocketServerStartup(mutableMapOf(
-                    6060 to mutableListOf("/test","/test1","/test2","/test3"),
-                    6061 to mutableListOf("/test","/test1","/test2","/test3"),
-                    6062 to mutableListOf("/test","/test1","/test2","/test3"),
-                    6063 to mutableListOf("/test","/test1","/test2","/test3"),
+                    6061 to mutableListOf("/test4","/test5","/test6","/test7"),
+                    6062 to mutableListOf("/test8","/test9","/test10","/test11"),
+                    6063 to mutableListOf("/test12","/test13","/test14","/test15"),
                 )),
                 WebSocketServerStartup(mutableMapOf(
                     6060 to mutableListOf("/test","/test1"),
-                    6061 to mutableListOf("/test","/test1","/test2","/test3"),
-                    6062 to mutableListOf("/test","/test1","/test2",),
-                    6063 to mutableListOf("/test","/test3"),
+                    6061 to mutableListOf("/test2","/test3","/test6","/test4"),
+                    6062 to mutableListOf("/test8","/test7","/test5",),
+                    6063 to mutableListOf("/test9","/test13"),
                 )),
             ),
         ){ (portsToWebSocketPaths) ->
