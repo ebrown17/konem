@@ -1,6 +1,7 @@
 package konem.json_websocket
 
 import io.kotest.assertions.nondeterministic.until
+import io.kotest.assertions.print.print
 import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.datatest.withTests
@@ -11,8 +12,13 @@ import konem.WebSocketServerStartup
 import konem.WsClientCommConfigsV1
 import konem.WsClientConfig
 import konem.activeTime
+import konem.connectClients
+import konem.data.json.KonemMessage
+import konem.netty.client.Client
 import konem.protocol.konem.KonemProtocolPipeline
 import konem.startServer
+import konem.waitForMessagesServer
+import konem.waitForMessagesServerNew
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -56,6 +62,37 @@ class WebSocketCommunicationSpec: FunSpec ({
                 )
             ),
         ) {(msgCount, clientConfigs) ->
+            var totalMessagesSent = 0
+            val clientList = mutableListOf<Client<KonemMessage>>()
+            val serverReceiverList = mutableListOf<JsonTestWebSocketServerReceiver>()
+
+            var serverReceiver =  JsonTestWebSocketServerReceiver() { _, _ ->
+                println("-----------asdfasdfasdf")
+            }
+
+            serverReceiverList.add(serverReceiver)
+            clientConfigs.forEach{ config ->
+                server?.registerChannelMessageReceiver(config.port,serverReceiver,*config.paths.toTypedArray())
+                for( i in 1..config.totalClients){
+                    for(path in config.paths) {
+                        clientFactory?.createClient("localhost", config.port,path)?.let{
+                            var clientReceiver = JsonTestWebSocketClientReceiver(it){_,_ -> }
+                            clientReceiver.clientId = "client-$i-${config.port}-$path"
+                            it.registerChannelMessageReceiver(clientReceiver)
+                            clientList.add(it)
+                        }
+                    }
+                }
+            }
+
+            startServer(server!!)
+            connectClients(clientList)
+            println(serverReceiverList)
+            println(clientList)
+            delay(200.milliseconds)
+            totalMessagesSent += sendClientMessages(msgCount,clientList)
+            waitForMessagesServerNew(totalMessagesSent, serverReceiverList, DEBUG)
+            if (DEBUG) println("-----------------------------------")
 
         }
     }

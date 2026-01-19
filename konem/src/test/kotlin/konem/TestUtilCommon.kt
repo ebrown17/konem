@@ -6,6 +6,7 @@ import konem.netty.client.Client
 import konem.netty.server.Server
 import java.net.SocketAddress
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
@@ -24,6 +25,32 @@ data class WsClientConfig(val port: Int,val totalClients: Int, val paths: List<S
 data class WsClientCommConfigsV1(val msgCount:Int, val clientConfigs: MutableList<WsClientConfig>)
 data class WsClientCommConfigsV2(val msgCount:Int, val broadcastPorts: MutableList<Int>, val clientConfigs: MutableList<WsClientConfig>)
 data class WebSocketServerStartup(val portsToWebSocketPaths: MutableMap<Int, MutableList<String>>)
+
+open class NewTestServerReceiver<T>(
+    received: (SocketAddress, T) -> Unit
+) : MessageReceiver<T>(received) {
+    var messageCount = 0
+        private set
+    var messageList = mutableListOf<T>()
+    override fun receive(addr: SocketAddress, message: T) {
+        messageCount++
+        messageList.add(message)
+        super.receive(addr, message)
+    }
+}
+open class NewTestClientReceiver<T>(
+    val client: Client<T>,
+    received: (SocketAddress, T) -> Unit
+) : MessageReceiver<T>(received) {
+    var messageCount = 0
+    var messageList = mutableListOf<T>()
+    var clientId = ""
+    override fun receive(addr: SocketAddress, message: T) {
+        messageCount++
+        messageList.add(message)
+        super.receive(addr, message)
+    }
+}
 
 open class TestServerReceiver<T>(receive: (SocketAddress, T) -> Unit) : MessageReceiver<T>(receive) {
     var messageCount = 0
@@ -109,6 +136,18 @@ suspend fun <T> disconnectClients(clientList : MutableList<Client<T>>) : Boolean
 
 @ExperimentalTime
 suspend fun <T> waitForMessagesServer(totalMessages:Int ,receiverList : MutableList<out TestServerReceiver<T>>,debug: Boolean = false) : Boolean{
+    var waitCount = 1
+    until(waitForMsgTime.seconds) {
+        val received: Int = receiverList.sumOf { it.messageCount }
+        if(debug){
+            println("Server received: $received out of $totalMessages (check ${waitCount++})")
+        }
+        received == totalMessages
+    }
+    return true
+}
+@ExperimentalTime
+suspend fun <T> waitForMessagesServerNew(totalMessages:Int ,receiverList : MutableList<out NewTestServerReceiver<T>>,debug: Boolean = false) : Boolean{
     var waitCount = 1
     until(waitForMsgTime.seconds) {
         val received: Int = receiverList.sumOf { it.messageCount }
