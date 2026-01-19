@@ -146,16 +146,15 @@ class WebSocketServerImp<T> internal constructor(
             throw IllegalArgumentException("port type can't be null or port is not configured: port $port")
         }
         val receiverListeners = receiveListenersMap[port]
-        if ( receiverListeners != null) {
-            for(wsPaths in websocketMap.values) {
-                for(path in wsPaths) {
-                    var receiverListenerList: ArrayList<MessageReceiver<T>>? = receiverListeners[path]
-                    if (receiverListenerList == null) {
-                        receiverListenerList = ArrayList()
-                    }
-                    receiverListenerList.add(receiver)
-                    receiverListeners[path] = receiverListenerList
+        val configuredPaths = websocketMap[port]
+        if (receiverListeners != null && configuredPaths != null) {
+            for (path in configuredPaths) {
+                var receiverListenerList: ArrayList<MessageReceiver<T>>? = receiverListeners[path]
+                if (receiverListenerList == null) {
+                    receiverListenerList = ArrayList()
                 }
+                receiverListenerList.add(receiver)
+                receiverListeners[path] = receiverListenerList
             }
         }
     }
