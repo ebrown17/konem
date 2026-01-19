@@ -185,8 +185,8 @@ class WebSocketServerImp<T> internal constructor(
         val webSocketPathsForChannel = websocketMap[port]
         if (webSocketPathsForChannel != null) {
             for(path in webSocketPaths) {
-                for(configuredPaths in webSocketPathsForChannel) {
-                    if(!configuredPaths.contains(path)) {
+                for(configuredPath in webSocketPathsForChannel) {
+                    if(configuredPath != path) {
                         continue
                     }
                     logger.info("registering receiver for {} on {}",path,port)
