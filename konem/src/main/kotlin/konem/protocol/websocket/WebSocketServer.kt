@@ -25,6 +25,7 @@ class WebSocketServerImp<T> internal constructor(
     private val receiveListenersMap: ConcurrentHashMap<
         Int,
         ConcurrentHashMap<String, CopyOnWriteArrayList<MessageReceiver<T>>>> = ConcurrentHashMap()
+    private val globalReceivers = CopyOnWriteArrayList<MessageReceiver<T>>()
 
     private val logger = logger(this)
 
@@ -65,7 +66,13 @@ class WebSocketServerImp<T> internal constructor(
             val transceiver = WebSocketServerTransceiver<T>(port)
             websocketMap.putIfAbsent(port, validPaths)
             if (addChannel(port, transceiver)) {
-                receiveListenersMap[port] = ConcurrentHashMap()
+                val receiverListeners = ConcurrentHashMap<String, CopyOnWriteArrayList<MessageReceiver<T>>>()
+                for (path in validPaths) {
+                    val receiverList = CopyOnWriteArrayList<MessageReceiver<T>>()
+                    receiverList.addAll(globalReceivers)
+                    receiverListeners[path] = receiverList
+                }
+                receiveListenersMap[port] = receiverListeners
                 return true
             } else {
                 websocketMap.remove(port)
@@ -128,6 +135,7 @@ class WebSocketServerImp<T> internal constructor(
     }
 
     override fun registerChannelMessageReceiver(receiver: MessageReceiver<T>) {
+        globalReceivers.add(receiver)
         for( receiverListeners in receiveListenersMap.values ) {
             for(wsPaths in websocketMap.values) {
                 for(path in wsPaths) {
