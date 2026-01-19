@@ -5,6 +5,7 @@ import konem.netty.MessageReceiver
 import konem.netty.client.ClientBootstrapConfig
 import konem.netty.client.ClientInternal
 import kotlinx.coroutines.launch
+import java.util.concurrent.CopyOnWriteArrayList
 import java.net.SocketAddress
 
 class TcpClient<T>(private val serverAddress: SocketAddress, config: ClientBootstrapConfig<T>):
@@ -12,7 +13,7 @@ class TcpClient<T>(private val serverAddress: SocketAddress, config: ClientBoots
 
     private val logger = logger(this)
     private val transceiver = config.transceiver
-    private val receiveListeners: ArrayList<MessageReceiver<T>> = ArrayList()
+    private val receiveListeners = CopyOnWriteArrayList<MessageReceiver<T>>()
 
     override fun sendMessage(message: T) {
         if (!isActive()) {

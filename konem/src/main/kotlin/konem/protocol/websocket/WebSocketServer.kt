@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import java.net.InetSocketAddress
 import java.net.SocketAddress
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 
 
 class WebSocketServerImp<T> internal constructor(
@@ -23,7 +24,7 @@ class WebSocketServerImp<T> internal constructor(
 
     private val receiveListenersMap: ConcurrentHashMap<
         Int,
-        ConcurrentHashMap<String,ArrayList<MessageReceiver<T>>>> = ConcurrentHashMap()
+        ConcurrentHashMap<String, CopyOnWriteArrayList<MessageReceiver<T>>>> = ConcurrentHashMap()
 
     private val logger = logger(this)
 
@@ -130,9 +131,9 @@ class WebSocketServerImp<T> internal constructor(
         for( receiverListeners in receiveListenersMap.values ) {
             for(wsPaths in websocketMap.values) {
                 for(path in wsPaths) {
-                    var receiverListnerList: ArrayList<MessageReceiver<T>>? = receiverListeners[path]
+                    var receiverListnerList: CopyOnWriteArrayList<MessageReceiver<T>>? = receiverListeners[path]
                     if (receiverListnerList == null) {
-                        receiverListnerList = ArrayList()
+                        receiverListnerList = CopyOnWriteArrayList()
                     }
                     receiverListnerList.add(receiver)
                     receiverListeners[path] = receiverListnerList
@@ -149,9 +150,9 @@ class WebSocketServerImp<T> internal constructor(
         val configuredPaths = websocketMap[port]
         if (receiverListeners != null && configuredPaths != null) {
             for (path in configuredPaths) {
-                var receiverListenerList: ArrayList<MessageReceiver<T>>? = receiverListeners[path]
+                var receiverListenerList: CopyOnWriteArrayList<MessageReceiver<T>>? = receiverListeners[path]
                 if (receiverListenerList == null) {
-                    receiverListenerList = ArrayList()
+                    receiverListenerList = CopyOnWriteArrayList()
                 }
                 receiverListenerList.add(receiver)
                 receiverListeners[path] = receiverListenerList
@@ -168,9 +169,9 @@ class WebSocketServerImp<T> internal constructor(
                 }
                 logger.info("registering receiver for {}",path)
                 for(receiverListeners in receiveListenersMap.values) {
-                    var receiverListnerList: ArrayList<MessageReceiver<T>>? = receiverListeners[path]
+                    var receiverListnerList: CopyOnWriteArrayList<MessageReceiver<T>>? = receiverListeners[path]
                     if (receiverListnerList == null) {
-                        receiverListnerList = ArrayList()
+                        receiverListnerList = CopyOnWriteArrayList()
                     }
                     receiverListnerList.add(receiver)
                     receiverListeners[path] = receiverListnerList
@@ -191,9 +192,9 @@ class WebSocketServerImp<T> internal constructor(
                     logger.info("registering receiver for {} on {}",path,port)
                     val receiverListeners = receiveListenersMap[port]
                     if(receiverListeners != null) {
-                        var receiverListenerList: ArrayList<MessageReceiver<T>>? = receiverListeners[path]
+                        var receiverListenerList: CopyOnWriteArrayList<MessageReceiver<T>>? = receiverListeners[path]
                         if (receiverListenerList == null) {
-                            receiverListenerList = ArrayList()
+                            receiverListenerList = CopyOnWriteArrayList()
                         }
                         receiverListenerList.add(receiver)
                         receiverListeners[path] = receiverListenerList

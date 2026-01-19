@@ -7,6 +7,7 @@ import konem.netty.server.*
 import kotlinx.coroutines.launch
 import java.net.SocketAddress
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 
 
 class TcpSocketServerImp<T> internal constructor(
@@ -14,12 +15,14 @@ class TcpSocketServerImp<T> internal constructor(
     protocolPipeline: ProtocolPipeline<T>
 ) : ServerInternal<T>(serverConfig, heartbeatProtocol, protocolPipeline), TcpSocketServer<T> {
 
-    private val receiveListeners: ConcurrentHashMap<Int, ArrayList<MessageReceiver<T>>> =
+    private val receiveListeners: ConcurrentHashMap<Int, CopyOnWriteArrayList<MessageReceiver<T>>> =
         ConcurrentHashMap()
+    private val globalReceivers = CopyOnWriteArrayList<MessageReceiver<T>>()
 
     private val logger = logger(this)
 
     override fun registerChannelMessageReceiver(receiver: MessageReceiver<T>) {
+        globalReceivers.add(receiver)
         for (list in receiveListeners.values) {
             list.add(receiver)
         }
@@ -32,7 +35,7 @@ class TcpSocketServerImp<T> internal constructor(
 
         var readerListenerList = receiveListeners[port]
         if (readerListenerList == null) {
-            readerListenerList = arrayListOf()
+            readerListenerList = CopyOnWriteArrayList()
         }
         readerListenerList.add(receiver)
         receiveListeners[port] = readerListenerList
@@ -67,7 +70,9 @@ class TcpSocketServerImp<T> internal constructor(
         val transceiver = TcpServerTransceiver<T>(port)
 
         return if (addChannel(port, transceiver)) {
-            receiveListeners[port] = ArrayList()
+            val listeners = CopyOnWriteArrayList<MessageReceiver<T>>()
+            listeners.addAll(globalReceivers)
+            receiveListeners[port] = listeners
             true
         } else {
             false

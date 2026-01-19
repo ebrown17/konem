@@ -8,6 +8,7 @@ import konem.netty.client.WebSocketClient
 import kotlinx.coroutines.launch
 import java.net.SocketAddress
 import java.net.URI
+import java.util.concurrent.CopyOnWriteArrayList
 
 class WebSocketClientImp<T>(
     private val serverAddress: SocketAddress,
@@ -18,7 +19,7 @@ class WebSocketClientImp<T>(
 
     private val logger = logger(this)
     private val transceiver = config.transceiver
-    private val receiveListeners: ArrayList<MessageReceiver<T>> = ArrayList()
+    private val receiveListeners = CopyOnWriteArrayList<MessageReceiver<T>>()
 
     override fun sendMessage(message: T) {
         if (!isActive()) {
