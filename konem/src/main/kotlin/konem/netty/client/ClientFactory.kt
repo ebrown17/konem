@@ -5,7 +5,9 @@ import io.netty.buffer.PooledByteBufAllocator
 import io.netty.channel.Channel
 import io.netty.channel.ChannelOption
 import io.netty.channel.EventLoopGroup
+import io.netty.channel.MultiThreadIoEventLoopGroup
 import io.netty.channel.nio.NioEventLoopGroup
+import io.netty.channel.nio.NioIoHandler
 import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.util.concurrent.DefaultThreadFactory
 import konem.netty.ClientHeartbeatProtocol
@@ -81,7 +83,8 @@ abstract class ClientFactory<T> constructor(
     internal val clientArrayList = ArrayList<Client<T>>()
 
     init {
-        this.workerGroup = NioEventLoopGroup(config.DEFAULT_NUM_THREADS, DefaultThreadFactory("client", true))
+        val threadFactory = NioIoHandler.newFactory()
+        this.workerGroup = MultiThreadIoEventLoopGroup(config.DEFAULT_NUM_THREADS, threadFactory)
         this.channelClass = NioSocketChannel::class.java
         this.allocator = PooledByteBufAllocator.DEFAULT
         this.clientScope = CoroutineScope(CoroutineName("ClientScope"))

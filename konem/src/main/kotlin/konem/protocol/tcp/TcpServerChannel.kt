@@ -18,13 +18,11 @@ class TcpServerChannel<T>(
         val protocolPipeline = serverChannelInfo.protocol_pipeline.getProtocolPipelineCodecs()
         val heartbeatProtocol = serverChannelInfo.heartbeatProtocol
 
-        val messageHandler = object: Handler<T>() {
+        val messageHandler = object: Handler<T>(serverChannelInfo.channel_id,transceiver) {
             override fun channelRead0(p0: ChannelHandlerContext?, message: T) {
                 transceiverReceive(message)
             }
         }
-        messageHandler.handlerId = serverChannelInfo.channel_id
-        messageHandler.transceiver = transceiver
 
         if (serverChannelInfo.use_ssl) {
             SslContextManager.getServerContext()?.let { context ->

@@ -10,16 +10,14 @@ interface HandlerListener<T> {
     fun registerInActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress)
 }
 
-abstract class Handler<T> :
+abstract class Handler<T>(val handlerId: Long, val transceiver: Transceiver<T>) :
     SimpleChannelInboundHandler<T>() {
 
     internal val logger = logger(this)
 
     private lateinit var context: ChannelHandlerContext
     internal lateinit var remoteAddress: SocketAddress
-
-    internal var handlerId: Long = -1
-    internal lateinit var transceiver: Transceiver<T>
+    private var isHandlerActive: Boolean = false
 
     open fun sendMessage(message: T) {
         if (isActive()) {
@@ -30,16 +28,28 @@ abstract class Handler<T> :
         }
     }
 
-    override fun channelActive(ctx: ChannelHandlerContext) {
-        logger.info("remote peer: {} connected", ctx.channel().remoteAddress())
+    internal fun initializeContext(ctx: ChannelHandlerContext) {
         context = ctx
         remoteAddress = ctx.channel().remoteAddress()
-        transceiver.handlerActive(remoteAddress, this)
+    }
+
+    internal fun activateHandler() {
+        if (!isHandlerActive) {
+            isHandlerActive = true
+            transceiver.handlerActive(remoteAddress, this)
+        }
+    }
+
+    override fun channelActive(ctx: ChannelHandlerContext) {
+        logger.info("remote peer: {} connected", ctx.channel().remoteAddress())
+        initializeContext(ctx)
+        activateHandler()
         ctx.fireChannelActive()
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
         logger.info("remote peer: {} disconnected", remoteAddress)
+        isHandlerActive = false
         transceiver.handlerInActive(remoteAddress)
         ctx.fireChannelInactive()
     }

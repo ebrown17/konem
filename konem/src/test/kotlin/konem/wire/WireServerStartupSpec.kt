@@ -1,10 +1,10 @@
 package konem.wire
 
-import io.kotest.assertions.until.fixed
-import io.kotest.assertions.until.until
+import io.kotest.assertions.nondeterministic.until
 import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.datatest.withData
+import io.kotest.datatest.withTests
+import io.kotest.engine.concurrency.TestExecutionMode
 
 import konem.*
 import konem.data.protobuf.HeartBeat
@@ -21,19 +21,23 @@ import kotlin.time.ExperimentalTime
 @ExperimentalTime
 @ExperimentalKotest
 class WireServerStartupSpec : FunSpec({
+    testExecutionMode = TestExecutionMode.Sequential
     afterTest{
         clientFactory?.shutdown()
         server?.shutdownServer()
+        delay(500.milliseconds)
     }
     context("Server starts with expected ports and values") {
-        withData(
-            nameFn = { data: ServerStartup -> "${this.testCase.name.testName} ${data.portsToConfigure}" },
+        withTests(
+            nameFn = { data: ServerStartup -> "${this.testCase.name.name} ${data.portsToConfigure}" },
+            ts = listOf(
             ServerStartup(mutableListOf(6060)),
             ServerStartup(mutableListOf(6060, 6061, 6062)),
             ServerStartup(mutableListOf(6060, 6061, 6062, 6063, 6064, 6065)),
             ServerStartup(mutableListOf(6060, 6061, 6062, 6060, 6061, 6062)),
             ServerStartup(mutableListOf(6060, 6061, 6062, 6061, 6062, 6065)),
 
+            ),
             ) { (portsToConfigure) ->
 
             server = Konem.createTcpSocketServer(
@@ -53,7 +57,7 @@ class WireServerStartupSpec : FunSpec({
 
             startServer(server!!)
             delay(1.seconds)
-            until(activeTime.seconds, 250.milliseconds.fixed()) {
+            until(activeTime.seconds) {
                 if (server != null) {
                     var allPortsConfigured = true
 

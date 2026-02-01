@@ -2,6 +2,8 @@ package konem.protocol.konem
 
 import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder
+import io.netty.handler.codec.LengthFieldPrepender
 import io.netty.handler.codec.string.StringDecoder
 import io.netty.handler.codec.string.StringEncoder
 import io.netty.util.CharsetUtil
@@ -22,8 +24,10 @@ class KonemProtocolPipeline private constructor(){
         fun getKonemJsonPipeline(): ProtocolPipeline<konem.data.json.KonemMessage> {
             return ProtocolPipeline(
                 protoPipelineCodecs = { pipeline ->
+                    pipeline["frameDecoder"] = LengthFieldBasedFrameDecoder(1048576, 0, 4, 0, 4)
                     pipeline["stringDecoder"] = StringDecoder(CharsetUtil.UTF_8)
                     pipeline["konemDecoder"] = KonemJsonDecoder()
+                    pipeline["frameEncoder"] = LengthFieldPrepender(4)
                     pipeline["stringEncoder"] = StringEncoder(CharsetUtil.UTF_8)
                     pipeline["konemEncoder"] = KonemJsonEncoder()
                 },

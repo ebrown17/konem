@@ -41,6 +41,14 @@ class WebSocketPathHandler<T>(
                 msg.release()
                 return
             }
+            val messageHandler = webSocketHandlerHolder.getHandler(path)
+            ctx.pipeline().addBefore(
+                "exceptionHandler",
+                "messageHandler-${path}",
+                messageHandler
+            )
+            logger.info("WebSocketServerProtocolHandler added for websocket path: {}", path)
+            messageHandler.initializeContext(ctx)
             // made it this far, valid websocket path
             ctx.pipeline().addAfter(
                 ctx.name(),
@@ -54,14 +62,7 @@ class WebSocketPathHandler<T>(
                     true
                 )
             )
-            val messageHandler = webSocketHandlerHolder.getHandler(path)
-            ctx.pipeline().addBefore(
-                "exceptionHandler",
-                "messageHandler-${path}",
-                messageHandler
-            )
-            logger.info("WebSocketServerProtocolHandler added for websocket path: {}", path)
-            messageHandler.channelActive(ctx)
+
             ctx.pipeline().remove(this)
             ctx.fireChannelRead(msg)
 

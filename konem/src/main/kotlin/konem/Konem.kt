@@ -52,7 +52,7 @@ class Konem private constructor() {
                 protocolPipeline
             )
             for((port, websockets) in userConfig.portToWsMap){
-                server.addChannel(port,*websockets)
+                server.addChannel(port,*websockets.toTypedArray())
             }
             return server
         }
@@ -68,10 +68,7 @@ class Konem private constructor() {
                 })
             )
         }
-
     }
-
-
 }
 
 

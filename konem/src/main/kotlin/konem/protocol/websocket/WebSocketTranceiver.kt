@@ -59,8 +59,17 @@ class WebSocketServerTransceiver<T>(channelPort: Int) : ServerTransceiver<T>(cha
     override fun broadcast(message: T, vararg webSocketPaths: String) {
         logger.trace("paths:{} message: {}", webSocketPaths, message)
         synchronized(activeLock) {
-            for (handler in activeHandlers.values) {
-                handler.sendMessage(message)
+            if (webSocketPaths.isEmpty()) {
+                for (handler in activeHandlers.values) {
+                    handler.sendMessage(message)
+                }
+            } else {
+                val pathSet = webSocketPaths.toHashSet()
+                for (handler in activeHandlers.values) {
+                    if (handler is WebSocketHandler<*> && handler.webSocketPath in pathSet) {
+                        handler.sendMessage(message)
+                    }
+                }
             }
         }
     }

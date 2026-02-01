@@ -25,6 +25,7 @@ fun websocketServerExamples() {
     val server = Konem.createWebSocketServer(
         config = {
             addChannel(8080,"/tester")
+            addChannel(8081,"/tester1")
         },
         protocolPipeline = KonemProtocolPipeline.getKonemJsonPipeline()
     )
@@ -34,7 +35,7 @@ fun websocketServerExamples() {
 
   sleep(5000)
 
-  server.registerChannelMessageReceiver(MessageReceiver { from, message ->
+  server.registerChannelMessageReceiver(8080,MessageReceiver { from, message ->
       logger.info("Server KoneMessageReceiver: got {} from {} ", message,from)
       sleep(3000)
       server.broadcastOnAllChannels(KonemMessage(Heartbeat("${count++}")))

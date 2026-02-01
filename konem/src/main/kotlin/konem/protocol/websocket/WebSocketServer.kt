@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import java.net.InetSocketAddress
 import java.net.SocketAddress
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 
 
 class WebSocketServerImp<T> internal constructor(
@@ -23,7 +24,8 @@ class WebSocketServerImp<T> internal constructor(
 
     private val receiveListenersMap: ConcurrentHashMap<
         Int,
-        ConcurrentHashMap<String,ArrayList<MessageReceiver<T>>>> = ConcurrentHashMap()
+        ConcurrentHashMap<String, CopyOnWriteArrayList<MessageReceiver<T>>>> = ConcurrentHashMap()
+    private val globalReceivers = CopyOnWriteArrayList<MessageReceiver<T>>()
 
     private val logger = logger(this)
 
@@ -62,9 +64,15 @@ class WebSocketServerImp<T> internal constructor(
         }
         if (validPaths.isNotEmpty()) {
             val transceiver = WebSocketServerTransceiver<T>(port)
-            websocketMap.putIfAbsent(port, validPaths.toTypedArray())
+            websocketMap.putIfAbsent(port, validPaths)
             if (addChannel(port, transceiver)) {
-                receiveListenersMap[port] = ConcurrentHashMap()
+                val receiverListeners = ConcurrentHashMap<String, CopyOnWriteArrayList<MessageReceiver<T>>>()
+                for (path in validPaths) {
+                    val receiverList = CopyOnWriteArrayList<MessageReceiver<T>>()
+                    receiverList.addAll(globalReceivers)
+                    receiverListeners[path] = receiverList
+                }
+                receiveListenersMap[port] = receiverListeners
                 return true
             } else {
                 websocketMap.remove(port)
@@ -85,7 +93,7 @@ class WebSocketServerImp<T> internal constructor(
                 heartbeatProtocol,
                 protocolPipeline
             ),
-            *websocketPaths!!
+            *websocketPaths!!.toTypedArray()
         )
         return createServerBootstrap(channel)
     }
@@ -127,12 +135,13 @@ class WebSocketServerImp<T> internal constructor(
     }
 
     override fun registerChannelMessageReceiver(receiver: MessageReceiver<T>) {
+        globalReceivers.add(receiver)
         for( receiverListeners in receiveListenersMap.values ) {
             for(wsPaths in websocketMap.values) {
                 for(path in wsPaths) {
-                    var receiverListnerList: ArrayList<MessageReceiver<T>>? = receiverListeners[path]
+                    var receiverListnerList: CopyOnWriteArrayList<MessageReceiver<T>>? = receiverListeners[path]
                     if (receiverListnerList == null) {
-                        receiverListnerList = ArrayList()
+                        receiverListnerList = CopyOnWriteArrayList()
                     }
                     receiverListnerList.add(receiver)
                     receiverListeners[path] = receiverListnerList
@@ -146,16 +155,15 @@ class WebSocketServerImp<T> internal constructor(
             throw IllegalArgumentException("port type can't be null or port is not configured: port $port")
         }
         val receiverListeners = receiveListenersMap[port]
-        if ( receiverListeners != null) {
-            for(wsPaths in websocketMap.values) {
-                for(path in wsPaths) {
-                    var receiverListenerList: ArrayList<MessageReceiver<T>>? = receiverListeners[path]
-                    if (receiverListenerList == null) {
-                        receiverListenerList = ArrayList()
-                    }
-                    receiverListenerList.add(receiver)
-                    receiverListeners[path] = receiverListenerList
+        val configuredPaths = websocketMap[port]
+        if (receiverListeners != null && configuredPaths != null) {
+            for (path in configuredPaths) {
+                var receiverListenerList: CopyOnWriteArrayList<MessageReceiver<T>>? = receiverListeners[path]
+                if (receiverListenerList == null) {
+                    receiverListenerList = CopyOnWriteArrayList()
                 }
+                receiverListenerList.add(receiver)
+                receiverListeners[path] = receiverListenerList
             }
         }
     }
@@ -169,9 +177,9 @@ class WebSocketServerImp<T> internal constructor(
                 }
                 logger.info("registering receiver for {}",path)
                 for(receiverListeners in receiveListenersMap.values) {
-                    var receiverListnerList: ArrayList<MessageReceiver<T>>? = receiverListeners[path]
+                    var receiverListnerList: CopyOnWriteArrayList<MessageReceiver<T>>? = receiverListeners[path]
                     if (receiverListnerList == null) {
-                        receiverListnerList = ArrayList()
+                        receiverListnerList = CopyOnWriteArrayList()
                     }
                     receiverListnerList.add(receiver)
                     receiverListeners[path] = receiverListnerList
@@ -182,22 +190,27 @@ class WebSocketServerImp<T> internal constructor(
 
     override fun registerChannelMessageReceiver(port: Int, receiver: MessageReceiver<T>, vararg webSocketPaths: String) {
         require(webSocketPaths.isNotEmpty()) { "webSocketPaths type can't be null or empty" }
-        for(path in webSocketPaths) {
-            for(configuredPaths in websocketMap.values) {
-                if(!configuredPaths.contains(path)) {
-                    continue
-                }
-                logger.info("registering receiver for {} on {}",path,port)
-                val receiverListeners = receiveListenersMap[port]
-                if(receiverListeners != null) {
-                    var receiverListnerList: ArrayList<MessageReceiver<T>>? = receiverListeners[path]
-                    if (receiverListnerList == null) {
-                        receiverListnerList = ArrayList()
+        val webSocketPathsForChannel = websocketMap[port]
+        if (webSocketPathsForChannel != null) {
+            for(path in webSocketPaths) {
+                for(configuredPath in webSocketPathsForChannel) {
+                    if(configuredPath != path) {
+                        continue
                     }
-                    receiverListnerList.add(receiver)
-                    receiverListeners[path] = receiverListnerList
+                    logger.info("registering receiver for {} on {}",path,port)
+                    val receiverListeners = receiveListenersMap[port]
+                    if(receiverListeners != null) {
+                        var receiverListenerList: CopyOnWriteArrayList<MessageReceiver<T>>? = receiverListeners[path]
+                        if (receiverListenerList == null) {
+                            receiverListenerList = CopyOnWriteArrayList()
+                        }
+                        receiverListenerList.add(receiver)
+                        receiverListeners[path] = receiverListenerList
+                    }
                 }
             }
+        }else {
+            logger.error("Tried to register receiver on none existent channel: {}",port)
         }
     }
 
@@ -212,6 +225,10 @@ class WebSocketServerImp<T> internal constructor(
     override fun registerPathConnectionStatusListener(listener: WebSocketConnectionStatusListener){
         pathConnectionListeners.add(listener)
         pathDisconnectionListeners.add(listener)
+    }
+
+    override fun isPathConfigured(port: Int, path: String): Boolean {
+        return isPathConfiguredOnPort(port,path)
     }
 
 }

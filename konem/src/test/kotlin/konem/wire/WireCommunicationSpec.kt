@@ -4,7 +4,8 @@ import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.BeforeTest
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.core.spec.style.ShouldSpec
-import io.kotest.datatest.withData
+import io.kotest.datatest.withTests
+import io.kotest.engine.concurrency.TestExecutionMode
 import konem.*
 import konem.data.protobuf.HeartBeat
 import konem.data.protobuf.KonemMessage
@@ -24,12 +25,12 @@ import kotlin.time.ExperimentalTime
 @ExperimentalTime
 @ExperimentalKotest
 class WireCommunicationSpec : FunSpec({
+    testExecutionMode = TestExecutionMode.Sequential
 
     beforeTest {
         clientFactory?.shutdown()
         server?.shutdownServer()
 
-        println("XXXX before")
         server = Konem.createTcpSocketServer(
             config = {
                 addChannel(6060)
@@ -58,11 +59,13 @@ class WireCommunicationSpec : FunSpec({
     afterTest {
         clientFactory?.shutdown()
         server?.shutdownServer()
+        delay(500.milliseconds)
     }
 
     context(": Server readers can register and then see messages: ") {
-        withData(
-            nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.testName} ${data.msgCount} ${data.clientConfigs}" },
+        withTests(
+            nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.name} ${data.msgCount} ${data.clientConfigs}" },
+            ts = listOf(
             ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
             ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
             ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
@@ -76,6 +79,7 @@ class WireCommunicationSpec : FunSpec({
                 ClientConfig(6062, 21), ClientConfig(6063, 43)
             )),
 
+            ),
         ) { (msgCount, clientConfigs ) ->
             lateinit var serverReceiver: WireTestServerReceiver
             var totalMessagesSent = 0
@@ -113,8 +117,8 @@ class WireCommunicationSpec : FunSpec({
 
 
     context(": Clients can register reader; connect; send and receive messages from server: ") {
-        withData(
-            nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.testName} ${data.msgCount} ${data.clientConfigs}" },
+        withTests(
+            nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.name} ${data.msgCount} ${data.clientConfigs}" },
             ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
             ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
             ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
@@ -169,8 +173,8 @@ class WireCommunicationSpec : FunSpec({
 
 
     context(": Clients can register reader; connect and then can send and receive messages from server after a reconnect: ") {
-        withData(
-            nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.testName} ${data.msgCount} ${data.clientConfigs}" },
+        withTests(
+            nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.name} ${data.msgCount} ${data.clientConfigs}" },
             ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
             ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
             ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
@@ -232,7 +236,7 @@ class WireCommunicationSpec : FunSpec({
 
 
     context(": Server's broadcastOnChannel sends to all clients on correct port: ") {
-       withData(
+       withTests(
            nameFn = { data: ClientCommConfigsV2 -> "${this.testCase.name} ${data.msgCount} ${data.broadcastPorts} ${data.clientConfigs}" },
            ClientCommConfigsV2(1, mutableListOf(6060), mutableListOf(ClientConfig(6060, 1))),
            ClientCommConfigsV2(5,  mutableListOf(6061),  mutableListOf(ClientConfig(6060, 10))),
@@ -287,8 +291,8 @@ class WireCommunicationSpec : FunSpec({
    }
 
     context(": Server's broadcastOnAllChannels sends to all clients on all ports: ") {
-       withData(
-           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.testName} ${data.msgCount} ${data.clientConfigs}" },
+       withTests(
+           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.name} ${data.msgCount} ${data.clientConfigs}" },
            ClientCommConfigsV1(1,  mutableListOf(ClientConfig(6060, 1))),
            ClientCommConfigsV1(5,  mutableListOf(ClientConfig(6060, 10))),
            ClientCommConfigsV1(5,  mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
@@ -341,8 +345,8 @@ class WireCommunicationSpec : FunSpec({
    }
 
     context(": Server can receive and then respond to correct clients: ") {
-       withData(
-           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.testName} ${data.msgCount} ${data.clientConfigs}" },
+       withTests(
+           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.name} ${data.msgCount} ${data.clientConfigs}" },
            ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
@@ -399,8 +403,8 @@ class WireCommunicationSpec : FunSpec({
    }
 
     context(": Each Client's ConnectionListener is called after connected to a server: ") {
-       withData(
-           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.testName} ${data.msgCount} ${data.clientConfigs}" },
+       withTests(
+           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.name} ${data.msgCount} ${data.clientConfigs}" },
            ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
@@ -452,8 +456,8 @@ class WireCommunicationSpec : FunSpec({
    }
 
     context(": Server's ConnectionListener is called after each client connects: ") {
-       withData(
-           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.testName} ${data.msgCount} ${data.clientConfigs}" },
+       withTests(
+           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.name} ${data.msgCount} ${data.clientConfigs}" },
            ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
@@ -501,8 +505,8 @@ class WireCommunicationSpec : FunSpec({
    }
 
     context(": Client's DisconnectionListener is called after a disconnect: ") {
-       withData(
-           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.testName} ${data.msgCount} ${data.clientConfigs}" },
+       withTests(
+           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.name} ${data.msgCount} ${data.clientConfigs}" },
            ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
@@ -562,8 +566,8 @@ class WireCommunicationSpec : FunSpec({
    }
 
     context(": Server's DisconnectionListener is called after each client disconnects: ") {
-       withData(
-           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.testName} ${data.msgCount} ${data.clientConfigs}" },
+       withTests(
+           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.name} ${data.msgCount} ${data.clientConfigs}" },
            ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),
@@ -610,8 +614,8 @@ class WireCommunicationSpec : FunSpec({
    }
 
     context(": Server and Client's ConnectionStatusListener is called after each connect and disconnect: ") {
-       withData(
-           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.testName} ${data.msgCount} ${data.clientConfigs}" },
+       withTests(
+           nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.name} ${data.msgCount} ${data.clientConfigs}" },
            ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 10))),
            ClientCommConfigsV1(5, mutableListOf(ClientConfig(6060, 1), ClientConfig(6061, 10))),

@@ -28,7 +28,7 @@ fun main(){
 
     sleep(5000)
 
-    server.registerChannelMessageReceiver(MessageReceiver { from, message ->
+    server.registerChannelMessageReceiver(8080,MessageReceiver { from, message ->
         logger.info("Server KoneMessageReceiver: got {} from {} ", message,from)
         sleep(3000)
         server.broadcastOnAllChannels(dataMessage("${count++}"))
