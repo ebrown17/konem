@@ -11,7 +11,6 @@ import io.netty.handler.timeout.IdleStateHandler
 import konem.logger
 import konem.netty.*
 import konem.netty.server.ServerChannelInfo
-import konem.protocol.websocket.json.WebSocketServerChannel.Companion.maxSize
 
 class WebSocketServerChannel<T>(
     private val transceiver: ServerTransceiver<T>,

@@ -42,13 +42,10 @@ dependencies {
     testImplementation libs.kotest.assertions
     testImplementation libs.kotest.property
 
-    testImplementation libs.groovy
-    testImplementation libs.spock
 
 }
 
 compileTestKotlin {
-    kotlinOptions.jvmTarget = jvmTargetVersion
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
 }
