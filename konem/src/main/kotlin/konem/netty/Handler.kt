@@ -10,7 +10,7 @@ interface HandlerListener<T> {
     fun registerInActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress)
 }
 
-abstract class Handler<T> :
+abstract class Handler<T>(val handlerId: Long, val transceiver: Transceiver<T>) :
     SimpleChannelInboundHandler<T>() {
 
     internal val logger = logger(this)
@@ -18,9 +18,6 @@ abstract class Handler<T> :
     private lateinit var context: ChannelHandlerContext
     internal lateinit var remoteAddress: SocketAddress
     private var isHandlerActive: Boolean = false
-
-    internal var handlerId: Long = -1
-    internal lateinit var transceiver: Transceiver<T>
 
     open fun sendMessage(message: T) {
         if (isActive()) {
