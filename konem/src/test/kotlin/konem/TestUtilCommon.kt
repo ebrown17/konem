@@ -5,6 +5,11 @@ import konem.netty.*
 import konem.netty.client.Client
 import konem.netty.server.Server
 import java.net.SocketAddress
+import java.util.concurrent.ConcurrentLinkedDeque
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.concurrent.atomics.AtomicArray
+import kotlin.concurrent.atomics.AtomicInt
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -29,11 +34,10 @@ data class WebSocketServerStartup(val portsToWebSocketPaths: MutableMap<Int, Mut
 open class NewTestServerReceiver<T>(
     received: (SocketAddress, T) -> Unit
 ) : MessageReceiver<T>(received) {
-    var messageCount = 0
-        private set
-    var messageList = mutableListOf<T>()
+    var messageCount = AtomicInteger(0)
+    var messageList = ConcurrentLinkedQueue<T>()
     override fun receive(addr: SocketAddress, message: T) {
-        messageCount++
+        messageCount.addAndGet(1)
         messageList.add(message)
         super.receive(addr, message)
     }
@@ -42,11 +46,11 @@ open class NewTestClientReceiver<T>(
     val client: Client<T>,
     received: (SocketAddress, T) -> Unit
 ) : MessageReceiver<T>(received) {
-    var messageCount = 0
-    var messageList = mutableListOf<T>()
+    var messageCount = AtomicInteger(0)
+    var messageList = ConcurrentLinkedQueue<T>()
     var clientId = ""
     override fun receive(addr: SocketAddress, message: T) {
-        messageCount++
+        messageCount.addAndGet(1)
         messageList.add(message)
         super.receive(addr, message)
     }
@@ -150,7 +154,7 @@ suspend fun <T> waitForMessagesServer(totalMessages:Int ,receiverList : MutableL
 suspend fun <T> waitForMessagesServerNew(totalMessages:Int ,receiverList : MutableList<out NewTestServerReceiver<T>>,debug: Boolean = false) : Boolean{
     var waitCount = 1
     until(waitForMsgTime.seconds) {
-        val received: Int = receiverList.sumOf { it.messageCount }
+        val received: Int = receiverList.sumOf { it.messageCount.get() }
         if(debug){
             println("Server received: $received out of $totalMessages (check ${waitCount++})")
         }

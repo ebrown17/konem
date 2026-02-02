@@ -40,8 +40,8 @@ class WebSocketCommunicationSpec: FunSpec ({
             config = {
                 addChannel(6060,"/test0","/test1")
                 addChannel(6061,"/test2","/test3")
-                addChannel(6063,"/test4","/test5","/test6")
-                addChannel(6064,"/test7","/test8","/test9","/test10")
+                addChannel(6062,"/test4","/test5","/test6")
+                addChannel(6063,"/test7","/test8","/test9","/test10")
             },
             protocolPipeline = KonemProtocolPipeline.getKonemJsonPipeline()
         )
@@ -64,6 +64,14 @@ class WebSocketCommunicationSpec: FunSpec ({
                     mutableListOf(
                         WsClientConfig(6060,5,listOf("/test0","/test1")),
                         WsClientConfig(6061,15,listOf("/test2","/test3"))
+                    )
+                ),
+                WsClientCommConfigsV1(1,
+                    mutableListOf(
+                        WsClientConfig(6060,15 ,listOf("/test0","/test1")),
+                        WsClientConfig(6061,15,listOf("/test2","/test3")),
+                        WsClientConfig(6062,15 ,listOf("/test4","/test5","/test6")),
+                        WsClientConfig(6063,15,listOf("/test7","/test8","/test9"))
                     )
                 )
             ),

@@ -35,6 +35,7 @@ abstract class Handler<T>(val handlerId: Long, val transceiver: Transceiver<T>) 
 
     internal fun activateHandler() {
         if (!isHandlerActive) {
+            logger.debug("Handler active")
             isHandlerActive = true
             transceiver.handlerActive(remoteAddress, this)
         }
