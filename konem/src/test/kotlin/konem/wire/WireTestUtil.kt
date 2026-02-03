@@ -85,24 +85,16 @@ fun serverBroadcastOnAllChannels(messageSendCount: Int){
     }
 }
 
-@ExperimentalTime
-suspend fun waitForMessagesReceiverClient(totalMessages:Int ,receiverList : MutableList<WireTestClientReceiver>,debug: Boolean = false) : Boolean{
-    until(waitForMsgTime.seconds) {
-        val received: Int = receiverList.sumOf { it.messageCount.get() }
-        var correctMsgs = true
-        receiverList.forEach{ receiver ->
-            receiver.messageList.forEach {
-                val msg = it.data_ as Data
-                if(msg.data_ != receiver.clientId){
-                    correctMsgs = false
-                    println("Bad data? ${msg.data_} != ${receiver.clientId}")
-                }
+fun compareClientMessages(receiverList : MutableList<WireTestClientReceiver>,debug: Boolean = false) : Boolean{
+    var correctMsgs = true
+    receiverList.forEach{ receiver ->
+        receiver.messageList.forEach {
+            val msg = it.data_ as Data
+            if(msg.data_ != receiver.clientId){
+                correctMsgs = false
+                println("Bad data? ${msg.data_} != ${receiver.clientId}")
             }
         }
-        if(debug){
-            println("Clients received: $received out of $totalMessages")
-        }
-        (received == totalMessages) && correctMsgs
     }
-    return true
+    return correctMsgs
 }

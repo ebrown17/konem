@@ -4,6 +4,7 @@ import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.datatest.withTests
 import io.kotest.engine.concurrency.TestExecutionMode
+import io.kotest.matchers.shouldBe
 import konem.*
 import konem.data.protobuf.HeartBeat
 import konem.data.protobuf.KonemMessage
@@ -47,7 +48,7 @@ class WireCommunicationSpec : FunSpec({
         clientFactory = Konem.createTcpSocketClientFactoryOfDefaults(
             protocolPipeline = KonemProtocolPipeline.getKonemWirePipeline(),
             heartbeatProtocol = ClientHeartbeatProtocol(isHeartbeat = { message ->
-                message is HeartBeat
+                message is KonemMessage && message.messageType == MessageType.HEARTBEAT
             }),
         )
     }
@@ -316,7 +317,7 @@ class WireCommunicationSpec : FunSpec({
        }
    }
 
-    context(": Server can receive and then respond to correct clients: ") {
+    context("Server can receive and then respond to correct clients") {
        withTests(
            nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.name} ${data.msgCount} ${data.clientConfigs}" },
            ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
@@ -366,7 +367,8 @@ class WireCommunicationSpec : FunSpec({
            totalMessagesSent += sendClientMessageWithReceiver(msgCount, clientReceiverList)
 
            waitForMessagesServer(totalMessagesSent, serverReceiverList,DEBUG)
-           waitForMessagesReceiverClient(totalMessagesSent, clientReceiverList,DEBUG)
+           waitForMessagesClient(totalMessagesSent,clientReceiverList,DEBUG)
+           compareClientMessages(clientReceiverList,DEBUG) shouldBe true
 
            if (DEBUG) println("-----------------------------------")
 
