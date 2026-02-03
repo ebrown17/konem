@@ -1,27 +1,21 @@
 package konem.json_websocket
 
-import io.kotest.assertions.nondeterministic.until
-import io.kotest.assertions.print.print
 import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.datatest.withTests
 import io.kotest.engine.concurrency.TestExecutionMode
 import konem.DEBUG
 import konem.Konem
-import konem.WebSocketServerStartup
 import konem.WsClientCommConfigsV1
 import konem.WsClientConfig
-import konem.activeTime
 import konem.connectClients
 import konem.data.json.KonemMessage
 import konem.netty.client.Client
 import konem.protocol.konem.KonemProtocolPipeline
 import konem.startServer
 import konem.waitForMessagesServer
-import konem.waitForMessagesServerNew
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
@@ -100,7 +94,7 @@ class WebSocketCommunicationSpec: FunSpec ({
             startServer(server!!)
             connectClients(clientList)
             totalMessagesSent += sendClientMessages(msgCount,clientList)
-            waitForMessagesServerNew(totalMessagesSent, serverReceiverList, DEBUG)
+            waitForMessagesServer(totalMessagesSent, serverReceiverList, DEBUG)
             if (DEBUG) println("-----------------------------------")
 
         }

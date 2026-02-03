@@ -11,7 +11,6 @@ import konem.netty.client.TcpSocketClientFactory
 import konem.netty.server.TcpSocketServer
 import konem.waitForMsgTime
 import java.net.SocketAddress
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
@@ -19,10 +18,13 @@ var server: TcpSocketServer<KonemMessage>? = null
 var clientFactory:  TcpSocketClientFactory<KonemMessage>? = null
 
 
-class JsonTestClientReceiver(client: Client<KonemMessage>, receive: (SocketAddress, KonemMessage) -> Unit):
-    TestClientReceiver<KonemMessage>(client,receive)
+class JsonTestServerReceiver(
+    received: (SocketAddress, KonemMessage) -> Unit
+) : TestServerReceiver<KonemMessage>(received)
 
-class JsonTestServerReceiver(receive: (SocketAddress, KonemMessage) -> Unit): TestServerReceiver<KonemMessage>(receive)
+class JsonTestClientReceiver(
+    client: Client<KonemMessage>, receive: (SocketAddress, KonemMessage) -> Unit
+): TestClientReceiver<KonemMessage>(client,receive)
 
 fun sendClientMessages(messageSendCount: Int, clientList: MutableList<Client<KonemMessage>>):Int{
     var totalMessagesSent = 0
@@ -63,7 +65,7 @@ fun serverBroadcastOnAllChannels(messageSendCount: Int){
 @ExperimentalTime
 suspend fun waitForMessagesReceiverClient(totalMessages:Int ,receiverList : MutableList<JsonTestClientReceiver>,debug: Boolean = false) : Boolean{
     until(waitForMsgTime.seconds) {
-        val received: Int = receiverList.sumOf { it.messageCount }
+        val received: Int = receiverList.sumOf { it.messageCount.get() }
         var correctMsgs = true
         receiverList.forEach{ receiver ->
             receiver.messageList.forEach {

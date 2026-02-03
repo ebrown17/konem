@@ -1,7 +1,6 @@
 package konem.json_websocket
 
-import konem.NewTestClientReceiver
-import konem.NewTestServerReceiver
+import konem.TestClientReceiver
 import konem.TestServerReceiver
 import konem.data.json.Data
 import konem.data.json.KonemMessage
@@ -15,11 +14,11 @@ var clientFactory: WebSocketClientFactory<KonemMessage>? = null
 
 class JsonTestWebSocketServerReceiver(
     received: (SocketAddress, KonemMessage) -> Unit
-) : NewTestServerReceiver<KonemMessage>(received)
+) : TestServerReceiver<KonemMessage>(received)
 
 class JsonTestWebSocketClientReceiver(
     client: Client<KonemMessage>, receive: (SocketAddress, KonemMessage) -> Unit
-): NewTestClientReceiver<KonemMessage>(client,receive)
+): TestClientReceiver<KonemMessage>(client,receive)
 
 fun sendClientMessages(messageSendCount: Int, clientList: MutableList<Client<KonemMessage>>):Int{
     var totalMessagesSent = 0

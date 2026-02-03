@@ -2,7 +2,6 @@ package konem.json
 
 import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.datatest.withTests
 import io.kotest.engine.concurrency.TestExecutionMode
 import konem.*
@@ -15,7 +14,6 @@ import konem.protocol.konem.KonemProtocolPipeline
 
 
 import kotlinx.coroutines.delay
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.ExperimentalTime
 
@@ -72,13 +70,11 @@ class JsonCommunicationSpec : FunSpec({
 
             ),
         ) { (msgCount, clientConfigs ) ->
-            lateinit var serverReceiver: JsonTestServerReceiver
             var totalMessagesSent = 0
             val clientList = mutableListOf<Client<KonemMessage>>()
             val serverReceiverList = mutableListOf<JsonTestServerReceiver>()
 
-            serverReceiver = JsonTestServerReceiver { from, msg ->
-                serverReceiver.messageCount++
+            var serverReceiver = JsonTestServerReceiver { from, msg ->
             }
             serverReceiverList.add(serverReceiver)
 
@@ -86,10 +82,7 @@ class JsonCommunicationSpec : FunSpec({
                 server?.registerChannelMessageReceiver(config.port, serverReceiver)
                 for (i in 1..config.totalClients) {
                     clientFactory?.createClient("localhost",config.port)?.let {
-                        lateinit var clientReceiver: JsonTestClientReceiver
-                        clientReceiver = JsonTestClientReceiver(it){ _, msg ->
-                            clientReceiver.messageCount++
-                            clientReceiver.messageList.add(msg)
+                        var clientReceiver = JsonTestClientReceiver(it){ _, msg ->
                         }
                         clientReceiver.clientId = "client-$i-${config.port}"
                         it.registerChannelMessageReceiver(clientReceiver)
@@ -123,14 +116,12 @@ class JsonCommunicationSpec : FunSpec({
                 ClientConfig(6062, 21), ClientConfig(6063, 43)
             )),
             ) { (msgCount, clientConfigs ) ->
-            lateinit var serverReceiver: JsonTestServerReceiver
             var totalMessagesSent = 0
             val clientList = mutableListOf<Client<KonemMessage>>()
             val serverReceiverList = mutableListOf<JsonTestServerReceiver>()
             val clientReceiverList = mutableListOf<JsonTestClientReceiver>()
 
-            serverReceiver = JsonTestServerReceiver { from, msg ->
-                serverReceiver.messageCount++
+            var serverReceiver = JsonTestServerReceiver { from, msg ->
                 server?.sendMessage(from, msg)
             }
             serverReceiverList.add(serverReceiver)
@@ -142,8 +133,6 @@ class JsonCommunicationSpec : FunSpec({
                     clientFactory?.createClient("localhost",config.port)?.let {
                         lateinit var clientReceiver: JsonTestClientReceiver
                         clientReceiver = JsonTestClientReceiver(it) { _, msg ->
-                            clientReceiver.messageCount++
-                            clientReceiver.messageList.add(msg)
                         }
                         clientReceiver.clientId = "client-$i-${config.port}"
                         clientReceiverList.add(clientReceiver)
@@ -187,7 +176,6 @@ class JsonCommunicationSpec : FunSpec({
             val clientReceiverList = mutableListOf<JsonTestClientReceiver>()
 
             serverReceiver = JsonTestServerReceiver { from, msg ->
-                serverReceiver.messageCount++
                 server?.sendMessage(from,msg)
             }
             serverReceiverList.add(serverReceiver)
@@ -197,10 +185,7 @@ class JsonCommunicationSpec : FunSpec({
 
                 for(i in 1..config.totalClients){
                     clientFactory?.createClient("localhost",config.port)?.let {
-                        lateinit var clientReceiver: JsonTestClientReceiver
-                        clientReceiver = JsonTestClientReceiver(it) { _, msg ->
-                            clientReceiver.messageCount++
-                            clientReceiver.messageList.add(msg)
+                        var clientReceiver = JsonTestClientReceiver(it) { _, msg ->
                         }
                         clientReceiver.clientId = "client-$i-${config.port}"
                         clientReceiverList.add(clientReceiver)
@@ -243,13 +228,11 @@ class JsonCommunicationSpec : FunSpec({
            )),
        ) { (msgCount,broadcastPorts, clientConfigs ) ->
 
-           lateinit var serverReceiver: JsonTestServerReceiver
            var totalMessagesSent = 0
            val clientList = mutableListOf<Client<KonemMessage>>()
            val serverReceiverList = mutableListOf<JsonTestServerReceiver>()
            val clientReceiverList = mutableListOf<JsonTestClientReceiver>()
-           serverReceiver = JsonTestServerReceiver { from, msg ->
-               serverReceiver.messageCount++
+           var serverReceiver = JsonTestServerReceiver { from, msg ->
            }
            serverReceiverList.add(serverReceiver)
 
@@ -262,8 +245,6 @@ class JsonCommunicationSpec : FunSpec({
                    clientFactory?.createClient("localhost",config.port)?.let {
                        lateinit var clientReceiver: JsonTestClientReceiver
                        clientReceiver = JsonTestClientReceiver(it) { _, msg ->
-                           clientReceiver.messageCount++
-                           clientReceiver.messageList.add(msg)
                        }
                        clientReceiver.clientId = "client-$i-${config.port}"
                        clientReceiverList.add(clientReceiver)
@@ -297,13 +278,11 @@ class JsonCommunicationSpec : FunSpec({
            )),
        ) { (msgCount, clientConfigs ) ->
 
-           lateinit var serverReceiver: JsonTestServerReceiver
            var totalMessagesSent = 0
            val clientList = mutableListOf<Client<KonemMessage>>()
            val serverReceiverList = mutableListOf<JsonTestServerReceiver>()
            val clientReceiverList = mutableListOf<JsonTestClientReceiver>()
-           serverReceiver = JsonTestServerReceiver { _, _ ->
-               serverReceiver.messageCount++
+           var serverReceiver = JsonTestServerReceiver { _, _ ->
            }
            serverReceiverList.add(serverReceiver)
 
@@ -314,10 +293,7 @@ class JsonCommunicationSpec : FunSpec({
 
                for (i in 1..config.totalClients) {
                    clientFactory?.createClient("localhost",config.port)?.let {
-                       lateinit var clientReceiver: JsonTestClientReceiver
-                       clientReceiver = JsonTestClientReceiver(it) { _, msg ->
-                           clientReceiver.messageCount++
-                           clientReceiver.messageList.add(msg)
+                       var clientReceiver = JsonTestClientReceiver(it) { _, msg ->
                        }
                        clientReceiver.clientId = "client-$i-${config.port}"
                        clientReceiverList.add(clientReceiver)
@@ -351,15 +327,13 @@ class JsonCommunicationSpec : FunSpec({
                ClientConfig(6062, 21), ClientConfig(6063, 43)
            )),
        ) { (msgCount, clientConfigs ) ->
-           lateinit var serverReceiver : JsonTestServerReceiver
            var totalMessagesSent = 0
            val clientList = mutableListOf<Client<KonemMessage>>()
            val serverReceiverList = mutableListOf<JsonTestServerReceiver>()
            val clientReceiverList = mutableListOf<JsonTestClientReceiver>()
 
-           serverReceiver = JsonTestServerReceiver { from, msg ->
-               serverReceiver.messageCount++
-               server?.sendMessage(from,msg)
+           var serverReceiver : JsonTestServerReceiver = JsonTestServerReceiver { from, msg ->
+               server?.sendMessage(from, msg)
            }
            serverReceiverList.add(serverReceiver)
 
@@ -368,10 +342,7 @@ class JsonCommunicationSpec : FunSpec({
 
                for(i in 1..config.totalClients){
                    clientFactory?.createClient("localhost",config.port)?.let {
-                       lateinit var clientReceiver: JsonTestClientReceiver
-                       clientReceiver = JsonTestClientReceiver(it) { _, msg ->
-                           clientReceiver.messageCount++
-                           clientReceiver.messageList.add(msg)
+                       var clientReceiver = JsonTestClientReceiver(it) { _, msg ->
                        }
                        clientReceiver.clientId = "client-$i-${config.port}"
                        clientReceiverList.add(clientReceiver)

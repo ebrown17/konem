@@ -19,10 +19,14 @@ var server: TcpSocketServer<KonemMessage>? = null
 var clientFactory:  TcpSocketClientFactory<KonemMessage>? = null
 
 
-class WireTestClientReceiver(client: Client<KonemMessage>, receive: (SocketAddress, KonemMessage) -> Unit):
-    TestClientReceiver<KonemMessage>(client,receive)
+class WireTestServerReceiver(
+    received: (SocketAddress, KonemMessage) -> Unit
+) : TestServerReceiver<KonemMessage>(received)
 
-class WireTestServerReceiver(receive: (SocketAddress, KonemMessage) -> Unit): TestServerReceiver<KonemMessage>(receive)
+class WireTestClientReceiver(
+    client: Client<KonemMessage>, receive: (SocketAddress, KonemMessage) -> Unit
+): TestClientReceiver<KonemMessage>(client,receive)
+
 
 fun sendClientMessages(messageSendCount: Int, clientList: MutableList<Client<KonemMessage>>):Int{
     var totalMessagesSent = 0
@@ -84,7 +88,7 @@ fun serverBroadcastOnAllChannels(messageSendCount: Int){
 @ExperimentalTime
 suspend fun waitForMessagesReceiverClient(totalMessages:Int ,receiverList : MutableList<WireTestClientReceiver>,debug: Boolean = false) : Boolean{
     until(waitForMsgTime.seconds) {
-        val received: Int = receiverList.sumOf { it.messageCount }
+        val received: Int = receiverList.sumOf { it.messageCount.get() }
         var correctMsgs = true
         receiverList.forEach{ receiver ->
             receiver.messageList.forEach {

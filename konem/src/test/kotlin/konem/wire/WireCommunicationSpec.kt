@@ -1,9 +1,7 @@
 package konem.wire
 
 import io.kotest.common.ExperimentalKotest
-import io.kotest.core.spec.BeforeTest
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.datatest.withTests
 import io.kotest.engine.concurrency.TestExecutionMode
 import konem.*
@@ -18,7 +16,6 @@ import konem.protocol.konem.KonemProtocolPipeline
 
 import kotlinx.coroutines.delay
 import java.util.*
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.ExperimentalTime
 
@@ -81,13 +78,11 @@ class WireCommunicationSpec : FunSpec({
 
             ),
         ) { (msgCount, clientConfigs ) ->
-            lateinit var serverReceiver: WireTestServerReceiver
             var totalMessagesSent = 0
             val clientList = mutableListOf<Client<KonemMessage>>()
             val serverReceiverList = mutableListOf<WireTestServerReceiver>()
 
-            serverReceiver = WireTestServerReceiver { from, msg ->
-                serverReceiver.messageCount++
+            var serverReceiver = WireTestServerReceiver { from, msg ->
             }
             serverReceiverList.add(serverReceiver)
 
@@ -95,10 +90,7 @@ class WireCommunicationSpec : FunSpec({
                 server?.registerChannelMessageReceiver(config.port, serverReceiver)
                 for (i in 1..config.totalClients) {
                     clientFactory?.createClient("localhost",config.port)?.let {
-                        lateinit var clientReceiver: WireTestClientReceiver
-                        clientReceiver = WireTestClientReceiver(it){ _, msg ->
-                            clientReceiver.messageCount++
-                            clientReceiver.messageList.add(msg)
+                        var clientReceiver = WireTestClientReceiver(it){ _, msg ->
                         }
                         clientReceiver.clientId = "client-$i-${config.port}"
                         it.registerChannelMessageReceiver(clientReceiver)
@@ -132,14 +124,12 @@ class WireCommunicationSpec : FunSpec({
                 ClientConfig(6062, 21), ClientConfig(6063, 43)
             )),
             ) { (msgCount, clientConfigs ) ->
-            lateinit var serverReceiver: WireTestServerReceiver
             var totalMessagesSent = 0
             val clientList = mutableListOf<Client<KonemMessage>>()
             val serverReceiverList = mutableListOf<WireTestServerReceiver>()
             val clientReceiverList = mutableListOf<WireTestClientReceiver>()
 
-            serverReceiver = WireTestServerReceiver { from, msg ->
-                serverReceiver.messageCount++
+            var serverReceiver = WireTestServerReceiver { from, msg ->
                 server?.sendMessage(from, msg)
             }
             serverReceiverList.add(serverReceiver)
@@ -149,10 +139,7 @@ class WireCommunicationSpec : FunSpec({
 
                 for (i in 1..config.totalClients) {
                     clientFactory?.createClient("localhost",config.port)?.let {
-                        lateinit var clientReceiver: WireTestClientReceiver
-                        clientReceiver = WireTestClientReceiver(it) { _, msg ->
-                            clientReceiver.messageCount++
-                            clientReceiver.messageList.add(msg)
+                        var clientReceiver: WireTestClientReceiver = WireTestClientReceiver(it) { _, msg ->
                         }
                         clientReceiver.clientId = "client-$i-${config.port}"
                         clientReceiverList.add(clientReceiver)
@@ -189,14 +176,12 @@ class WireCommunicationSpec : FunSpec({
             )),
         ) { (msgCount, clientConfigs ) ->
 
-            lateinit var serverReceiver : WireTestServerReceiver
             var totalMessagesSent = 0
             val clientList = mutableListOf<Client<KonemMessage>>()
             val serverReceiverList = mutableListOf<WireTestServerReceiver>()
             val clientReceiverList = mutableListOf<WireTestClientReceiver>()
 
-            serverReceiver = WireTestServerReceiver { from, msg ->
-                serverReceiver.messageCount++
+            var serverReceiver  = WireTestServerReceiver { from, msg ->
                 server?.sendMessage(from,msg)
             }
             serverReceiverList.add(serverReceiver)
@@ -206,10 +191,7 @@ class WireCommunicationSpec : FunSpec({
 
                 for(i in 1..config.totalClients){
                     clientFactory?.createClient("localhost",config.port)?.let {
-                        lateinit var clientReceiver: WireTestClientReceiver
-                        clientReceiver = WireTestClientReceiver(it) { _, msg ->
-                            clientReceiver.messageCount++
-                            clientReceiver.messageList.add(msg)
+                        var clientReceiver: WireTestClientReceiver = WireTestClientReceiver(it) { _, msg ->
                         }
                         clientReceiver.clientId = "client-$i-${config.port}"
                         clientReceiverList.add(clientReceiver)
@@ -252,13 +234,11 @@ class WireCommunicationSpec : FunSpec({
            )),
        ) { (msgCount,broadcastPorts, clientConfigs ) ->
 
-           lateinit var serverReceiver: WireTestServerReceiver
            var totalMessagesSent = 0
            val clientList = mutableListOf<Client<KonemMessage>>()
            val serverReceiverList = mutableListOf<WireTestServerReceiver>()
            val clientReceiverList = mutableListOf<WireTestClientReceiver>()
-           serverReceiver = WireTestServerReceiver { from, msg ->
-               serverReceiver.messageCount++
+           var serverReceiver = WireTestServerReceiver { from, msg ->
            }
            serverReceiverList.add(serverReceiver)
 
@@ -269,10 +249,7 @@ class WireCommunicationSpec : FunSpec({
                }
                for (i in 1..config.totalClients) {
                    clientFactory?.createClient("localhost",config.port)?.let {
-                       lateinit var clientReceiver: WireTestClientReceiver
-                       clientReceiver = WireTestClientReceiver(it) { _, msg ->
-                           clientReceiver.messageCount++
-                           clientReceiver.messageList.add(msg)
+                       var clientReceiver: WireTestClientReceiver = WireTestClientReceiver(it) { _, msg ->
                        }
                        clientReceiver.clientId = "client-$i-${config.port}"
                        clientReceiverList.add(clientReceiver)
@@ -306,13 +283,11 @@ class WireCommunicationSpec : FunSpec({
            )),
        ) { (msgCount, clientConfigs ) ->
 
-           lateinit var serverReceiver: WireTestServerReceiver
            var totalMessagesSent = 0
            val clientList = mutableListOf<Client<KonemMessage>>()
            val serverReceiverList = mutableListOf<WireTestServerReceiver>()
            val clientReceiverList = mutableListOf<WireTestClientReceiver>()
-           serverReceiver = WireTestServerReceiver { _, _ ->
-               serverReceiver.messageCount++
+           var serverReceiver = WireTestServerReceiver { _, _ ->
            }
            serverReceiverList.add(serverReceiver)
 
@@ -323,10 +298,7 @@ class WireCommunicationSpec : FunSpec({
 
                for (i in 1..config.totalClients) {
                    clientFactory?.createClient("localhost",config.port)?.let {
-                       lateinit var clientReceiver: WireTestClientReceiver
-                       clientReceiver = WireTestClientReceiver(it) { _, msg ->
-                           clientReceiver.messageCount++
-                           clientReceiver.messageList.add(msg)
+                       var clientReceiver = WireTestClientReceiver(it) { _, msg ->
                        }
                        clientReceiver.clientId = "client-$i-${config.port}"
                        clientReceiverList.add(clientReceiver)
@@ -359,15 +331,17 @@ class WireCommunicationSpec : FunSpec({
                ClientConfig(6060, 1), ClientConfig(6061, 10),
                ClientConfig(6062, 21), ClientConfig(6063, 43)
            )),
+           ClientCommConfigsV1(1, mutableListOf(
+               ClientConfig(6060, 250), ClientConfig(6061, 250),
+               ClientConfig(6062, 250), ClientConfig(6063, 250)
+           )),
        ) { (msgCount, clientConfigs ) ->
-           lateinit var serverReceiver : WireTestServerReceiver
            var totalMessagesSent = 0
            val clientList = mutableListOf<Client<KonemMessage>>()
            val serverReceiverList = mutableListOf<WireTestServerReceiver>()
            val clientReceiverList = mutableListOf<WireTestClientReceiver>()
 
-           serverReceiver = WireTestServerReceiver { from, msg ->
-               serverReceiver.messageCount++
+           var serverReceiver  = WireTestServerReceiver { from, msg ->
                server?.sendMessage(from,msg)
            }
            serverReceiverList.add(serverReceiver)
@@ -377,10 +351,7 @@ class WireCommunicationSpec : FunSpec({
 
                for(i in 1..config.totalClients){
                    clientFactory?.createClient("localhost",config.port)?.let {
-                       lateinit var clientReceiver: WireTestClientReceiver
-                       clientReceiver = WireTestClientReceiver(it) { _, msg ->
-                           clientReceiver.messageCount++
-                           clientReceiver.messageList.add(msg)
+                       var clientReceiver = WireTestClientReceiver(it) { _, msg ->
                        }
                        clientReceiver.clientId = "client-$i-${config.port}"
                        clientReceiverList.add(clientReceiver)
