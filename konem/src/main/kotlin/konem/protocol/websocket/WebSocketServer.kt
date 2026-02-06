@@ -101,17 +101,17 @@ class WebSocketServerImp<T> internal constructor(
     override fun connectionActive(handler: Handler<T>) {
         val wsHandler = handler as WebSocketHandler<T>
         logger.info("connection active")
-        onPathConnect(wsHandler.remoteAddress as InetSocketAddress, wsHandler.webSocketPath)
+        onPathConnect(wsHandler.connectionKey.remoteAddress as InetSocketAddress, wsHandler.webSocketPath)
         for (listener in connectionListeners) {
-            listener.onConnection(handler.remoteAddress)
+            listener.onConnection(handler.connectionKey.remoteAddress)
         }
     }
 
     override fun connectionInActive(handler: Handler<T>) {
         val wsHandler = handler as WebSocketHandler<T>
-        onPathDisconnect(wsHandler.remoteAddress as InetSocketAddress, wsHandler.webSocketPath)
+        onPathDisconnect(wsHandler.connectionKey.remoteAddress as InetSocketAddress, wsHandler.webSocketPath)
         for (listener in disconnectionListeners) {
-            listener.onDisconnection(handler.remoteAddress)
+            listener.onDisconnection(handler.connectionKey.remoteAddress)
         }
     }
 

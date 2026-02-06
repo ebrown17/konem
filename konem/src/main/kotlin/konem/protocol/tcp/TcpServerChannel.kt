@@ -18,7 +18,7 @@ class TcpServerChannel<T>(
         val protocolPipeline = serverChannelInfo.protocol_pipeline.getProtocolPipelineCodecs()
         val heartbeatProtocol = serverChannelInfo.heartbeatProtocol
 
-        val messageHandler = object: Handler<T>(serverChannelInfo.channel_id,transceiver) {
+        val messageHandler = object: Handler<T>(transceiver) {
             override fun channelRead0(p0: ChannelHandlerContext?, message: T) {
                 transceiverReceive(message)
             }

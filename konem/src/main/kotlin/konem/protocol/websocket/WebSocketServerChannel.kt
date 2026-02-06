@@ -39,7 +39,7 @@ class WebSocketServerChannel<T>(
         pipeline.addLast("httpAggregator", HttpObjectAggregator(maxContentLength))
         pipeline.addLast("compressionHandler", WebSocketServerCompressionHandler(maxAllocation))
 
-        val webSocketHandlerHolder = WebSocketHandlerHolder(serverChannelInfo.channel_id,transceiver)
+        val webSocketHandlerHolder = WebSocketHandlerHolder(transceiver)
 
         if (heartbeatProtocol.enabled) {
             pipeline.addLast("idleStateHandler", IdleStateHandler(0, heartbeatProtocol.write_idle_time, 0))

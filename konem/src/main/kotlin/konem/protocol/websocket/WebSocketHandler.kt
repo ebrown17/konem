@@ -9,10 +9,8 @@ import konem.netty.Transceiver
 
 abstract class WebSocketHandler<T>(
     val webSocketPath: String,
-    handlerId: Long,
     transceiver: Transceiver<T>
-)
-    : Handler<T>(handlerId,transceiver) {
+) : Handler<T>(transceiver) {
 
     override fun channelActive(ctx: ChannelHandlerContext) {
         initializeContext(ctx)
@@ -30,12 +28,11 @@ abstract class WebSocketHandler<T>(
 }
 
 class WebSocketHandlerHolder<T>(
-    val handlerId: Long,
     val transceiver: ServerTransceiver<T>
 )
 {
     fun getHandler(wsPath: String): WebSocketHandler<T>{
-         return object: WebSocketHandler<T>(wsPath,handlerId,transceiver){
+         return object: WebSocketHandler<T>(wsPath, transceiver){
             override fun channelRead0(p0: ChannelHandlerContext?, message: T) {
                 transceiverReceive(message,webSocketPath)
             }

@@ -10,18 +10,21 @@ interface HandlerListener<T> {
     fun registerInActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress)
 }
 
-abstract class Handler<T>(val handlerId: Long, val transceiver: Transceiver<T>) :
+data class ConnectionKey(val channelId: String, val remoteAddress: SocketAddress)
+
+abstract class Handler<T>(val transceiver: Transceiver<T>) :
     SimpleChannelInboundHandler<T>() {
 
     internal val logger = logger(this)
 
     private lateinit var context: ChannelHandlerContext
-    internal lateinit var remoteAddress: SocketAddress
+    internal lateinit var connectionKey: ConnectionKey
+        private set
     private var isHandlerActive: Boolean = false
 
     open fun sendMessage(message: T) {
         if (isActive()) {
-            logger.trace("[write2Wire] dest: {} msg: {} ", remoteAddress, message.toString())
+            logger.trace("[write2Wire] dest: {} msg: {} ", connectionKey.remoteAddress, message.toString())
             context.writeAndFlush(message)
         } else {
             logger.warn("called when channel not active or writable")
@@ -30,14 +33,14 @@ abstract class Handler<T>(val handlerId: Long, val transceiver: Transceiver<T>) 
 
     internal fun initializeContext(ctx: ChannelHandlerContext) {
         context = ctx
-        remoteAddress = ctx.channel().remoteAddress()
+        connectionKey = ConnectionKey(context.channel().id().asLongText(), ctx.channel().remoteAddress())
     }
 
     internal fun activateHandler() {
         if (!isHandlerActive) {
             logger.debug("Handler active")
             isHandlerActive = true
-            transceiver.handlerActive(remoteAddress, this)
+            transceiver.handlerActive(connectionKey.remoteAddress, this)
         }
     }
 
@@ -49,9 +52,9 @@ abstract class Handler<T>(val handlerId: Long, val transceiver: Transceiver<T>) 
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
-        logger.info("remote peer: {} disconnected", remoteAddress)
+        logger.info("remote peer: {} disconnected", connectionKey.remoteAddress)
         isHandlerActive = false
-        transceiver.handlerInActive(remoteAddress)
+        transceiver.handlerInActive(connectionKey.remoteAddress)
         ctx.fireChannelInactive()
     }
 
@@ -64,11 +67,11 @@ abstract class Handler<T>(val handlerId: Long, val transceiver: Transceiver<T>) 
     }
 
     fun transceiverReceive(message: T,  extra: String="") {
-        logger.debug("Id=$handlerId from: {} received: {}", remoteAddress, message)
-        transceiver.receive(remoteAddress, message, extra)
+        logger.debug("Id={} from: {} received: {}",connectionKey.channelId, connectionKey.remoteAddress, message)
+        transceiver.receive(connectionKey.remoteAddress, message, extra)
     }
 
     override fun toString(): String {
-        return "Handler(Id=$handlerId,transceiver=$transceiver)"
+        return "Handler($connectionKey,transceiver=$transceiver)"
     }
 }

@@ -95,13 +95,13 @@ class TcpSocketServerImp<T> internal constructor(
 
     override fun connectionActive(handler: Handler<T>) {
         for (listener in connectionListeners) {
-            listener.onConnection(handler.remoteAddress)
+            listener.onConnection(handler.connectionKey.remoteAddress)
         }
     }
 
     override fun connectionInActive(handler: Handler<T>) {
         for (listener in disconnectionListeners) {
-            listener.onDisconnection(handler.remoteAddress)
+            listener.onDisconnection(handler.connectionKey.remoteAddress)
         }
     }
 
