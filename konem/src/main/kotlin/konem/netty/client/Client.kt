@@ -44,7 +44,7 @@ abstract class ClientInternal<T>(private val serverAddress: SocketAddress, priva
 
     private val connectionListeners: MutableList<ConnectListener> = ArrayList()
     private val disconnectionListeners: MutableList<DisconnectListener> = ArrayList()
-
+    internal lateinit var serverConnectionKey: ConnectionKey
     internal var channel: Channel? = null
         private set
 
@@ -71,13 +71,20 @@ abstract class ClientInternal<T>(private val serverAddress: SocketAddress, priva
                 logger.info("Client connected to {} ", serverAddress.toString())
                 isDisconnectInitiated = false
                 channel = channelFuture.channel()
-                transceiver.registerChannelReceiver(serverAddress, this)
-                closedListener = ClientClosedConnectionListener(this) {
-                    handleDisconnection()
-                    connect()
+                channel?.let { channel ->
+                    serverConnectionKey = ConnectionKey(channel.id().asLongText() ,channel.remoteAddress())
+                    transceiver.registerChannelReceiver(serverConnectionKey, this)
+                    closedListener = ClientClosedConnectionListener(this) {
+                        handleDisconnection()
+                        connect()
+                    }
+                    channel.closeFuture().addListener(closedListener)
+                    handleConnection()
+                } ?: {
+                    logger.error("Channel future returned null channel, unable to add connection listener")
+                    throw InterruptedException()
                 }
-                channel!!.closeFuture().addListener(closedListener)
-                handleConnection()
+
             }
         }
 

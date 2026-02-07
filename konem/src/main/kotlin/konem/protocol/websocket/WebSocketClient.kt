@@ -1,6 +1,7 @@
 package konem.protocol.websocket
 
 import konem.logger
+import konem.netty.ConnectionKey
 import konem.netty.MessageReceiver
 import konem.netty.client.ClientBootstrapConfig
 import konem.netty.client.ClientInternal
@@ -27,27 +28,27 @@ class WebSocketClientImp<T>(
             return
         }
         logger.info("remote: {} message: {}", channel?.remoteAddress(), message)
-        transceiver.transmit(serverAddress, message)
+        transceiver.transmit(serverConnectionKey, message)
     }
 
     override fun isActive(): Boolean {
-        return super.isActive() && transceiver.hasActiveHandler(serverAddress)
+        return super.isActive() && transceiver.hasActiveHandler(serverConnectionKey)
     }
 
     override fun registerChannelMessageReceiver(receiver: MessageReceiver<T>) {
         receiveListeners.add(receiver)
     }
 
-    override fun handleReceivedMessage(addr: SocketAddress, port: Int, message: T, extra: String) {
+    override fun handleReceivedMessage(connectionKey: ConnectionKey, port: Int, message: T, extra: String) {
         clientScope.launch {
-            receiveMessage(addr, port, message,extra)
+            receiveMessage(connectionKey, port, message,extra)
         }
     }
 
-    override suspend fun receiveMessage(addr: SocketAddress, port: Int, message: T, extra: String) {
+    override suspend fun receiveMessage(connectionKey: ConnectionKey, port: Int, message: T, extra: String) {
         logger.trace("got message: {} for path: {}", message,extra)
         for (listener in receiveListeners) {
-            listener.handle(addr, message)
+            listener.handle(connectionKey, message)
         }
     }
 

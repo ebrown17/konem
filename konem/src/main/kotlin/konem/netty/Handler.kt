@@ -6,8 +6,8 @@ import konem.logger
 import java.net.SocketAddress
 
 interface HandlerListener<T> {
-    fun registerActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress)
-    fun registerInActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress)
+    fun registerActiveHandler(handler: Handler<T>, channelPort: Int)
+    fun registerInActiveHandler(handler: Handler<T>, channelPort: Int)
 }
 
 data class ConnectionKey(val channelId: String, val remoteAddress: SocketAddress)
@@ -40,7 +40,7 @@ abstract class Handler<T>(val transceiver: Transceiver<T>) :
         if (!isHandlerActive) {
             logger.debug("Handler active")
             isHandlerActive = true
-            transceiver.handlerActive(connectionKey.remoteAddress, this)
+            transceiver.handlerActive(this)
         }
     }
 
@@ -54,7 +54,7 @@ abstract class Handler<T>(val transceiver: Transceiver<T>) :
     override fun channelInactive(ctx: ChannelHandlerContext) {
         logger.info("remote peer: {} disconnected", connectionKey.remoteAddress)
         isHandlerActive = false
-        transceiver.handlerInActive(connectionKey.remoteAddress)
+        transceiver.handlerInActive(this)
         ctx.fireChannelInactive()
     }
 
@@ -68,10 +68,13 @@ abstract class Handler<T>(val transceiver: Transceiver<T>) :
 
     fun transceiverReceive(message: T,  extra: String="") {
         logger.debug("Id={} from: {} received: {}",connectionKey.channelId, connectionKey.remoteAddress, message)
-        transceiver.receive(connectionKey.remoteAddress, message, extra)
+        transceiver.receive(connectionKey, message, extra)
     }
 
     override fun toString(): String {
-        return "Handler($connectionKey,transceiver=$transceiver)"
+        if(this::connectionKey.isInitialized) {
+            return "Handler($connectionKey,transceiver=$transceiver)"
+        }
+        return "Handler(transceiver=$transceiver)"
     }
 }

@@ -2,6 +2,7 @@ package konem.protocol.websocket
 
 import io.netty.bootstrap.ServerBootstrap
 import konem.logger
+import konem.netty.ConnectionKey
 import konem.netty.Handler
 import konem.netty.MessageReceiver
 import konem.netty.ProtocolPipeline
@@ -41,11 +42,11 @@ class WebSocketServerImp<T> internal constructor(
         }
     }
 
-    override fun sendMessage(addr: SocketAddress, message: T) {
-        val channelPort = getRemoteHostToChannelMap()[addr]
+    override fun sendMessage(connectionKey: ConnectionKey, message: T) {
+        val channelPort = getRemoteHostToChannelMap()[connectionKey]
         if (channelPort != null) {
             val transceiver = getTransceiverMap()[channelPort]
-            transceiver?.transmit(addr, message)
+            transceiver?.transmit(connectionKey, message)
         }
     }
 
@@ -115,20 +116,20 @@ class WebSocketServerImp<T> internal constructor(
         }
     }
 
-    override fun handleReceivedMessage(addr: SocketAddress, port: Int, message: T, webSocketPath: String) {
+    override fun handleReceivedMessage(connectionKey: ConnectionKey, port: Int, message: T, webSocketPath: String) {
         serverScope.launch {
-            receiveMessage(addr, port, message,webSocketPath)
+            receiveMessage(connectionKey, port, message,webSocketPath)
         }
     }
 
-    override suspend fun receiveMessage(addr: SocketAddress, port: Int, message: T, webSocketPath: String) {
+    override suspend fun receiveMessage(connectionKey: ConnectionKey, port: Int, message: T, webSocketPath: String) {
         logger.trace("{}", message)
         val receiveListeners = receiveListenersMap[port]
         if (receiveListeners != null) {
             val receiveListenerList = receiveListeners[webSocketPath]
             if (receiveListenerList != null) {
                 for (listener in receiveListenerList) {
-                    listener.handle(addr, message)
+                    listener.handle(connectionKey, message)
                 }
             }
         }

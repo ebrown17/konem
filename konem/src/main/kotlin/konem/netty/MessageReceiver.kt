@@ -2,19 +2,19 @@ package konem.netty
 
 import java.net.SocketAddress
 
-open class MessageReceiver<T>(private val received: (SocketAddress, T) -> Unit){
+open class MessageReceiver<T>(private val received: (ConnectionKey, T) -> Unit){
 
-    fun handle(addr: SocketAddress, message: T) {
-        receive(addr, message)
+    fun handle(connectionKey: ConnectionKey, message: T) {
+        receive(connectionKey, message)
     }
 
     /**
-     * @param addr address from where message originated
+     * @param connectionKey from where message originated
      * @param message
      */
-    open fun receive(addr: SocketAddress, message: T) {
+    open fun receive(connectionKey: ConnectionKey, message: T) {
         synchronized(this) {
-            received(addr, message)
+            received(connectionKey, message)
         }
     }
 }

@@ -1,6 +1,7 @@
 package konem.protocol.tcp
 
 import konem.logger
+import konem.netty.ConnectionKey
 import konem.netty.MessageReceiver
 import konem.netty.client.ClientBootstrapConfig
 import konem.netty.client.ClientInternal
@@ -21,23 +22,23 @@ class TcpClient<T>(private val serverAddress: SocketAddress, config: ClientBoots
             return
         }
         logger.info("remote: {} message: {}", channel?.remoteAddress(), message)
-        transceiver.transmit(serverAddress, message)
+        transceiver.transmit(serverConnectionKey, message)
     }
 
     override fun registerChannelMessageReceiver(receiver: MessageReceiver<T>) {
         receiveListeners.add(receiver)
     }
 
-    override fun handleReceivedMessage(addr: SocketAddress, port: Int, message: T, extra: String) {
+    override fun handleReceivedMessage(connectionKey: ConnectionKey, port: Int, message: T, extra: String) {
         clientScope.launch {
-            receiveMessage(addr, port, message)
+            receiveMessage(connectionKey, port, message)
         }
     }
 
-    override suspend fun receiveMessage(addr: SocketAddress, port: Int, message: T, extra: String) {
+    override suspend fun receiveMessage(connectionKey: ConnectionKey, port: Int, message: T, extra: String) {
         logger.trace("got message: {}", message)
         for (listener in receiveListeners) {
-            listener.handle(addr, message)
+            listener.handle(connectionKey, message)
         }
     }
 

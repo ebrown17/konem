@@ -4,8 +4,8 @@ import java.net.SocketAddress
 
 
 interface ChannelReceiver<T> {
-    fun handleReceivedMessage(addr: SocketAddress, port: Int, message: T, extra: String  = "")
-    suspend fun receiveMessage(addr: SocketAddress, port: Int, message: T, extra: String  = "")
+    fun handleReceivedMessage(connectionKey: ConnectionKey, port: Int, message: T, extra: String  = "")
+    suspend fun receiveMessage(connectionKey: ConnectionKey, port: Int, message: T, extra: String  = "")
 }
 
 interface BaseChannelReceiverRegistrant<T> {

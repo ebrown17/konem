@@ -9,6 +9,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel
 import konem.netty.BaseServerChannelReceiverRegistrant
 import konem.netty.ChannelReceiver
 import konem.netty.ConnectListener
+import konem.netty.ConnectionKey
 import konem.netty.ConnectionListener
 import konem.netty.ConnectionStatusListener
 import konem.netty.DisconnectListener
@@ -154,10 +155,10 @@ interface Server<T> : BaseServerChannelReceiverRegistrant<T> {
     /**
      * Sends a message to specified host
      *
-     * @param addr
+     * @param connectionKey
      * @param message
      */
-    fun sendMessage(addr: SocketAddress, message: T)
+    fun sendMessage(connectionKey: ConnectionKey, message: T)
 
     fun registerConnectionListener(listener: ConnectionListener)
     fun registerDisconnectionListener(listener: DisconnectionListener)
@@ -212,9 +213,9 @@ abstract class ServerInternal<T>(
         ConcurrentHashMap()
     private val portAddressMap: ConcurrentHashMap<Int, SocketAddress> = ConcurrentHashMap()
     private val transceiverMap: ConcurrentHashMap<Int, ServerTransceiver<T>> = ConcurrentHashMap()
-    internal val channelConnectionMap: ConcurrentHashMap<Int, ArrayList<SocketAddress>> =
+    internal val channelConnectionMap: ConcurrentHashMap<Int, ArrayList<ConnectionKey>> =
         ConcurrentHashMap()
-    internal val remoteHostToChannelMap: ConcurrentHashMap<SocketAddress, Int> =
+    internal val remoteHostToChannelMap: ConcurrentHashMap<ConnectionKey, Int> =
         ConcurrentHashMap()
 
     internal val connectionListeners: MutableList<ConnectListener> = ArrayList()
@@ -344,7 +345,7 @@ abstract class ServerInternal<T>(
         workerGroup.shutdownGracefully()
     }
 
-    fun getChannelConnections(channelPort: Int): List<SocketAddress> {
+    fun getChannelConnections(channelPort: Int): List<ConnectionKey> {
         val channelConnections = channelConnectionMap[channelPort]
         return if (channelConnections == null) {
             emptyList()
@@ -353,7 +354,7 @@ abstract class ServerInternal<T>(
         }
     }
 
-    fun getRemoteHostToChannelMap(): Map<SocketAddress, Int> {
+    fun getRemoteHostToChannelMap(): Map<ConnectionKey, Int> {
         return Collections.unmodifiableMap(remoteHostToChannelMap)
     }
 
@@ -404,28 +405,29 @@ abstract class ServerInternal<T>(
         return transceiverMap[port] != null
     }
 
-    override fun registerActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress) {
+    override fun registerActiveHandler(handler: Handler<T>, channelPort: Int) {
         var channelConnections = channelConnectionMap[channelPort]
         if (channelConnections == null) {
             channelConnections = ArrayList()
         }
-        if (!channelConnections.contains(remoteConnection)) {
-            channelConnections.add(remoteConnection)
-            remoteHostToChannelMap[remoteConnection] = channelPort
+        val connectionKey = handler.connectionKey
+        if (!channelConnections.contains(connectionKey)) {
+            channelConnections.add(connectionKey)
+            remoteHostToChannelMap[connectionKey] = channelPort
             serverScope.launch {
                 connectionActive(handler)
             }
         }
         val transceiver = transceiverMap[channelPort]
-        transceiver?.registerChannelReceiver(remoteConnection, this)
+        transceiver?.registerChannelReceiver(connectionKey, this)
         channelConnectionMap.putIfAbsent(channelPort, channelConnections)
     }
 
-    override fun registerInActiveHandler(handler: Handler<T>, channelPort: Int, remoteConnection: SocketAddress) {
+    override fun registerInActiveHandler(handler: Handler<T>, channelPort: Int) {
         val channelConnections = channelConnectionMap[channelPort]
         if (channelConnections != null) {
-            channelConnections.remove(remoteConnection)
-            remoteHostToChannelMap.remove(remoteConnection)
+            channelConnections.remove(handler.connectionKey)
+            remoteHostToChannelMap.remove(handler.connectionKey)
             channelConnectionMap.putIfAbsent(channelPort, channelConnections)
             serverScope.launch {
                 connectionInActive(handler)

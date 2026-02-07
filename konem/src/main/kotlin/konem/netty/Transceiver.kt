@@ -1,55 +1,52 @@
 package konem.netty
 
-import java.net.SocketAddress
-import java.util.ArrayList
-import java.util.concurrent.ConcurrentHashMap
 import konem.logger
+import java.util.concurrent.ConcurrentHashMap
 
 abstract class Transceiver<T>(protected val channelPort: Int) {
 
     private val logger = logger(javaClass)
 
-    protected val activeHandlers: ConcurrentHashMap<SocketAddress, Handler<T>> =
+    protected val activeHandlers: ConcurrentHashMap<ConnectionKey, Handler<T>> =
         ConcurrentHashMap()
     protected val activeLock = Any()
 
-    protected val channelReceiver: ConcurrentHashMap<SocketAddress, ChannelReceiver<T>> =
+    protected val channelReceiver: ConcurrentHashMap<ConnectionKey, ChannelReceiver<T>> =
         ConcurrentHashMap()
 
     protected val handlerListeners: MutableList<HandlerListener<T>> = ArrayList()
 
-    fun handlerActive(addr: SocketAddress, handler: Handler<T>) {
+    fun handlerActive(handler: Handler<T>) {
         synchronized(activeLock) {
-            logger.trace("handlerActive remote: {}", addr)
-            val activeHandler = activeHandlers[addr]
-            if (activeHandler == null) {
-                activeHandlers.putIfAbsent(addr, handler)
-                handlerListeners.forEach { listener -> listener.registerActiveHandler(handler, channelPort, addr) }
+            logger.trace("handler: {}", handler)
+            val key = handler.connectionKey
+            if (activeHandlers.putIfAbsent(key, handler) == null) {
+                handlerListeners.forEach { it.registerActiveHandler(handler, channelPort) }
             }
         }
     }
 
-    fun handlerInActive(addr: SocketAddress) {
+    fun handlerInActive(handler: Handler<T>) {
         synchronized(activeLock) {
-            logger.trace("remote: {}", addr)
-            val handler = activeHandlers.remove(addr)
+            logger.trace("handler: {}", handler)
+            val handler = activeHandlers.remove(handler.connectionKey)
             if (handler != null) {
-                handlerListeners.forEach { listener -> listener.registerInActiveHandler(handler, channelPort, addr) }
+                handlerListeners.forEach { listener -> listener.registerInActiveHandler(handler, channelPort) }
             }
         }
     }
 
-    fun registerChannelReceiver(addr: SocketAddress, receiver: ChannelReceiver<T>) {
-        channelReceiver.putIfAbsent(addr, receiver)
+    fun registerChannelReceiver(connectionKey: ConnectionKey, receiver: ChannelReceiver<T>) {
+        channelReceiver.putIfAbsent(connectionKey, receiver)
     }
 
-    fun hasActiveHandler(addr: SocketAddress): Boolean {
-        return activeHandlers.containsKey(addr)
+    fun hasActiveHandler(connectionKey: ConnectionKey): Boolean {
+        return activeHandlers.containsKey(connectionKey)
     }
 
-    abstract fun transmit(addr: SocketAddress, message: T)
+    abstract fun transmit(connectionKey: ConnectionKey, message: T)
 
-    abstract fun receive(addr: SocketAddress, message: T, extra: String)
+    abstract fun receive(connectionKey: ConnectionKey, message: T, extra: String)
 
     override fun toString(): String {
         return (
