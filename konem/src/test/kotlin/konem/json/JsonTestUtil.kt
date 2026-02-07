@@ -6,6 +6,7 @@ import konem.TestClientReceiver
 import konem.TestServerReceiver
 import konem.data.json.Data
 import konem.data.json.KonemMessage
+import konem.netty.ConnectionKey
 import konem.netty.client.Client
 import konem.netty.client.TcpSocketClientFactory
 import konem.netty.server.TcpSocketServer
@@ -19,11 +20,11 @@ var clientFactory:  TcpSocketClientFactory<KonemMessage>? = null
 
 
 class JsonTestServerReceiver(
-    received: (SocketAddress, KonemMessage) -> Unit
+    received: (ConnectionKey, KonemMessage) -> Unit
 ) : TestServerReceiver<KonemMessage>(received)
 
 class JsonTestClientReceiver(
-    client: Client<KonemMessage>, receive: (SocketAddress, KonemMessage) -> Unit
+    client: Client<KonemMessage>, receive: (ConnectionKey, KonemMessage) -> Unit
 ): TestClientReceiver<KonemMessage>(client,receive)
 
 fun sendClientMessages(messageSendCount: Int, clientList: MutableList<Client<KonemMessage>>):Int{

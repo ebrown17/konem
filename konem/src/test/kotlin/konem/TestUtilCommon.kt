@@ -27,27 +27,27 @@ data class WsClientCommConfigsV2(val msgCount:Int, val broadcastPorts: MutableLi
 data class WebSocketServerStartup(val portsToWebSocketPaths: MutableMap<Int, MutableList<String>>)
 
 open class TestServerReceiver<T>(
-    received: (SocketAddress, T) -> Unit
+    received: (ConnectionKey, T) -> Unit
 ) : MessageReceiver<T>(received) {
     var messageCount = AtomicInteger(0)
     var messageList = ConcurrentLinkedQueue<T>()
-    override fun receive(addr: SocketAddress, message: T) {
+    override fun receive(connectionKey: ConnectionKey, message: T) {
         messageCount.addAndGet(1)
         messageList.add(message)
-        super.receive(addr, message)
+        super.receive(connectionKey, message)
     }
 }
 open class TestClientReceiver<T>(
     val client: Client<T>,
-    received: (SocketAddress, T) -> Unit
+    received: (ConnectionKey, T) -> Unit
 ) : MessageReceiver<T>(received) {
     var messageCount = AtomicInteger(0)
     var messageList = ConcurrentLinkedQueue<T>()
     var clientId = ""
-    override fun receive(addr: SocketAddress, message: T) {
+    override fun receive(connectionKey: ConnectionKey, message: T) {
         messageCount.addAndGet(1)
         messageList.add(message)
-        super.receive(addr, message)
+        super.receive(connectionKey, message)
     }
 }
 

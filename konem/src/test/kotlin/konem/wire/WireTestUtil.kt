@@ -7,6 +7,7 @@ import konem.TestServerReceiver
 import konem.data.protobuf.Data
 import konem.data.protobuf.KonemMessage
 import konem.data.protobuf.MessageType
+import konem.netty.ConnectionKey
 import konem.netty.client.Client
 import konem.netty.client.TcpSocketClientFactory
 import konem.netty.server.TcpSocketServer
@@ -20,11 +21,11 @@ var clientFactory:  TcpSocketClientFactory<KonemMessage>? = null
 
 
 class WireTestServerReceiver(
-    received: (SocketAddress, KonemMessage) -> Unit
+    received: (ConnectionKey, KonemMessage) -> Unit
 ) : TestServerReceiver<KonemMessage>(received)
 
 class WireTestClientReceiver(
-    client: Client<KonemMessage>, receive: (SocketAddress, KonemMessage) -> Unit
+    client: Client<KonemMessage>, receive: (ConnectionKey, KonemMessage) -> Unit
 ): TestClientReceiver<KonemMessage>(client,receive)
 
 
