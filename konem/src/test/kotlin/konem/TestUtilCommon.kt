@@ -4,7 +4,6 @@ import io.kotest.assertions.nondeterministic.until
 import konem.netty.*
 import konem.netty.client.Client
 import konem.netty.server.Server
-import java.net.SocketAddress
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.time.Duration.Companion.seconds
@@ -51,16 +50,16 @@ open class TestClientReceiver<T>(
     }
 }
 
-class TestConnectionListener(connected: (SocketAddress) -> Unit): ConnectionListener(connected){
+class TestConnectionListener(connected: (ConnectionKey) -> Unit): ConnectionListener(connected){
     var connections = 0
 }
 
-class TestDisconnectionListener(disconnected: (SocketAddress) -> Unit) : DisconnectionListener(disconnected) {
+class TestDisconnectionListener(disconnected: (ConnectionKey) -> Unit) : DisconnectionListener(disconnected) {
     var disconnections = 0
 }
 
-class TestConnectionStatusListener(connected: (SocketAddress) -> Unit,
-                                   disconnected: (SocketAddress) -> Unit
+class TestConnectionStatusListener(connected: (ConnectionKey) -> Unit,
+                                   disconnected: (ConnectionKey) -> Unit
 ) : ConnectionStatusListener(connected, disconnected) {
     var connections = 0
     var disconnections = 0

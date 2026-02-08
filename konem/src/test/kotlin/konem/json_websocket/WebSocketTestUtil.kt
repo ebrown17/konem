@@ -8,7 +8,6 @@ import konem.netty.ConnectionKey
 import konem.netty.client.Client
 import konem.netty.client.WebSocketClientFactory
 import konem.netty.server.WebSocketServer
-import java.net.SocketAddress
 
 var server: WebSocketServer<KonemMessage>? = null
 var clientFactory: WebSocketClientFactory<KonemMessage>? = null

@@ -10,7 +10,6 @@ import konem.protocol.konem.KonemProtocolPipeline
 import konem.protocol.websocket.WebSocketConnectionStatusListener
 import org.slf4j.LoggerFactory
 import java.lang.Thread.sleep
-import java.net.SocketAddress
 
 
 private val logger = LoggerFactory.getLogger("Main")
@@ -54,7 +53,8 @@ fun websocketServerExamples() {
 
   val fact = Konem.createWebSocketClientFactoryOfDefaults(KonemProtocolPipeline.getKonemJsonPipeline())
   val client = fact.createClient("localhost", 8080, "/tester")
-  val connectionListener = ConnectionListener { remoteAddr: SocketAddress ->
+  val connectionListener = ConnectionListener { remoteConnection ->
+      val remoteAddr = remoteConnection.remoteAddress
       logger.info("Client connected to {}", remoteAddr)
       sleep(2000)
       client.sendMessage(KonemMessage(Heartbeat("${count++}")))
@@ -62,7 +62,8 @@ fun websocketServerExamples() {
 
   client.registerConnectionListener(connectionListener)
 
-  client.registerDisconnectionListener(DisconnectionListener { remoteAddr ->
+  client.registerDisconnectionListener(DisconnectionListener { remoteConnection ->
+      val remoteAddr = remoteConnection.remoteAddress
       logger.info("Client {} disconnected from {}", client.toString(), remoteAddr)
   })
 

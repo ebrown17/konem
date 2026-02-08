@@ -12,8 +12,6 @@ import konem.netty.server.WebSocketServer
 import konem.netty.server.WebSocketServerConfig
 import konem.netty.server.WebSocketServerInternal
 import kotlinx.coroutines.launch
-import java.net.InetSocketAddress
-import java.net.SocketAddress
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -102,17 +100,17 @@ class WebSocketServerImp<T> internal constructor(
     override fun connectionActive(handler: Handler<T>) {
         val wsHandler = handler as WebSocketHandler<T>
         logger.info("connection active")
-        onPathConnect(wsHandler.connectionKey.remoteAddress as InetSocketAddress, wsHandler.webSocketPath)
+        onPathConnect(wsHandler.connectionKey, wsHandler.webSocketPath)
         for (listener in connectionListeners) {
-            listener.onConnection(handler.connectionKey.remoteAddress)
+            listener.onConnection(handler.connectionKey)
         }
     }
 
     override fun connectionInActive(handler: Handler<T>) {
         val wsHandler = handler as WebSocketHandler<T>
-        onPathDisconnect(wsHandler.connectionKey.remoteAddress as InetSocketAddress, wsHandler.webSocketPath)
+        onPathDisconnect(wsHandler.connectionKey, wsHandler.webSocketPath)
         for (listener in disconnectionListeners) {
-            listener.onDisconnection(handler.connectionKey.remoteAddress)
+            listener.onDisconnection(handler.connectionKey)
         }
     }
 

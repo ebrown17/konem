@@ -106,13 +106,13 @@ abstract class ClientInternal<T>(private val serverAddress: SocketAddress, priva
 
     private fun handleConnection() = clientScope.launch {
         for (listener in connectionListeners) {
-            listener.onConnection(serverAddress)
+            listener.onConnection(serverConnectionKey)
         }
     }
 
     private fun handleDisconnection() = clientScope.launch {
         for (listener in disconnectionListeners) {
-            listener.onDisconnection(serverAddress)
+            listener.onDisconnection(serverConnectionKey)
         }
     }
 

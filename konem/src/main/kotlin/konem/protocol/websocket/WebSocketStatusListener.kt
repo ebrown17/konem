@@ -1,46 +1,46 @@
 package konem.protocol.websocket
 
+import konem.netty.ConnectionKey
 import konem.netty.StatusListener
-import java.net.SocketAddress
 
 interface WsConnectListener : StatusListener {
-    fun onConnection(address: SocketAddress, path: String)
+    fun onConnection(connectionKey: ConnectionKey, path: String)
 }
 
 interface WsDisconnectListener : StatusListener {
-    fun onDisconnection(address: SocketAddress, path: String)
+    fun onDisconnection(connectionKey: ConnectionKey, path: String)
 }
 
-class WebSocketConnectionListener(private val connected: (remoteAddr: SocketAddress, wsPath: String) -> Unit) : WsConnectListener {
-    override fun onConnection(address: SocketAddress, path: String) {
+class WebSocketConnectionListener(private val connected: (connectionKey: ConnectionKey, wsPath: String) -> Unit) : WsConnectListener {
+    override fun onConnection(connectionKey: ConnectionKey, path: String) {
         synchronized(this) {
-            connected(address, path)
+            connected(connectionKey, path)
         }
     }
 }
 
-class WebSocketDisconnectionListener(private val disconnected: (remoteAddr: SocketAddress, wsPath: String) -> Unit) : WsDisconnectListener {
-    override fun onDisconnection(address: SocketAddress, path: String) {
+class WebSocketDisconnectionListener(private val disconnected: (connectionKey: ConnectionKey, wsPath: String) -> Unit) : WsDisconnectListener {
+    override fun onDisconnection(connectionKey: ConnectionKey, path: String) {
         synchronized(this) {
-            disconnected(address, path)
+            disconnected(connectionKey, path)
         }
     }
 }
 
 class WebSocketConnectionStatusListener(
-    private val connected: (remoteAddr: SocketAddress, wsPath: String) -> Unit,
-    private val disconnected: (remoteAddr: SocketAddress, wsPath: String) -> Unit
+    private val connected: (connectionKey: ConnectionKey, wsPath: String) -> Unit,
+    private val disconnected: (connectionKey: ConnectionKey, wsPath: String) -> Unit
 ) : WsConnectListener, WsDisconnectListener {
 
-    override fun onConnection(address: SocketAddress, path: String) {
+    override fun onConnection(connectionKey: ConnectionKey, path: String) {
         synchronized(this) {
-            connected(address, path)
+            connected(connectionKey, path)
         }
     }
 
-    override fun onDisconnection(address: SocketAddress, path: String) {
+    override fun onDisconnection(connectionKey: ConnectionKey, path: String) {
         synchronized(this) {
-            disconnected(address, path)
+            disconnected(connectionKey, path)
         }
     }
 }

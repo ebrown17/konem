@@ -1,47 +1,45 @@
 package konem.netty
 
-import java.net.SocketAddress
-
 interface StatusListener
 
 interface ConnectListener : StatusListener {
-    fun onConnection(address: SocketAddress)
+    fun onConnection(connectionKey: ConnectionKey)
 }
 
 interface DisconnectListener : StatusListener {
-    fun onDisconnection(address: SocketAddress)
+    fun onDisconnection(connectionKey: ConnectionKey)
 }
 
-open class ConnectionListener(private val connected: (SocketAddress) -> Unit) : ConnectListener {
-    override fun onConnection(address: SocketAddress) {
+open class ConnectionListener(private val connected: (ConnectionKey) -> Unit) : ConnectListener {
+    override fun onConnection(connectionKey: ConnectionKey) {
         synchronized(this) {
-            connected(address)
+            connected(connectionKey)
         }
     }
 }
 
-open class DisconnectionListener(private val disconnected: (SocketAddress) -> Unit) : DisconnectListener {
-    override fun onDisconnection(address: SocketAddress) {
+open class DisconnectionListener(private val disconnected: (ConnectionKey) -> Unit) : DisconnectListener {
+    override fun onDisconnection(connectionKey: ConnectionKey) {
         synchronized(this) {
-            disconnected(address)
+            disconnected(connectionKey)
         }
     }
 }
 
 open class ConnectionStatusListener(
-    private val connected: (SocketAddress) -> Unit,
-    private val disconnected: (SocketAddress) -> Unit
+    private val connected: (ConnectionKey) -> Unit,
+    private val disconnected: (ConnectionKey) -> Unit
 ) : ConnectListener, DisconnectListener {
 
-    override fun onConnection(address: SocketAddress) {
+    override fun onConnection(connectionKey: ConnectionKey) {
         synchronized(this) {
-            connected(address)
+            connected(connectionKey)
         }
     }
 
-    override fun onDisconnection(address: SocketAddress) {
+    override fun onDisconnection(connectionKey: ConnectionKey) {
         synchronized(this) {
-            disconnected(address)
+            disconnected(connectionKey)
         }
     }
 }

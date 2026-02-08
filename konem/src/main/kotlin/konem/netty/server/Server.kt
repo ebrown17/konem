@@ -185,15 +185,15 @@ abstract class WebSocketServerInternal<T>(
         return configuredPaths?.contains(path) ?: false
     }
 
-    internal fun onPathConnect(remoteConnection: InetSocketAddress, paths: String) {
+    internal fun onPathConnect(connectionKey: ConnectionKey, paths: String) {
         for (listener in pathConnectionListeners) {
-            listener.onConnection(remoteConnection, paths)
+            listener.onConnection(connectionKey, paths)
         }
     }
 
-    internal fun onPathDisconnect(remoteConnection: InetSocketAddress, paths: String) {
+    internal fun onPathDisconnect(connectionKey: ConnectionKey, paths: String) {
         for (listener in pathDisconnectionListeners) {
-            listener.onDisconnection(remoteConnection, paths)
+            listener.onDisconnection(connectionKey, paths)
         }
     }
 }

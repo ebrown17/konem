@@ -11,7 +11,6 @@ import konem.netty.client.Client
 import konem.netty.client.TcpSocketClientFactory
 import konem.netty.server.TcpSocketServer
 import konem.waitForMsgTime
-import java.net.SocketAddress
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
