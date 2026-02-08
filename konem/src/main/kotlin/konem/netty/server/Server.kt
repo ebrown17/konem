@@ -213,7 +213,7 @@ abstract class ServerInternal<T>(
         ConcurrentHashMap()
     private val portAddressMap: ConcurrentHashMap<Int, SocketAddress> = ConcurrentHashMap()
     private val transceiverMap: ConcurrentHashMap<Int, ServerTransceiver<T>> = ConcurrentHashMap()
-    internal val channelConnectionMap: ConcurrentHashMap<Int, ArrayList<ConnectionKey>> =
+    internal val channelConnectionMap: ConcurrentHashMap<Int, MutableSet<ConnectionKey>> =
         ConcurrentHashMap()
     internal val remoteHostToChannelMap: ConcurrentHashMap<ConnectionKey, Int> =
         ConcurrentHashMap()
@@ -350,7 +350,7 @@ abstract class ServerInternal<T>(
         return if (channelConnections == null) {
             emptyList()
         } else {
-            Collections.unmodifiableList(channelConnections)
+            channelConnections.toList()
         }
     }
 
@@ -406,13 +406,11 @@ abstract class ServerInternal<T>(
     }
 
     override fun registerActiveHandler(handler: Handler<T>, channelPort: Int) {
-        var channelConnections = channelConnectionMap[channelPort]
-        if (channelConnections == null) {
-            channelConnections = ArrayList()
-        }
         val connectionKey = handler.connectionKey
-        if (!channelConnections.contains(connectionKey)) {
-            channelConnections.add(connectionKey)
+        val channelConnections = channelConnectionMap.computeIfAbsent(channelPort) {
+            ConcurrentHashMap.newKeySet()
+        }
+        if (channelConnections.add(connectionKey)) {
             remoteHostToChannelMap[connectionKey] = channelPort
             serverScope.launch {
                 connectionActive(handler)
@@ -420,15 +418,16 @@ abstract class ServerInternal<T>(
         }
         val transceiver = transceiverMap[channelPort]
         transceiver?.registerChannelReceiver(connectionKey, this)
-        channelConnectionMap.putIfAbsent(channelPort, channelConnections)
     }
 
     override fun registerInActiveHandler(handler: Handler<T>, channelPort: Int) {
         val channelConnections = channelConnectionMap[channelPort]
-        if (channelConnections != null) {
-            channelConnections.remove(handler.connectionKey)
-            remoteHostToChannelMap.remove(handler.connectionKey)
-            channelConnectionMap.putIfAbsent(channelPort, channelConnections)
+        val connectionKey = handler.connectionKey
+        if (channelConnections?.remove(connectionKey) == true) {
+            if (channelConnections.isEmpty()) {
+                channelConnectionMap.remove(channelPort, channelConnections)
+            }
+            remoteHostToChannelMap.remove(connectionKey)
             serverScope.launch {
                 connectionInActive(handler)
             }
