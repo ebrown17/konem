@@ -61,7 +61,6 @@ class WireCommunicationSpec : FunSpec({
     }
 
     context(": Server readers can register and then see messages: ") {
-        if (DEBUG) println(this.testCase.name.name)
         withTests(
             nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.name} ${data.msgCount} ${data.clientConfigs}" },
             ts = listOf(
@@ -80,6 +79,7 @@ class WireCommunicationSpec : FunSpec({
 
             ),
         ) { (msgCount, clientConfigs ) ->
+            if (DEBUG) println(this.testCase.name.name)
             var totalMessagesSent = 0
             val clientList = mutableListOf<Client<KonemMessage>>()
             val serverReceiverList = mutableListOf<WireTestServerReceiver>()
@@ -111,7 +111,6 @@ class WireCommunicationSpec : FunSpec({
 
 
     context(": Clients can register reader; connect; send and receive messages from server: ") {
-        if (DEBUG) println(this.testCase.name.name)
         withTests(
             nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.name} ${data.msgCount} ${data.clientConfigs}" },
             ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
@@ -127,6 +126,7 @@ class WireCommunicationSpec : FunSpec({
                 ClientConfig(6062, 21), ClientConfig(6063, 43)
             )),
             ) { (msgCount, clientConfigs ) ->
+            if (DEBUG) println(this.testCase.name.name)
             var totalMessagesSent = 0
             val clientList = mutableListOf<Client<KonemMessage>>()
             val serverReceiverList = mutableListOf<WireTestServerReceiver>()
@@ -163,7 +163,6 @@ class WireCommunicationSpec : FunSpec({
 
 
     context(": Clients can register reader; connect and then can send and receive messages from server after a reconnect: ") {
-        if (DEBUG) println(this.testCase.name.name)
         withTests(
             nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.name} ${data.msgCount} ${data.clientConfigs}" },
             ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
@@ -179,7 +178,7 @@ class WireCommunicationSpec : FunSpec({
                 ClientConfig(6062, 21), ClientConfig(6063, 43)
             )),
         ) { (msgCount, clientConfigs ) ->
-
+            if (DEBUG) println(this.testCase.name.name)
             var totalMessagesSent = 0
             val clientList = mutableListOf<Client<KonemMessage>>()
             val serverReceiverList = mutableListOf<WireTestServerReceiver>()
@@ -222,7 +221,6 @@ class WireCommunicationSpec : FunSpec({
 
 
     context(": Server's broadcastOnChannel sends to all clients on correct port: ") {
-        if (DEBUG) println(this.testCase.name.name)
        withTests(
            nameFn = { data: ClientCommConfigsV2 -> "${this.testCase.name} ${data.msgCount} ${data.broadcastPorts} ${data.clientConfigs}" },
            ClientCommConfigsV2(1, mutableListOf(6060), mutableListOf(ClientConfig(6060, 1))),
@@ -238,7 +236,7 @@ class WireCommunicationSpec : FunSpec({
                ClientConfig(6062, 21), ClientConfig(6063, 43)
            )),
        ) { (msgCount,broadcastPorts, clientConfigs ) ->
-
+           if (DEBUG) println(this.testCase.name.name)
            var totalMessagesSent = 0
            val clientList = mutableListOf<Client<KonemMessage>>()
            val serverReceiverList = mutableListOf<WireTestServerReceiver>()
@@ -273,7 +271,6 @@ class WireCommunicationSpec : FunSpec({
    }
 
     context(": Server's broadcastOnAllChannels sends to all clients on all ports: ") {
-        if (DEBUG) println(this.testCase.name.name)
        withTests(
            nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.name} ${data.msgCount} ${data.clientConfigs}" },
            ClientCommConfigsV1(1,  mutableListOf(ClientConfig(6060, 1))),
@@ -288,7 +285,7 @@ class WireCommunicationSpec : FunSpec({
                ClientConfig(6062, 21), ClientConfig(6063, 43)
            )),
        ) { (msgCount, clientConfigs ) ->
-
+           if (DEBUG) println(this.testCase.name.name)
            var totalMessagesSent = 0
            val clientList = mutableListOf<Client<KonemMessage>>()
            val serverReceiverList = mutableListOf<WireTestServerReceiver>()
@@ -323,7 +320,6 @@ class WireCommunicationSpec : FunSpec({
    }
 
     context("Server can receive and then respond to correct clients") {
-        if (DEBUG) println(this.testCase.name.name)
        withTests(
            nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.name} ${data.msgCount} ${data.clientConfigs}" },
            ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
@@ -343,6 +339,7 @@ class WireCommunicationSpec : FunSpec({
                ClientConfig(6062, 250), ClientConfig(6063, 250)
            )),
        ) { (msgCount, clientConfigs ) ->
+           if (DEBUG) println(this.testCase.name.name)
            var totalMessagesSent = 0
            val clientList = mutableListOf<Client<KonemMessage>>()
            val serverReceiverList = mutableListOf<WireTestServerReceiver>()
@@ -382,7 +379,6 @@ class WireCommunicationSpec : FunSpec({
    }
 
     context(": Each Client's ConnectionListener is called after connected to a server: ") {
-        if (DEBUG) println(this.testCase.name.name)
        withTests(
            nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.name} ${data.msgCount} ${data.clientConfigs}" },
            ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
@@ -398,7 +394,7 @@ class WireCommunicationSpec : FunSpec({
                ClientConfig(6062, 21), ClientConfig(6063, 43)
            )),
        ) { (_, clientConfigs ) ->
-
+           if (DEBUG) println(this.testCase.name.name)
            val clientList = mutableListOf<Client<KonemMessage>>()
            val clientDiscList = mutableListOf<TestConnectionListener>()
            var totalClientConnections = 0
@@ -436,7 +432,6 @@ class WireCommunicationSpec : FunSpec({
    }
 
     context(": Server's ConnectionListener is called after each client connects: ") {
-        if (DEBUG) println(this.testCase.name.name)
        withTests(
            nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.name} ${data.msgCount} ${data.clientConfigs}" },
            ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
@@ -452,7 +447,7 @@ class WireCommunicationSpec : FunSpec({
                ClientConfig(6062, 21), ClientConfig(6063, 43)
            )),
        ) { (_, clientConfigs ) ->
-
+           if (DEBUG) println(this.testCase.name.name)
            val clientList = mutableListOf<Client<KonemMessage>>()
            val serverConList = mutableListOf<TestConnectionListener>()
            var totalServerConnections = 0
@@ -486,7 +481,6 @@ class WireCommunicationSpec : FunSpec({
    }
 
     context(": Client's DisconnectionListener is called after a disconnect: ") {
-        if (DEBUG) println(this.testCase.name.name)
        withTests(
            nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.name} ${data.msgCount} ${data.clientConfigs}" },
            ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
@@ -502,7 +496,7 @@ class WireCommunicationSpec : FunSpec({
                ClientConfig(6062, 21), ClientConfig(6063, 43)
            )),
        ) { (_, clientConfigs ) ->
-
+           if (DEBUG) println(this.testCase.name.name)
            val clientList = mutableListOf<Client<KonemMessage>>()
            val serverConList = mutableListOf<TestConnectionListener>()
            val clientDiscList = mutableListOf<TestDisconnectionListener>()
@@ -548,7 +542,6 @@ class WireCommunicationSpec : FunSpec({
    }
 
     context(": Server's DisconnectionListener is called after each client disconnects: ") {
-        if (DEBUG) println(this.testCase.name.name)
        withTests(
            nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.name} ${data.msgCount} ${data.clientConfigs}" },
            ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
@@ -564,7 +557,7 @@ class WireCommunicationSpec : FunSpec({
                ClientConfig(6062, 21), ClientConfig(6063, 43)
            )),
        ) { (_, clientConfigs ) ->
-
+           if (DEBUG) println(this.testCase.name.name)
            val clientList = mutableListOf<Client<KonemMessage>>()
            var totalServerDisconnections = 0
            lateinit var serverDisconnectionListener: TestDisconnectionListener
@@ -597,7 +590,6 @@ class WireCommunicationSpec : FunSpec({
    }
 
     context(": Server and Client's ConnectionStatusListener is called after each connect and disconnect: ") {
-        if (DEBUG) println(this.testCase.name.name)
        withTests(
            nameFn = { data: ClientCommConfigsV1 -> "${this.testCase.name.name} ${data.msgCount} ${data.clientConfigs}" },
            ClientCommConfigsV1(1, mutableListOf(ClientConfig(6060, 1))),
@@ -614,6 +606,7 @@ class WireCommunicationSpec : FunSpec({
            )),
        ) { (_, clientConfigs ) ->
 
+           if (DEBUG) println(this.testCase.name.name)
            val clientList = mutableListOf<Client<KonemMessage>>()
            val clientStatusList = mutableListOf<TestConnectionStatusListener>()
            val serverStatusList = mutableListOf<TestConnectionStatusListener>()
