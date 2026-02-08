@@ -70,20 +70,18 @@ abstract class ClientInternal<T>(private val serverAddress: SocketAddress, priva
             retryListener = ClientConnectionListener(this, config.retryInfo) { channelFuture ->
                 logger.info("Client connected to {} ", serverAddress.toString())
                 isDisconnectInitiated = false
-                channel = channelFuture.channel()
-                channel?.let { channel ->
-                    serverConnectionKey = ConnectionKey(channel.id().asLongText() ,channel.remoteAddress())
-                    transceiver.registerChannelReceiver(serverConnectionKey, this)
-                    closedListener = ClientClosedConnectionListener(this) {
-                        handleDisconnection()
-                        connect()
-                    }
-                    channel.closeFuture().addListener(closedListener)
-                    handleConnection()
-                } ?: {
-                    logger.error("Channel future returned null channel, unable to add connection listener")
-                    throw InterruptedException()
+                val connectedChannel = checkNotNull(channelFuture.channel()) {
+                    "ChannelFuture completed successfully but channel was null for $serverAddress"
                 }
+                channel = connectedChannel
+                serverConnectionKey = ConnectionKey(connectedChannel.id().asLongText(), connectedChannel.remoteAddress())
+                transceiver.registerChannelReceiver(serverConnectionKey, this)
+                closedListener = ClientClosedConnectionListener(this) {
+                    handleDisconnection()
+                    connect()
+                }
+                connectedChannel.closeFuture().addListener(closedListener)
+                handleConnection()
 
             }
         }
