@@ -18,6 +18,25 @@ import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.ExperimentalTime
 
+
+
+/*
+1. Server receivers can register and then see messages
+2. Clients can register receiver before connect and then see messages
+3. Clients can register receiver and see messages
+4. Client receivers can see messages after a reconnect
+5. Server can broadcast to all clients on a port
+6. Server can broadcast to all clients on all ports
+7. Server can receive and respond to correct clients
+8. Server receives all messages a client sends
+9. Receiver can register for specific ws path and only get reads from that path
+10. Receiver with no path specified receives reads for all paths
+11. Clients OnConnect listener is called after connect and can send message
+12. ConnectionStatusListener connect and disconnect listeners are called
+13. ConnectionStatusListener disconnect listeners are called when server dies
+14. Messages sent by a client are received in expected order
+*/
+
 @ExperimentalTime
 @ExperimentalKotest
 class WebSocketCommunicationSpec: FunSpec ({
