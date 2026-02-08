@@ -29,9 +29,11 @@ abstract class Transceiver<T>(protected val channelPort: Int) {
     fun handlerInActive(handler: Handler<T>) {
         synchronized(activeLock) {
             logger.trace("handler: {}", handler)
-            val handler = activeHandlers.remove(handler.connectionKey)
-            if (handler != null) {
-                handlerListeners.forEach { listener -> listener.registerInActiveHandler(handler, channelPort) }
+            val connectionKey = handler.connectionKey
+            val inactiveHandler = activeHandlers.remove(connectionKey)
+            channelReceiver.remove(connectionKey)
+            if (inactiveHandler != null) {
+                handlerListeners.forEach { listener -> listener.registerInActiveHandler(inactiveHandler, channelPort) }
             }
         }
     }
