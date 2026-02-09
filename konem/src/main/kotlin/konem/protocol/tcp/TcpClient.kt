@@ -5,7 +5,6 @@ import konem.netty.ConnectionKey
 import konem.netty.MessageReceiver
 import konem.netty.client.ClientBootstrapConfig
 import konem.netty.client.ClientInternal
-import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArrayList
 import java.net.SocketAddress
 
@@ -30,12 +29,10 @@ class TcpClient<T>(private val serverAddress: SocketAddress, config: ClientBoots
     }
 
     override fun handleReceivedMessage(connectionKey: ConnectionKey, port: Int, message: T, extra: String) {
-        clientScope.launch {
-            receiveMessage(connectionKey, port, message)
-        }
+        receiveMessage(connectionKey, port, message)
     }
 
-    override suspend fun receiveMessage(connectionKey: ConnectionKey, port: Int, message: T, extra: String) {
+    override fun receiveMessage(connectionKey: ConnectionKey, port: Int, message: T, extra: String) {
         logger.trace("got message: {}", message)
         for (listener in receiveListeners) {
             listener.handle(connectionKey, message)

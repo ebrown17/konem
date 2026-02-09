@@ -4,7 +4,6 @@ import io.netty.bootstrap.ServerBootstrap
 import konem.logger
 import konem.netty.*
 import konem.netty.server.*
-import kotlinx.coroutines.launch
 import java.net.SocketAddress
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
@@ -106,12 +105,10 @@ class TcpSocketServerImp<T> internal constructor(
     }
 
     override fun handleReceivedMessage(connectionKey: ConnectionKey, port: Int, message: T, extra: String) {
-        serverScope.launch {
-            receiveMessage(connectionKey, port, message)
-        }
+        receiveMessage(connectionKey, port, message)
     }
 
-    override suspend fun receiveMessage(connectionKey: ConnectionKey, port: Int, message: T, extra: String) {
+    override fun receiveMessage(connectionKey: ConnectionKey, port: Int, message: T, extra: String) {
         logger.trace("{}", message)
         val receiveListenerList = receiveListeners[port]
         if (receiveListenerList != null) {

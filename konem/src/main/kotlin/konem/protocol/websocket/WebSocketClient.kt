@@ -6,7 +6,6 @@ import konem.netty.MessageReceiver
 import konem.netty.client.ClientBootstrapConfig
 import konem.netty.client.ClientInternal
 import konem.netty.client.WebSocketClient
-import kotlinx.coroutines.launch
 import java.net.SocketAddress
 import java.net.URI
 import java.util.concurrent.CopyOnWriteArrayList
@@ -40,12 +39,10 @@ class WebSocketClientImp<T>(
     }
 
     override fun handleReceivedMessage(connectionKey: ConnectionKey, port: Int, message: T, extra: String) {
-        clientScope.launch {
-            receiveMessage(connectionKey, port, message,extra)
-        }
+        receiveMessage(connectionKey, port, message, extra)
     }
 
-    override suspend fun receiveMessage(connectionKey: ConnectionKey, port: Int, message: T, extra: String) {
+    override fun receiveMessage(connectionKey: ConnectionKey, port: Int, message: T, extra: String) {
         logger.trace("got message: {} for path: {}", message,extra)
         for (listener in receiveListeners) {
             listener.handle(connectionKey, message)

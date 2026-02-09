@@ -11,7 +11,6 @@ import konem.netty.server.ServerChannelInfo
 import konem.netty.server.WebSocketServer
 import konem.netty.server.WebSocketServerConfig
 import konem.netty.server.WebSocketServerInternal
-import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -115,12 +114,10 @@ class WebSocketServerImp<T> internal constructor(
     }
 
     override fun handleReceivedMessage(connectionKey: ConnectionKey, port: Int, message: T, webSocketPath: String) {
-        serverScope.launch {
-            receiveMessage(connectionKey, port, message,webSocketPath)
-        }
+        receiveMessage(connectionKey, port, message, webSocketPath)
     }
 
-    override suspend fun receiveMessage(connectionKey: ConnectionKey, port: Int, message: T, webSocketPath: String) {
+    override fun receiveMessage(connectionKey: ConnectionKey, port: Int, message: T, webSocketPath: String) {
         logger.trace("{}", message)
         val receiveListeners = receiveListenersMap[port]
         if (receiveListeners != null) {

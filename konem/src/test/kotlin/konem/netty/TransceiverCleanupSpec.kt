@@ -43,5 +43,5 @@ private class TestHandler(transceiver: Transceiver<String>) : Handler<String>(tr
 
 private class TestChannelReceiver : ChannelReceiver<String> {
     override fun handleReceivedMessage(connectionKey: ConnectionKey, port: Int, message: String, extra: String) {}
-    override suspend fun receiveMessage(connectionKey: ConnectionKey, port: Int, message: String, extra: String) {}
+    override fun receiveMessage(connectionKey: ConnectionKey, port: Int, message: String, extra: String) {}
 }
