@@ -56,18 +56,37 @@ class WebSocketMessageOrderSpec : FunSpec({
                         WsClientConfig(6060, 1, listOf("/test0"))
                     )
                 ),
-                WsClientCommConfigsV1(1500,
+                WsClientCommConfigsV1(
+                    1000, mutableListOf(
+                        WsClientConfig(6060, 5, listOf("/test0"))
+                    )
+                ),
+                WsClientCommConfigsV1(1000,
                     mutableListOf(
                         WsClientConfig(6060,1,listOf("/test0")),
                         WsClientConfig(6061,1,listOf("/test2"))
                     )
                 ),
-                WsClientCommConfigsV1(1500,
+                WsClientCommConfigsV1(1000,
+                    mutableListOf(
+                        WsClientConfig(6060,5,listOf("/test0")),
+                        WsClientConfig(6061,5,listOf("/test2"))
+                    )
+                ),
+                WsClientCommConfigsV1(1000,
                     mutableListOf(
                         WsClientConfig(6060,1,listOf("/test0")),
                         WsClientConfig(6061,1,listOf("/test2")),
                         WsClientConfig(6062,1,listOf("/test4")),
                         WsClientConfig(6063,1,listOf("/test10"))
+                    )
+                ),
+                WsClientCommConfigsV1(750,
+                mutableListOf(
+                    WsClientConfig(6060,5,listOf("/test0")),
+                    WsClientConfig(6061,5,listOf("/test2")),
+                    WsClientConfig(6062,5,listOf("/test4")),
+                    WsClientConfig(6063,5,listOf("/test10"))
                     )
                 )
             ),
@@ -118,17 +137,17 @@ class WebSocketMessageOrderSpec : FunSpec({
             nameFn = { data: WsClientCommConfigsV1 -> "${this.testCase.name.name} ${data.msgCount} ${data.clientConfigs}" },
             ts = listOf(
                 WsClientCommConfigsV1(
-                    1, mutableListOf(
+                    1500, mutableListOf(
                         WsClientConfig(6060, 1, listOf("/test0"))
                     )
                 ),
                 WsClientCommConfigsV1(
-                    1, mutableListOf(
+                    1500, mutableListOf(
                         WsClientConfig(6060, 5, listOf("/test0"))
                     )
                 ),
                 WsClientCommConfigsV1(
-                    1, mutableListOf(
+                    1500, mutableListOf(
                         WsClientConfig(6060, 1, listOf("/test0")),
                         WsClientConfig(6061, 1, listOf("/test2"))
                     )
