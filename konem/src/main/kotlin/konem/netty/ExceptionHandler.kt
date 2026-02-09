@@ -12,6 +12,7 @@ class ExceptionHandler : ChannelDuplexHandler() {
     @Throws(Exception::class)
     override fun channelRead(ctx: ChannelHandlerContext, message: Any) {
         logger.warn("end of pipeline reached without handling: {}", message.toString())
+        ctx.fireChannelRead(message)
     }
 
     @Deprecated("Deprecated in Java")
