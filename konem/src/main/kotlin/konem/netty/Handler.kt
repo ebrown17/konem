@@ -22,10 +22,11 @@ abstract class Handler<T>(val transceiver: Transceiver<T>) :
         private set
     private var isHandlerActive: Boolean = false
 
+    @Synchronized
     open fun sendMessage(message: T) {
         if (isActive()) {
             logger.trace("[write2Wire] dest: {} msg: {} ", connectionKey.remoteAddress, message.toString())
-            context.writeAndFlush(message)
+            context.executor().execute { context.writeAndFlush(message) }
         } else {
             logger.warn("called when channel not active or writable")
         }

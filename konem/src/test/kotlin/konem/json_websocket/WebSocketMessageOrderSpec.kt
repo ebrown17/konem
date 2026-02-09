@@ -120,10 +120,13 @@ class WebSocketMessageOrderSpec : FunSpec({
             totalMessagesSent += sendClientMessagesCounted(msgCount, clientList)
             waitForMessagesServer(totalMessagesSent, serverReceiverList, DEBUG)
             serverReceiverList.forEach { receiver ->
-                val msgList = receiver.messageList.toTypedArray<KonemMessage>()
-                (0..msgCount).forEach { i ->
-                    val data: Data = msgList[i].message as Data
-                     data.data.toInt() shouldBe i
+                receiver.messageListByConnection.values.forEach { connectionMessages ->
+                    val msgList = connectionMessages.toTypedArray<KonemMessage>()
+                    msgList.size shouldBe msgCount + 1
+                    (0..msgCount).forEach { i ->
+                        val data: Data = msgList[i].message as Data
+                        data.data.toInt() shouldBe i
+                    }
                 }
             }
 
@@ -196,11 +199,13 @@ class WebSocketMessageOrderSpec : FunSpec({
             waitForMessagesClient(totalMessagesSent, clientReceiverList, DEBUG)
 
             clientReceiverList.forEach { receiver ->
-                val msgList = receiver.messageList.toTypedArray<KonemMessage>()
-                msgList.size shouldBe msgCount + 1
-                (0..msgCount).forEach { i ->
-                    val data: Data = msgList[i].message as Data
-                    data.data.toInt() shouldBe i
+                receiver.messageListByConnection.values.forEach { connectionMessages ->
+                    val msgList = connectionMessages.toTypedArray<KonemMessage>()
+                    msgList.size shouldBe msgCount + 1
+                    (0..msgCount).forEach { i ->
+                        val data: Data = msgList[i].message as Data
+                        data.data.toInt() shouldBe i
+                    }
                 }
             }
 

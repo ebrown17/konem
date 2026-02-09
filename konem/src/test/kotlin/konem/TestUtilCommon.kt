@@ -4,6 +4,7 @@ import io.kotest.assertions.nondeterministic.until
 import konem.netty.*
 import konem.netty.client.Client
 import konem.netty.server.Server
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.time.Duration.Companion.seconds
@@ -30,9 +31,14 @@ open class TestServerReceiver<T>(
 ) : MessageReceiver<T>(received) {
     var messageCount = AtomicInteger(0)
     var messageList = ConcurrentLinkedQueue<T>()
+    val messageListByConnection = ConcurrentHashMap<ConnectionKey, ConcurrentLinkedQueue<T>>()
     override fun receive(connectionKey: ConnectionKey, message: T) {
         messageCount.addAndGet(1)
         messageList.add(message)
+        val byConnectionQueue = messageListByConnection.computeIfAbsent(connectionKey) {
+            ConcurrentLinkedQueue()
+        }
+        byConnectionQueue.add(message)
         super.receive(connectionKey, message)
     }
 }
@@ -42,10 +48,15 @@ open class TestClientReceiver<T>(
 ) : MessageReceiver<T>(received) {
     var messageCount = AtomicInteger(0)
     var messageList = ConcurrentLinkedQueue<T>()
+    val messageListByConnection = ConcurrentHashMap<ConnectionKey, ConcurrentLinkedQueue<T>>()
     var clientId = ""
     override fun receive(connectionKey: ConnectionKey, message: T) {
         messageCount.addAndGet(1)
         messageList.add(message)
+        val byConnectionQueue = messageListByConnection.computeIfAbsent(connectionKey) {
+            ConcurrentLinkedQueue()
+        }
+        byConnectionQueue.add(message)
         super.receive(connectionKey, message)
     }
 }

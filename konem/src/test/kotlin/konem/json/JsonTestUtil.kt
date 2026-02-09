@@ -68,10 +68,12 @@ suspend fun waitForMessagesReceiverClient(totalMessages:Int ,receiverList : Muta
         val received: Int = receiverList.sumOf { it.messageCount.get() }
         var correctMsgs = true
         receiverList.forEach{ receiver ->
-            receiver.messageList.forEach {
-                val msg = it.message as Data
-                if(msg.data != receiver.clientId){
-                    correctMsgs = false
+            receiver.messageListByConnection.values.forEach { connectionMessages ->
+                connectionMessages.forEach {
+                    val msg = it.message as Data
+                    if(msg.data != receiver.clientId){
+                        correctMsgs = false
+                    }
                 }
             }
         }

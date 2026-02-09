@@ -88,11 +88,13 @@ fun serverBroadcastOnAllChannels(messageSendCount: Int){
 fun compareClientMessages(receiverList : MutableList<WireTestClientReceiver>,debug: Boolean = false) : Boolean{
     var correctMsgs = true
     receiverList.forEach{ receiver ->
-        receiver.messageList.forEach {
-            val msg = it.data_ as Data
-            if(msg.data_ != receiver.clientId){
-                correctMsgs = false
-                println("Bad data? ${msg.data_} != ${receiver.clientId}")
+        receiver.messageListByConnection.values.forEach { connectionMessages ->
+            connectionMessages.forEach {
+                val msg = it.data_ as Data
+                if(msg.data_ != receiver.clientId){
+                    correctMsgs = false
+                    println("Bad data? ${msg.data_} != ${receiver.clientId}")
+                }
             }
         }
     }
