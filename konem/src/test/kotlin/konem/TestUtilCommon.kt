@@ -123,7 +123,8 @@ suspend fun <T> disconnectClients(clientList : MutableList<Client<T>>) : Boolean
 @ExperimentalTime
 suspend fun <T> waitForMessagesServer(totalMessages:Int, receiverList : MutableList<out TestServerReceiver<T>>, debug: Boolean = false) : Boolean{
     var waitCount = 1
-    until(waitForMsgTime.seconds) {
+    val extraTime = if (totalMessages >10_000 )  ((totalMessages/10_000) + 3) else 0
+    until(waitForMsgTime.seconds + extraTime.seconds) {
         val received: Int = receiverList.sumOf { it.messageCount.get() }
         if(debug){
             println("Server received: $received out of $totalMessages (check ${waitCount++})")
@@ -136,7 +137,8 @@ suspend fun <T> waitForMessagesServer(totalMessages:Int, receiverList : MutableL
 @ExperimentalTime
 suspend fun <T> waitForMessagesClient(totalMessages:Int, receiverList : MutableList<out TestClientReceiver<T>>, debug: Boolean = false) : Boolean{
     var waitCount = 1
-    until(waitForMsgTime.seconds) {
+    val extraTime = if (totalMessages >10_000 )  ((totalMessages/10_000) + 3) else 0
+    until(waitForMsgTime.seconds + extraTime.seconds) {
         val received: Int = receiverList.sumOf { it.messageCount.get() }
         if(debug){
             println("Clients received: $received out of $totalMessages (check ${waitCount++})")

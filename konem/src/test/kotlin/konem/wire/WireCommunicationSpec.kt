@@ -194,7 +194,7 @@ class WireCommunicationSpec : FunSpec({
 
                 for(i in 1..config.totalClients){
                     clientFactory?.createClient("localhost",config.port)?.let {
-                        var clientReceiver: WireTestClientReceiver = WireTestClientReceiver(it) { _, msg ->
+                        var clientReceiver  = WireTestClientReceiver(it) { _, msg ->
                         }
                         clientReceiver.clientId = "client-$i-${config.port}"
                         clientReceiverList.add(clientReceiver)

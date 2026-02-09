@@ -48,7 +48,14 @@ class WebSocketPathHandler<T>(
                 messageHandler
             )
             logger.info("WebSocketServerProtocolHandler added for websocket path: {}", path)
-            messageHandler.initializeContext(ctx)
+            val messageHandlerCtx = ctx.pipeline().context("messageHandler-${path}")
+            if (messageHandlerCtx == null) {
+                logger.error("Failed to locate message handler context for path: {}", path)
+                msg.release()
+                ctx.close()
+                return
+            }
+            messageHandler.initializeContext(messageHandlerCtx)
             // made it this far, valid websocket path
             ctx.pipeline().addAfter(
                 ctx.name(),

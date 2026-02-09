@@ -46,7 +46,7 @@ class WebSocketClientChannel<T>(
         val heartbeatProtocol = clientChannelInfo.heartbeatProtocol
         val webSocketMessageHandler = object: WebSocketHandler<T>(webSocketPath.path,transceiver ){
             override fun channelRead0(p0: ChannelHandlerContext?, message: T) {
-                transceiverReceive(message,webSocketPath)
+                transceiverReceive(message, webSocketPath)
             }
         }
 

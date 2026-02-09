@@ -30,7 +30,7 @@ class WebSocketTransceiver<T>(channelPort: Int) : Transceiver<T>(channelPort) {
     override fun receive(connectionKey: ConnectionKey, message: T,  webSocketPath: String) {
         logger.trace("from {} with {}", connectionKey, message)
         val receiver = channelReceiver[connectionKey]
-        receiver?.handleReceivedMessage(connectionKey, channelPort, message) ?: run {
+        receiver?.handleReceivedMessage(connectionKey, channelPort, message,webSocketPath) ?: run {
             logger.warn("receiver for {} is null", connectionKey)
         }
     }
@@ -58,7 +58,7 @@ class WebSocketServerTransceiver<T>(channelPort: Int) : ServerTransceiver<T>(cha
     }
 
     override fun broadcast(message: T, vararg webSocketPaths: String) {
-        logger.trace("paths:{} message: {}", webSocketPaths, message)
+        logger.info("paths:{} message: {}", webSocketPaths, message)
         synchronized(activeLock) {
             if (webSocketPaths.isEmpty()) {
                 for (handler in activeHandlers.values) {
