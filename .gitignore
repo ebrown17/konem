@@ -4,7 +4,7 @@
 *.log
 *.log.*
 *.report.html
-
+.gradle-local
 ### Eclipse ###
 .metadata
 bin/
