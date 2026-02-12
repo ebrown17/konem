@@ -96,19 +96,8 @@ class WebSocketCommunicationSpec: FunSpec ({
             var serverReceiver =  JsonTestWebSocketServerReceiver() { _, _ -> }
 
             serverReceiverList.add(serverReceiver)
-            clientConfigs.forEach{ config ->
-                server?.registerChannelMessageReceiver(config.port,serverReceiver,*config.paths.toTypedArray())
-                for( i in 1..config.totalClients){
-                    for(path in config.paths) {
-                        clientFactory?.createClient("localhost", config.port,path)?.let{
-                            var clientReceiver = JsonTestWebSocketClientReceiver(it){_,_ -> }
-                            clientReceiver.clientId = "client-$i-${config.port}-$path"
-                            it.registerChannelMessageReceiver(clientReceiver)
-                            clientList.add(it)
-                        }
-                    }
-                }
-            }
+            clientList.addAll(clientConfigSingleServReceiver(clientConfigs,serverReceiver))
+
 
             startServer(server!!)
             connectClients(clientList)

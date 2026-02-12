@@ -66,3 +66,24 @@ suspend fun connectClientsAndWaitForServerConnections(
     waitForServerStatusChange(expectedConnections, mutableListOf(serverConnectionListener), debug, true)
     return true
 }
+
+fun clientConfigSingleServReceiver(
+    clientConfigs: MutableList<WsClientConfig>,
+    serverReceiver: JsonTestWebSocketServerReceiver
+    ): MutableList<Client<KonemMessage>> {
+    val clientList = mutableListOf<Client<KonemMessage>>()
+    clientConfigs.forEach{ config ->
+        server?.registerChannelMessageReceiver(config.port,serverReceiver,*config.paths.toTypedArray())
+        for( i in 1..config.totalClients){
+            for(path in config.paths) {
+                clientFactory?.createClient("localhost", config.port,path)?.let{
+                    val clientReceiver = JsonTestWebSocketClientReceiver(it){ _, _ -> }
+                    clientReceiver.clientId = "client-$i-${config.port}-$path"
+                    it.registerChannelMessageReceiver(clientReceiver)
+                    clientList.add(it)
+                }
+            }
+        }
+    }
+    return clientList
+}

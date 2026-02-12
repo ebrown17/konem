@@ -131,8 +131,7 @@ class JsonCommunicationSpec : FunSpec({
 
                 for (i in 1..config.totalClients) {
                     clientFactory?.createClient("localhost",config.port)?.let {
-                        lateinit var clientReceiver: JsonTestClientReceiver
-                        clientReceiver = JsonTestClientReceiver(it) { _, msg ->
+                        var clientReceiver: JsonTestClientReceiver = JsonTestClientReceiver(it) { _, msg ->
                         }
                         clientReceiver.clientId = "client-$i-${config.port}"
                         clientReceiverList.add(clientReceiver)
